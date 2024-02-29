@@ -1,7 +1,6 @@
 import { System } from "../system/system";
 import { ComponentManager } from "../manager/componentManager";
 import { Manager } from "../manager/manager";
-import { Component } from "./component";
 
 export class World {
   private systems: System[];
@@ -24,10 +23,8 @@ export class World {
     this.availableIds = [];
   }
 
-  public registerComponent(name: string, defaultValue?: Component): World {
-    const defaultComponent: Component = defaultValue
-      ? defaultValue
-      : new Component();
+  public registerComponent(name: string, defaultValue?: any): World {
+    const defaultComponent: any = defaultValue ? defaultValue : {};
     this.componentManager.register(this, name, defaultComponent);
     return this;
   }

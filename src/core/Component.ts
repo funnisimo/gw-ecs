@@ -1,2 +1,3 @@
-export class Component {
+export interface Component {
+  symbol(): Symbol;
 }

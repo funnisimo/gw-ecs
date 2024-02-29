@@ -1,12 +1,11 @@
 import "jest-extended";
-import { World, Component } from "../core";
+import { World } from "../core";
 
 describe("manager", () => {
-  class MyComponent extends Component {
+  class MyComponent {
     public value: string;
 
     constructor(myValue: string = "not set") {
-      super();
       this.value = myValue;
     }
   }

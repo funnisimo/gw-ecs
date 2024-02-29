@@ -1,46 +1,46 @@
-import {World, Component} from '../core';
+import { World } from "../core";
 
 export class Manager {
-    public defaultValue: Component;
-    private world: World;
+  public defaultValue: any;
+  private world: World;
 
-    public container: {
-        [id: number]: Component,
-    };
+  public container: {
+    [id: number]: any;
+  };
 
-    constructor(world: World, defaultValue: Component) {
-        this.world = world;
-        this.defaultValue = defaultValue;
-        this.container = {};
+  constructor(world: World, defaultValue: any) {
+    this.world = world;
+    this.defaultValue = defaultValue;
+    this.container = {};
+  }
+
+  public add(entity: number, component?: any): void {
+    if (component === undefined) {
+      this.container[entity] = { ...this.defaultValue };
+    } else {
+      this.container[entity] = component;
     }
+    this.world.update(entity);
+  }
 
-    public add(entity: number, component?: Component): void {
-        if (component === undefined) {
-            this.container[entity] = {...this.defaultValue};
-        } else {
-            this.container[entity] = component;
-        }
-        this.world.update(entity);
+  public fetch(entity: number): any {
+    if (this.container[entity] === undefined) {
+      this.container[entity] = { ...this.defaultValue };
+      this.world.update(entity);
     }
+    return this.container[entity];
+  }
 
-    public fetch(entity: number): Component {
-        if (this.container[entity] === undefined) {
-            this.container[entity] = {...this.defaultValue};
-            this.world.update(entity);
-        }
-        return this.container[entity];
-    }
+  public remove(entity: number): void {
+    delete this.container[entity];
+    this.world.update(entity);
+  }
 
-    public remove(entity: number): void {
-        delete this.container[entity];
-        this.world.update(entity);
-    }
+  public has(entity: number): boolean {
+    return this.container[entity] !== undefined;
+  }
 
-    public has(entity: number): boolean {
-        return this.container[entity] !== undefined;
-    }
-
-    public clean(entity: number): void {
-        delete this.container[entity];
-    }
+  public clean(entity: number): void {
+    delete this.container[entity];
+  }
 }

@@ -1,5 +1,5 @@
 import "jest-extended";
-import { World, Aspect, Component } from "../core";
+import { World, Aspect } from "../core";
 import { DelayedEntitySystem } from "./delayedEntitySystem";
 
 describe("delayed entity system", () => {
@@ -28,11 +28,10 @@ describe("delayed entity system", () => {
     }
   }
 
-  class Timer extends Component {
+  class Timer {
     public timeBeforeProcess = 10;
 
     constructor(timer: number) {
-      super();
       this.timeBeforeProcess = timer;
     }
 

@@ -1,4 +1,4 @@
-import { World, Component } from "../core";
+import { World } from "../core";
 import { Manager } from "./manager";
 
 interface IManager {
@@ -12,7 +12,7 @@ export class ComponentManager {
     this.managers = {};
   }
 
-  public register(world: World, name: string, component: Component): void {
+  public register(world: World, name: string, component: any): void {
     this.managers[name] = new Manager(world, component);
   }
 
