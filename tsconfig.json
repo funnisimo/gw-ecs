@@ -1,0 +1,20 @@
+{
+  "include": ["src"],
+  "exclude": ["src/**/*.spec.ts"],
+  "compilerOptions": {
+    "strict": true,
+    "module": "es6",
+    "outDir": "_temp",
+    "target": "esNext",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmitOnError": true,
+    "declaration": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "sourceMap": true,
+
+    // see: https://github.com/Swatinem/rollup-plugin-dts/issues/156
+    "useDefineForClassFields": false
+  }
+}
