@@ -1,60 +1,60 @@
 export class Aspect {
-  private allComponents: string[];
-  private oneComponents: string[][];
-  private someComponents: string[][];
-  private noneComponents: string[];
+  protected _allComponents: string[];
+  protected _oneComponents: string[][];
+  protected _someComponents: string[][];
+  protected _noneComponents: string[];
 
-  public constructor() {
-    this.allComponents = [];
-    this.oneComponents = [];
-    this.noneComponents = [];
-    this.someComponents = [];
+  constructor() {
+    this._allComponents = [];
+    this._oneComponents = [];
+    this._noneComponents = [];
+    this._someComponents = [];
   }
 
-  public accept(components: string[]): boolean {
+  accept(components: string[]): boolean {
     return (
-      this.checkAll(components) &&
-      this.checkOne(components) &&
-      this.checkSome(components) &&
-      this.checkNone(components)
+      this._checkAll(components) &&
+      this._checkOne(components) &&
+      this._checkSome(components) &&
+      this._checkNone(components)
     );
   }
 
-  public all(...components: string[]): Aspect {
-    this.allComponents = this.allComponents.concat(components);
+  all(...components: string[]): Aspect {
+    this._allComponents = this._allComponents.concat(components);
     return this;
   }
 
-  public one(...components: string[]): Aspect {
+  one(...components: string[]): Aspect {
     if (components.length == 0) return this;
-    this.oneComponents.push(components);
+    this._oneComponents.push(components);
     return this;
   }
 
-  public some(...components: string[]): Aspect {
+  some(...components: string[]): Aspect {
     if (components.length == 0) return this;
-    this.someComponents.push(components);
+    this._someComponents.push(components);
     return this;
   }
 
-  public none(...components: string[]): Aspect {
-    this.noneComponents = this.noneComponents.concat(components);
+  none(...components: string[]): Aspect {
+    this._noneComponents = this._noneComponents.concat(components);
     return this;
   }
 
-  private checkAll(components: string[]) {
+  protected _checkAll(components: string[]) {
     return (
-      this.allComponents.length === 0 ||
-      this.allComponents.every((componentName: string) =>
+      this._allComponents.length === 0 ||
+      this._allComponents.every((componentName: string) =>
         components.includes(componentName)
       )
     );
   }
 
-  private checkOne(components: string[]) {
+  protected _checkOne(components: string[]) {
     return (
-      this.oneComponents.length === 0 ||
-      this.oneComponents.every((set: string[]) => {
+      this._oneComponents.length === 0 ||
+      this._oneComponents.every((set: string[]) => {
         return (
           set.length == 0 ||
           set.reduce(
@@ -67,10 +67,10 @@ export class Aspect {
     );
   }
 
-  private checkSome(components: string[]): boolean {
+  protected _checkSome(components: string[]): boolean {
     return (
-      this.someComponents.length === 0 ||
-      this.someComponents.some((set: string[]): boolean => {
+      this._someComponents.length === 0 ||
+      this._someComponents.some((set: string[]): boolean => {
         return (
           set.length == 0 ||
           set.some((componentName: string) =>
@@ -81,10 +81,10 @@ export class Aspect {
     );
   }
 
-  private checkNone(components: string[]) {
+  protected _checkNone(components: string[]) {
     return (
-      this.noneComponents.length === 0 ||
-      this.noneComponents.every(
+      this._noneComponents.length === 0 ||
+      this._noneComponents.every(
         (componentName: string) => !components.includes(componentName)
       )
     );

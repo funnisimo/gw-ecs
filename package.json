@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "jest",
-    "build": "tsc"
+    "build": "rm -r dist/**/*.js && tsc && cp package.dist.json dist/package.json && cp LICENSE dist/LICENSE && cp README.md dist/README.md"
   },
   "keywords": [
     "ecs",
@@ -15,6 +15,10 @@
   ],
   "author": "Sean Castette",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/funnisimo/gw-ecs.git"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "jest": "^29.7.0",

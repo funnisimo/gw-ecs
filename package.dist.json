@@ -1,0 +1,11 @@
+{
+  "name": "gw-ecs",
+  "version": "1.0.0",
+  "description": "A simple ECS for making games with Goblinwerks",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {},
+  "keywords": ["ecs", "goblinwerks", "roguelike"],
+  "author": "Sean Castette",
+  "license": "MIT"
+}
