@@ -1,5 +1,5 @@
 import "jest-extended";
-import { World, Aspect } from "../index";
+import { World, Aspect } from "../core";
 import { EntitySystem } from "../system";
 
 describe("World", function () {

@@ -1,5 +1,5 @@
 import "jest-extended";
-import { Aspect } from "../index";
+import { Aspect } from "./index";
 
 describe("Aspect", () => {
   describe("all", () => {
@@ -22,7 +22,7 @@ describe("Aspect", () => {
       expect(aspect.accept(["b"])).toBeTrue();
       expect(aspect.accept(["c"])).toBeTrue();
       expect(aspect.accept(["a", "e"])).toBeTrue();
-      expect(aspect.accept(["a", "b"])).toBeTrue();
+      expect(aspect.accept(["a", "b"])).toBeFalse(); // It has 2, but only 1 is the filter
     });
     it("should refuses entity if it has none of all the required components", () => {
       let aspect = new Aspect().one("a", "b", "c");
@@ -51,8 +51,8 @@ describe("Aspect", () => {
       expect(aspect.accept(["a", "b", "c"])).toBeTrue();
       expect(aspect.accept(["a", "b", "d"])).toBeTrue();
       expect(aspect.accept(["a", "c", "d"])).toBeFalse();
-      expect(aspect.accept(["a", "b", "c", "d"])).toBeTrue();
-      expect(aspect.accept(["a", "b", "c", "d", "e"])).toBeTrue();
+      expect(aspect.accept(["a", "b", "c", "d"])).toBeFalse(); // We want only 1
+      expect(aspect.accept(["a", "b", "c", "e"])).toBeTrue();
     });
 
     it("all and none", () => {
@@ -80,10 +80,25 @@ describe("Aspect", () => {
       expect(aspect.accept(["a", "b"])).toBeFalse();
       expect(aspect.accept(["a", "b", "c"])).toBeTrue();
       expect(aspect.accept(["a", "b", "d"])).toBeTrue();
-      expect(aspect.accept(["a", "b", "c", "d"])).toBeTrue();
+      expect(aspect.accept(["a", "b", "c", "d"])).toBeFalse(); // It has 2, but we want only 1
       expect(aspect.accept(["a", "b", "c", "e"])).toBeFalse();
       expect(aspect.accept(["a", "c", "d"])).toBeFalse();
-      expect(aspect.accept(["a", "b", "c", "d", "f"])).toBeTrue();
+      expect(aspect.accept(["a", "b", "c", "d", "f"])).toBeFalse(); // It has 2, but we want only 1
+    });
+
+    it("all, one, some, and none", () => {
+      let aspect = new Aspect()
+        .all("a", "b")
+        .one("c", "d")
+        .some("e", "f")
+        .none("g");
+      expect(aspect.accept(["a", "b"])).toBeFalse();
+      expect(aspect.accept(["a", "b", "c"])).toBeFalse();
+      expect(aspect.accept(["a", "b", "d"])).toBeFalse();
+      expect(aspect.accept(["a", "b", "c", "d", "e"])).toBeFalse();
+      expect(aspect.accept(["a", "b", "c", "e"])).toBeTrue();
+      expect(aspect.accept(["a", "b", "c", "e", "f"])).toBeTrue();
+      expect(aspect.accept(["a", "b", "c", "e", "g"])).toBeFalse();
     });
   });
 });

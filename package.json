@@ -2,9 +2,11 @@
   "name": "gw-ecs",
   "version": "1.0.0",
   "description": "A simple ECS for making games with Goblinwerks",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "keywords": [
     "ecs",
@@ -14,11 +16,10 @@
   "author": "Sean Castette",
   "license": "MIT",
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.42.0",
     "@types/jest": "^29.5.12",
     "jest": "^29.7.0",
     "jest-extended": "^4.0.2",
     "ts-jest": "^29.1.2",
-    "tsup": "^8.0.2"
+    "typescript": "^5.3.3"
   }
 }

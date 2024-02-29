@@ -1,4 +1,4 @@
-import { System } from "../system";
+import { System } from ".";
 
 export abstract class DelayedSystem extends System {
   protected delay: number;

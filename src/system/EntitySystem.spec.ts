@@ -1,5 +1,6 @@
 import "jest-extended";
-import { Aspect, World, EntitySystem } from "../index";
+import { Aspect, World } from "../core";
+import { EntitySystem } from "./index";
 
 describe("entity system", () => {
   class MyEntitySytem extends EntitySystem {

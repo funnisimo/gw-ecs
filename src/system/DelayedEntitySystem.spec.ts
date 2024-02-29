@@ -1,6 +1,6 @@
 import "jest-extended";
 import { World, Aspect, Component } from "../core";
-import { DelayedEntitySystem } from "./DelayedEntitySystem";
+import { DelayedEntitySystem } from "./delayedEntitySystem";
 
 describe("delayed entity system", () => {
   class MyDelayedEntitySystem extends DelayedEntitySystem {

@@ -1,5 +1,5 @@
 import "jest-extended";
-import { DelayedSystem } from "./DelayedSystem";
+import { DelayedSystem } from "./delayedSystem";
 import { World } from "../core";
 
 describe("delayed system", () => {

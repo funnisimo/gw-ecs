@@ -1,3 +1,3 @@
-export * from "./core";
-export * from "./system";
-export * from "./manager";
+export * as core from "./core";
+export * as system from "./system";
+export * as manager from "./manager";

@@ -1,5 +1,6 @@
 import "jest-extended";
-import { World, Aspect, IntervalEntitySystem } from "../index";
+import { World, Aspect } from "../core";
+import { IntervalEntitySystem } from "./index";
 
 describe("interval entity system", () => {
   class MyIntervalEntitySystem extends IntervalEntitySystem {

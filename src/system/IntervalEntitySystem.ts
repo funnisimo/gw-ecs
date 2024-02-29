@@ -1,5 +1,5 @@
-import { EntitySystem } from "../system";
-import { Aspect } from "../core/Aspect";
+import { EntitySystem } from ".";
+import { Aspect } from "../core/aspect";
 
 export abstract class IntervalEntitySystem extends EntitySystem {
   protected delay: number;

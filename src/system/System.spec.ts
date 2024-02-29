@@ -1,5 +1,6 @@
 import "jest-extended";
-import { World, System } from "../index";
+import { World } from "../core";
+import { System } from "./index";
 
 describe("System", () => {
   class SystemTest extends System {

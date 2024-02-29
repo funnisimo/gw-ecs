@@ -3,9 +3,9 @@
   "exclude": ["src/**/*.spec.ts"],
   "compilerOptions": {
     "strict": true,
-    "module": "es6",
-    "outDir": "_temp",
-    "target": "esNext",
+    "module": "esnext",
+    "outDir": "dist",
+    "target": "esnext",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noEmitOnError": true,

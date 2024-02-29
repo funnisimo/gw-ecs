@@ -1,3 +1,6 @@
+# ignore build
+dist/
+
 # ignore <root>/js
 .DS_Store
 .rollup.cache/
