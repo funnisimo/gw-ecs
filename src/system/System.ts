@@ -4,32 +4,31 @@ export abstract class System {
   protected world: World;
   private enable: boolean = true;
 
-  public constructor() {
+  constructor() {
     this.enable = true;
     this.world = new World();
   }
 
-  public init(world: World) {
+  init(world: World) {
     this.world = world;
   }
 
-  public setEnable(enable: boolean) {
+  setEnable(enable: boolean) {
     this.enable = enable;
   }
 
-  public isEnable() {
+  isEnable() {
     return this.enable;
   }
 
-  /* tslint:disable:no-empty */
-  public accept(_entity: number, _components: string[]): boolean {
+  accept(_entity: number, _components: string[]): boolean {
     return false;
   }
 
   /* tslint:disable:no-empty */
-  public removeEntities(_entities: number[]): void {}
+  removeEntities(_entities: number[]): void {}
 
-  public doProcessSystem(): void {
+  doProcessSystem(): void {
     if (this.isEnable()) {
       this.beforeProcess();
       this.processSystem();

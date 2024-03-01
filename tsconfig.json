@@ -7,7 +7,7 @@
     "outDir": "dist",
     "target": "esnext",
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedParameters": true, // TODO - Make this false
     "noEmitOnError": true,
     "declaration": true,
     "moduleResolution": "node",
