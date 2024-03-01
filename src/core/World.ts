@@ -1,98 +1,139 @@
 import { System } from "../system/system";
 import { ComponentManager } from "../manager/componentManager";
 import { Manager } from "../manager/manager";
+import { ComponentSource, Entities, Entity } from "./entity";
+import { Component } from "./component";
 
-export class World {
-  private systems: System[];
-  public componentManager: ComponentManager;
-  private lastId: number;
-  public delta: number;
-  public cumulativeDelta: number;
-  private toDelete: number[];
-  private toUpdate: number[];
-  private availableIds: number[];
+export class World implements ComponentSource {
+  _systems: System[];
+  _components: ComponentManager;
+  _entities: Entities;
+  _destroyedEntities: Entity[];
+  delta: number;
+  time: number;
+  _currentTick: number;
 
   constructor() {
-    this.lastId = 0;
+    this._entities = new Entities(this);
     this.delta = 0;
-    this.cumulativeDelta = 0;
-    this.componentManager = new ComponentManager();
-    this.systems = [];
-    this.toDelete = [];
-    this.toUpdate = [];
-    this.availableIds = [];
+    this.time = 0;
+    this._currentTick = 0;
+    this._components = new ComponentManager(this);
+    this._systems = [];
+    this._destroyedEntities = [];
   }
 
-  public registerComponent(name: string, defaultValue?: any): World {
-    const defaultComponent: any = defaultValue ? defaultValue : {};
-    this.componentManager.register(this, name, defaultComponent);
+  currentTick(): number {
+    return this._currentTick;
+  }
+
+  registerComponent<T>(comp: Component<T>): World {
+    this._components.register(comp);
     return this;
   }
 
-  public addSystem(system: System, enable: boolean = true): World {
-    system.setEnable(enable);
-    this.systems.push(system);
+  addSystem(system: System, enable: boolean = true): World {
+    system.setEnabled(enable);
+    this._systems.push(system);
     return this;
   }
 
-  public init(): void {
-    this.systems.forEach((system) => system.init(this));
+  init(): void {
+    this._systems.forEach((system) => system.init(this));
   }
 
-  public getComponentManager(name: string): Manager {
-    return this.componentManager.getManager(name);
+  getComponentManager<T>(comp: Component<T>): Manager<T> {
+    return this._components.getManager(comp);
   }
 
-  public create() {
-    let entityId = this.availableIds.pop();
-    if (entityId === undefined) {
-      entityId = ++this.lastId;
-    }
-    this.toUpdate.push(entityId);
-    return entityId;
+  create(): Entity {
+    return this._entities.create();
   }
 
-  private beforeProcess() {
-    this.toUpdate.forEach((entity) => {
-      const components = this.componentManager.getAllComponents(entity);
-      this.systems.forEach((system) => system.accept(entity, components));
-    });
-    this.toUpdate = [];
+  _beforeSystemProcess() {
+    // this.toUpdate.forEach((entity) => {
+    //   const components = entity.allComponents(); // this.componentManager.getAllComponents(entity);
+    //   this.systems.forEach((system) => system.accept(entity, components));
+    // });
+    // this.toUpdate = [];
   }
 
-  public process(delta: number = 0): void {
+  process(delta: number = 0): void {
     this.delta = delta;
-    this.cumulativeDelta += delta;
-    this.systems.forEach((system) => {
-      this.beforeProcess();
-      system.doProcessSystem();
-      this.afterProcess();
+    this.time += delta;
+
+    this._systems.forEach((system) => {
+      this._currentTick += 1; // Tick each system
+      this._beforeSystemProcess();
+      system.process();
+      this._afterSystemProcess();
     });
-    this.afterProcess();
-  }
 
-  private afterProcess(): void {
-    if (this.toDelete.length > 0) {
-      this.systems.forEach((system) => system.removeEntities(this.toDelete));
-      this.componentManager.cleanEntitiesComponents(this.toDelete);
-      this.toDelete.forEach((entityId) => {
-        if (!this.availableIds.includes(entityId)) {
-          this.availableIds.push(entityId);
-        }
-      });
-      this.toDelete = [];
+    this._afterSystemProcess(); // In case no systems run
+
+    if (this._currentTick > 100000) {
+      this._currentTick -= 100000;
+      this._components.compactAndRebase(100000);
     }
   }
 
-  public update(entity: number): void {
-    if (!this.toUpdate.includes(entity)) {
-      this.toUpdate.push(entity);
+  _afterSystemProcess(): void {
+    // TODO - Should this be done less often?  Once per process cycle?
+    // this._entities.processDestroyed((deleted) => {
+    //   this._components.cleanEntities(deleted);
+    // });
+
+    if (this._destroyedEntities.length) {
+      this._components.destroyEntities(this._destroyedEntities);
+      this._destroyedEntities.forEach((e) => e._destroy());
+      this._destroyedEntities = [];
     }
   }
 
-  public remove(entity: number): void {
-    if (!this.toDelete.includes(entity)) {
-      this.toDelete.push(entity);
-    }
+  // queueUpdate(entity: Entity): void {
+  //   if (!this.toUpdate.includes(entity)) {
+  //     this.toUpdate.push(entity);
+  //   }
+  // }
+
+  queueDestroy(entity: Entity): void {
+    // this._entities.queueDestroy(entity);
+    this._destroyedEntities.push(entity);
+  }
+
+  destroyNow(entity: Entity): void {
+    this._components.destroyEntity(entity);
+    entity._destroy();
+  }
+
+  entities(): Entities {
+    return this._entities;
+  }
+
+  /// ComponentSource
+
+  fetchComponent<T>(entity: Entity, comp: Component<T>): T | undefined {
+    const mgr = this._components.getManager(comp);
+    if (!mgr) return undefined;
+    return mgr.fetch(entity);
+  }
+
+  updateComponent<T>(entity: Entity, comp: Component<T>): T | undefined {
+    const mgr = this._components.getManager(comp);
+    if (!mgr) return undefined;
+    return mgr.update(entity);
+  }
+
+  addComponent<T>(entity: Entity, val: T, comp?: Component<T>): T | undefined {
+    // @ts-ignore
+    comp = comp || val.constructor;
+    if (!comp) throw new Error("Missing constructor!");
+    const mgr = this._components.getManager(comp);
+    if (!mgr) throw new Error("Using unregistered component: " + comp.name);
+    return mgr.add(entity, val);
+  }
+
+  removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined {
+    return this._components.getManager(comp).remove(entity);
   }
 }

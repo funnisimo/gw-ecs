@@ -1,4 +1,4 @@
-import { System } from ".";
+import { System } from "./system";
 
 export abstract class DelayedSystem extends System {
   protected delay: number;
@@ -12,23 +12,23 @@ export abstract class DelayedSystem extends System {
     this.delay -= this.world.delta;
   }
 
-  public doProcessSystem(): void {
-    if (this.isEnable()) {
+  public process(): void {
+    if (this.isEnabled()) {
       this.updateDelay();
       if (this.delay <= 0) {
         this.beforeProcess();
-        this.processSystem();
+        this.doProcess();
         this.afterProcess();
         this.delay = 0;
-        this.setEnable(false);
+        this.setEnabled(false);
       }
     }
   }
 
-  public addDelay(delay: number, enable: boolean = true) {
-    this.setEnable(enable);
-    this.delay += delay;
+  public runIn(delay: number) {
+    this.delay = delay;
+    this.setEnabled(true);
   }
 
-  protected abstract processSystem(): void;
+  protected abstract doProcess(): void;
 }

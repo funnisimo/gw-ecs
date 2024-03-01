@@ -11,7 +11,7 @@ describe("interval system", () => {
       this.callback = callback;
     }
 
-    protected processSystem(): void {
+    protected doProcess(): void {
       this.callback();
     }
   }
@@ -61,12 +61,12 @@ describe("interval system", () => {
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
-    myIntervalSystem.setEnable(false);
+    myIntervalSystem.setEnabled(false);
     world.process(1);
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
-    myIntervalSystem.setEnable(true);
+    myIntervalSystem.setEnabled(true);
     world.process(1);
     expect(callback).toHaveBeenCalled();
   });

@@ -11,7 +11,7 @@ describe("delayed system", () => {
       this.callback = callback;
     }
 
-    protected processSystem(): void {
+    protected doProcess(): void {
       this.callback();
     }
   }
@@ -52,7 +52,7 @@ describe("delayed system", () => {
       expect(callback).not.toHaveBeenCalled();
 
       callback.mockClear();
-      system.addDelay(10);
+      system.runIn(10);
       world.process(5);
       expect(callback).not.toHaveBeenCalled();
 
@@ -71,11 +71,12 @@ describe("delayed system", () => {
       expect(callback).not.toHaveBeenCalled();
 
       callback.mockClear();
-      system.addDelay(10, false);
-      world.process(15);
-      expect(callback).not.toHaveBeenCalled();
+      system.runIn(10);
+      expect(system.isEnabled()).toBeTrue();
 
-      expect(system.isEnable()).toBeFalse();
+      world.process(15);
+      expect(callback).toHaveBeenCalled();
+      expect(system.isEnabled()).toBeFalse();
     });
   });
 });

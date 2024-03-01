@@ -1,40 +1,53 @@
-import { World } from "../core";
-import { Manager } from "./manager";
+import { Component, Entity } from "../core";
+import { Manager, TimeSource } from "./manager";
 
 interface IManager {
-  [name: string]: Manager;
+  [name: string]: Manager<any>;
 }
 
 export class ComponentManager {
   private managers: IManager;
+  _world: TimeSource;
 
-  constructor() {
+  constructor(world: TimeSource) {
     this.managers = {};
+    this._world = world;
   }
 
-  public register(world: World, name: string, component: any): void {
-    this.managers[name] = new Manager(world, component);
+  register<T>(comp: Component<T>): void {
+    this.managers[comp.name] = new Manager(this._world, comp);
   }
 
-  public getManager(name: string): Manager {
-    return this.managers[name];
+  getManager<T>(comp: Component<T>): Manager<T> {
+    return this.managers[comp.name] as Manager<T>;
   }
 
-  public getAllComponents(entity: number): string[] {
-    const components: string[] = [];
-    Object.keys(this.managers).forEach((name) => {
-      if (this.managers[name].has(entity)) {
-        components.push(name);
-      }
+  // getAllComponents(entity: Entity): AnyComponent[] {
+  //   // const components: string[] = [];
+  //   // Object.keys(this.managers).forEach((name) => {
+  //   //   if (this.managers[name].has(entity)) {
+  //   //     components.push(name);
+  //   //   }
+  //   // });
+  //   // return components;
+  //   return entity.allComponents();
+  // }
+
+  destroyEntity(entity: Entity): void {
+    Object.values(this.managers).forEach((manager) => {
+      manager.destroyEntity(entity);
     });
-    return components;
   }
 
-  public cleanEntitiesComponents(entities: number[]): void {
-    Object.keys(this.managers).forEach((name) => {
-      entities.forEach((entity) => {
-        this.managers[name].clean(entity);
-      });
+  destroyEntities(entities: Entity[]): void {
+    Object.values(this.managers).forEach((manager) => {
+      manager.destroyEntities(entities);
     });
+  }
+
+  compactAndRebase(zeroTime: number): void {
+    Object.values(this.managers).forEach((mgr) =>
+      mgr.compactAndRebase(zeroTime)
+    );
   }
 }

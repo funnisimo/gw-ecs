@@ -15,7 +15,7 @@ describe("System", () => {
       this.callback("beforeProcess");
     }
 
-    protected processSystem(): void {
+    protected doProcess(): void {
       this.callback("processSystem");
     }
 
@@ -44,15 +44,17 @@ describe("System", () => {
     let system = new SystemTest(callback);
 
     world.addSystem(system);
-    system.setEnable(false);
+    system.setEnabled(false);
     world.init();
     world.process();
 
-    expect(callback).not.toHaveBeenCalled();
+    expect(callback).toHaveBeenCalledTimes(0);
 
-    system.setEnable(true);
+    callback.mockClear();
+    system.setEnabled(true);
     world.process();
 
+    expect(callback).toHaveBeenCalledTimes(3); // before, process, after
     expect(callback).toHaveBeenCalledWith("beforeProcess");
     expect(callback).toHaveBeenCalledWith("processSystem");
     expect(callback).toHaveBeenCalledWith("afterProcess");

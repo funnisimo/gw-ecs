@@ -1,11 +1,12 @@
-import { World } from "../core";
+import { Entity, World } from "../core";
 
 export abstract class System {
   protected world: World;
-  private enable: boolean = true;
+  private enabled: boolean = true;
+  lastTick = 0;
 
   constructor() {
-    this.enable = true;
+    this.enabled = true;
     this.world = new World();
   }
 
@@ -13,34 +14,37 @@ export abstract class System {
     this.world = world;
   }
 
-  setEnable(enable: boolean) {
-    this.enable = enable;
+  setEnabled(enable: boolean) {
+    this.enabled = enable;
   }
 
-  isEnable() {
-    return this.enable;
+  isEnabled() {
+    return this.enabled;
   }
 
-  accept(_entity: number, _components: string[]): boolean {
-    return false;
-  }
+  // // TODO - Remove?
+  // accept(_entity: Entity, _components: AnyComponent[]): boolean {
+  //   return false;
+  // }
 
+  // TODO - Remove?
   /* tslint:disable:no-empty */
-  removeEntities(_entities: number[]): void {}
+  removeEntities(_entities: Entity[]): void {}
 
-  doProcessSystem(): void {
-    if (this.isEnable()) {
+  process(): void {
+    if (this.isEnabled()) {
       this.beforeProcess();
-      this.processSystem();
+      this.doProcess();
       this.afterProcess();
     }
+    this.lastTick = this.world.currentTick();
   }
 
   /* tslint:disable:no-empty */
-  protected beforeProcess(): void {}
+  beforeProcess(): void {}
 
-  protected abstract processSystem(): void;
+  protected abstract doProcess(): void;
 
   /* tslint:disable:no-empty */
-  protected afterProcess(): void {}
+  afterProcess(): void {}
 }

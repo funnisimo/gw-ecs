@@ -1,50 +1,56 @@
-import { Aspect } from "../core";
+import { Aspect, Entity } from "../core";
 import { System } from ".";
 
 export abstract class EntitySystem extends System {
-  protected entities: number[];
-  private aspect: Aspect;
+  // protected entities: Entity[];
+  _aspect: Aspect;
 
-  public constructor(aspect: Aspect) {
+  constructor(aspect: Aspect) {
     super();
-    this.aspect = aspect;
-    this.entities = [];
+    this._aspect = aspect;
+    // this.entities = [];
   }
 
-  public accept(entity: number, components: string[]): boolean {
-    const present = this.entities.includes(entity);
-    const valid = this.aspect.accept(components);
-    if (!present && valid) {
-      this.entities.push(entity);
-      return true;
-    } else if (present && !valid) {
-      this.entities = this.entities.filter((sEntity) => sEntity !== entity);
+  // accept(entity: Entity, components: AnyComponent[]): boolean {
+  //   const present = this.entities.includes(entity);
+  //   const valid = this.aspect.accept(components);
+  //   if (!present && valid) {
+  //     this.entities.push(entity);
+  //     return true;
+  //   } else if (present && !valid) {
+  //     this.entities = this.entities.filter((sEntity) => sEntity !== entity);
+  //   }
+  //   return valid;
+  // }
+
+  accept(entity: Entity): boolean {
+    return this._aspect.accept(entity.allComponents());
+  }
+
+  // public removeEntities(entitiesToRemove: Entity[]) {
+  //   this.entities = this.entities.filter(
+  //     (entity) => !entitiesToRemove.includes(entity)
+  //   );
+  // }
+
+  // public process(): void {
+  //   if (this.isEnabled()) {
+  //     this.beforeProcess();
+  //     this.processEntities();
+  //     this.afterProcess();
+  //   }
+  // }
+
+  protected doProcess(): void {
+    for (let e of this.world.entities().alive()) {
+      if (this.accept(e)) {
+        this.processEntity(e);
+      }
     }
-    return valid;
   }
 
-  public removeEntities(entitiesToRemove: number[]) {
-    this.entities = this.entities.filter(
-      (entity) => !entitiesToRemove.includes(entity)
-    );
-  }
+  protected abstract processEntity(entity: Entity): void;
 
-  public doProcessSystem(): void {
-    if (this.isEnable()) {
-      this.beforeProcess();
-      this.processEntities();
-      this.afterProcess();
-    }
-  }
-
-  protected processEntities(): void {
-    for (const entity of this.entities) {
-      this.process(entity);
-    }
-  }
-
-  protected abstract process(entity: number): void;
-
-  /* tslint:disable:no-empty */
-  public processSystem(): void {}
+  // /* tslint:disable:no-empty */
+  // public doProcess(): void {}
 }

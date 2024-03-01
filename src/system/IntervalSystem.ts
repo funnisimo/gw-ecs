@@ -1,4 +1,4 @@
-import { System } from ".";
+import { System } from "./system";
 
 export abstract class IntervalSystem extends System {
   protected delay: number;
@@ -19,12 +19,12 @@ export abstract class IntervalSystem extends System {
     this.catchUp = catchUp;
   }
 
-  public doProcessSystem(): void {
-    if (this.isEnable()) {
+  public process(): void {
+    if (this.isEnabled()) {
       this.updateDelay();
       if (this.delay <= 0) {
         this.beforeProcess();
-        this.processSystem();
+        this.doProcess();
         this.afterProcess();
         this.delay += this.interval;
         // TODO - there is a way to do this without the loop

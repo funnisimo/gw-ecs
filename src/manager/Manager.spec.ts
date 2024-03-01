@@ -1,27 +1,22 @@
 import "jest-extended";
 import { World } from "../core";
 
+class A {
+  value = 1;
+}
+
 describe("manager", () => {
-  class MyComponent {
-    public value: string;
-
-    constructor(myValue: string = "not set") {
-      this.value = myValue;
-    }
-  }
-
   describe("manager fetch", () => {
-    it("should add the default component to an entity if it has none", () => {
+    it("no default values", () => {
       let world = new World();
-      world.registerComponent("A", new MyComponent("default value"));
+      world.registerComponent(A);
       world.init();
 
       let entity = world.create();
-      let manager = world.getComponentManager("A");
+      let manager = world.getComponentManager(A);
 
-      let component = manager.fetch(entity) as MyComponent;
-
-      expect(component.value).toEqual("default value");
+      let component = manager.fetch(entity);
+      expect(component).toBeUndefined();
     });
   });
 });

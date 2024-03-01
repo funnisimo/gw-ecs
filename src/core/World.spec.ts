@@ -1,6 +1,8 @@
 import "jest-extended";
-import { World, Aspect } from "../core";
+import { World, Aspect, Entity } from "../core";
 import { EntitySystem } from "../system";
+
+class A {}
 
 describe("World", function () {
   class MockSystem extends EntitySystem {
@@ -11,7 +13,7 @@ describe("World", function () {
       this.callback = callback;
     }
 
-    protected process(entity: number): void {
+    protected processEntity(entity: Entity): void {
       this.callback(entity);
     }
   }
@@ -29,39 +31,38 @@ describe("World", function () {
       world.init();
       let idA = world.create();
       let idB = world.create();
-      world.remove(idA);
+      world.queueDestroy(idA);
       world.process();
       let idC = world.create();
       let idD = world.create();
-      expect(idA).toEqual(1);
-      expect(idB).toEqual(2);
-      expect(idC).toEqual(1);
-      expect(idD).toEqual(3);
+      expect(idA._index).toEqual(0);
+      expect(idB._index).toEqual(1);
+      expect(idC._index).toEqual(0);
+      expect(idD._index).toEqual(2);
     });
 
     it("should remove an entity from a system when it' deleted from world", () => {
       let world = new World();
       let callback = jest.fn();
-      let system = new MockSystem(new Aspect().all("A"), callback);
-      world.registerComponent("A").addSystem(system);
-
-      let entity = world.create();
-      world.getComponentManager("A").add(entity);
+      let system = new MockSystem(new Aspect().all(A), callback);
+      world.registerComponent(A).addSystem(system);
       world.init();
 
+      let entity = world.create();
+      entity.add(new A());
+
       world.process(0);
       expect(callback).toHaveBeenCalledTimes(1);
 
-      // entity is not deleted until 'process' completes...
+      // entity is not deleted until sytem 'process' completes...
       callback.mockClear();
-      world.remove(entity);
-      world.remove(entity); // Can remove multiple times
+      world.queueDestroy(entity);
+      world.queueDestroy(entity); // Can remove multiple times
       world.process(0);
 
       expect(callback).toHaveBeenCalledTimes(1);
 
       callback.mockClear();
-      world.remove(entity);
       world.process(0);
       expect(callback).not.toHaveBeenCalled();
     });
@@ -69,17 +70,17 @@ describe("World", function () {
     it("should not process systems that are initially disabled", () => {
       let world = new World();
       let callback = jest.fn();
-      let system = new MockSystem(new Aspect().all("A"), callback);
-      world.registerComponent("A").addSystem(system, false);
+      let system = new MockSystem(new Aspect().all(A), callback);
+      world.registerComponent(A).addSystem(system, false);
 
       let entity = world.create();
-      world.getComponentManager("A").add(entity);
+      world.getComponentManager(A).add(entity, new A());
       world.init();
 
       callback.mockClear();
       world.process(1);
       expect(callback).not.toHaveBeenCalled();
-      system.setEnable(true);
+      system.setEnabled(true);
 
       callback.mockClear();
       world.process(1);

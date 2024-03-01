@@ -1,6 +1,9 @@
 import "jest-extended";
-import { World, Aspect } from "../core";
+import { World, Aspect, Entity } from "../core";
 import { IntervalEntitySystem } from "./index";
+
+class A {}
+class B {}
 
 describe("interval entity system", () => {
   class MyIntervalEntitySystem extends IntervalEntitySystem {
@@ -11,7 +14,7 @@ describe("interval entity system", () => {
       this.fakeCallback = callback;
     }
 
-    protected process(entity: number): void {
+    protected processEntity(entity: Entity): void {
       this.fakeCallback(entity);
     }
   }
@@ -24,7 +27,7 @@ describe("interval entity system", () => {
       this.fakeCallback = callback;
     }
 
-    protected process(entity: number): void {
+    protected processEntity(entity: Entity): void {
       this.fakeCallback(entity);
     }
   }
@@ -32,7 +35,7 @@ describe("interval entity system", () => {
   it("should process matching entities at regular interval", () => {
     let callback = jest.fn();
     let world = new World();
-    let aspect = new Aspect().all("A").none("B");
+    let aspect = new Aspect().all(A).none(B);
     let interval = 10;
     let myIntervalSystem = new MyIntervalEntitySystem(
       aspect,
@@ -41,15 +44,15 @@ describe("interval entity system", () => {
     );
 
     world
-      .registerComponent("A")
-      .registerComponent("B")
+      .registerComponent(A)
+      .registerComponent(B)
       .addSystem(myIntervalSystem)
       .init();
 
     let entityA = world.create();
     let entityB = world.create();
-    world.getComponentManager("A").add(entityA);
-    world.getComponentManager("A").add(entityB);
+    world.getComponentManager(A).add(entityA, new A());
+    world.getComponentManager(A).add(entityB, new A());
 
     world.process(5);
     expect(callback).not.toHaveBeenCalled();
@@ -59,7 +62,7 @@ describe("interval entity system", () => {
     expect(callback).toHaveBeenCalledWith(entityB);
 
     callback.mockClear();
-    world.getComponentManager("B").add(entityB);
+    world.getComponentManager(B).add(entityB, new B());
     world.process(10);
     expect(callback).toHaveBeenCalledWith(entityA);
     expect(!callback).toHaveBeenCalledWith(entityB);
@@ -69,7 +72,7 @@ describe("interval entity system", () => {
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
-    world.getComponentManager("B").remove(entityB);
+    world.getComponentManager(B).remove(entityB);
     world.process(1);
     expect(callback).toHaveBeenCalledWith(entityA);
     expect(callback).toHaveBeenCalledWith(entityB);
@@ -95,12 +98,12 @@ describe("interval entity system", () => {
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
-    system.setEnable(false);
+    system.setEnabled(false);
     world.process(10);
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
-    system.setEnable(true);
+    system.setEnabled(true);
     world.process(10);
     expect(callback).not.toHaveBeenCalled();
 

@@ -1,36 +1,22 @@
-import { EntitySystem } from ".";
+import { DelayedSystem } from "./delayedSystem";
+import { Entity } from "../core";
 import { Aspect } from "../core/aspect";
 
-export abstract class DelayedEntitySystem extends EntitySystem {
-  private entitiesToProcess: number[];
+export abstract class DelayedEntitySystem extends DelayedSystem {
+  private _aspect: Aspect;
 
-  public constructor(aspect: Aspect) {
-    super(aspect);
-    this.entitiesToProcess = [];
+  public constructor(aspect: Aspect, delay: number) {
+    super(delay);
+    this._aspect = aspect;
   }
 
-  public abstract updateEntityDelay(entity: number): boolean;
-
-  private updateEntitiesDelay() {
-    this.entitiesToProcess = [];
-    this.entities.forEach((entity) => {
-      if (this.updateEntityDelay(entity)) {
-        this.entitiesToProcess.push(entity);
+  protected doProcess(): void {
+    for (let e of this.world.entities().alive()) {
+      if (this._aspect.accept(e.allComponents())) {
+        this.processEntity(e);
       }
-    });
-  }
-
-  protected processEntities(): void {
-    this.entitiesToProcess.forEach((entity) => this.process(entity));
-    this.entitiesToProcess = [];
-  }
-
-  public doProcessSystem(): void {
-    if (this.isEnable()) {
-      this.updateEntitiesDelay();
-      this.beforeProcess();
-      this.processEntities();
-      this.afterProcess();
     }
   }
+
+  protected abstract processEntity(entity: Entity): void;
 }

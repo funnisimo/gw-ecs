@@ -1,46 +1,110 @@
-import { World } from "../core";
+import { Component, Entity, Gen, Index } from "../core";
 
-export class Manager {
-  public defaultValue: any;
-  private world: World;
+export interface TimeSource {
+  currentTick(): number;
+}
 
-  public container: {
-    [id: number]: any;
+class Data<T> {
+  gen: Gen;
+  data: T;
+  added: number;
+  updated: number;
+  removed: number;
+
+  constructor(gen: Gen, data: T, time: number) {
+    this.gen = gen;
+    this.added = this.updated = time;
+    this.removed = -1;
+    this.data = data;
+  }
+}
+
+export class Manager<T> {
+  _time: TimeSource;
+  _comp: Component<T>;
+  _data: {
+    [entity: Index]: Data<T>;
   };
 
-  constructor(world: World, defaultValue: any) {
-    this.world = world;
-    this.defaultValue = defaultValue;
-    this.container = {};
+  constructor(world: TimeSource, comp: Component<T>) {
+    this._time = world;
+    this._comp = comp;
+    this._data = {};
   }
 
-  public add(entity: number, component?: any): void {
-    if (component === undefined) {
-      this.container[entity] = { ...this.defaultValue };
-    } else {
-      this.container[entity] = component;
+  /**
+   *
+   * @param entity
+   * @param comp
+   * @returns Prior value - if any
+   */
+  add(entity: Entity, comp: T): T | undefined {
+    entity._addComp(this._comp);
+
+    let current = this._data[entity._index];
+    if (!current) {
+      this._data[entity._index] = new Data(
+        entity._gen,
+        comp,
+        this._time.currentTick()
+      );
+      return undefined;
     }
-    this.world.update(entity);
+
+    const prior = current.data;
+    current.data = comp;
+    current.added = current.updated = this._time.currentTick();
+    current.removed = -1;
+    return prior;
   }
 
-  public fetch(entity: number): any {
-    if (this.container[entity] === undefined) {
-      this.container[entity] = { ...this.defaultValue };
-      this.world.update(entity);
+  fetch(entity: Entity): T | undefined {
+    const v = this._data[entity._index];
+    if (!v || v.gen !== entity._gen || v.removed > 0) return undefined; // TODO - log?  Delete?  throw?
+    return v.data;
+  }
+
+  update(entity: Entity): T | undefined {
+    const v = this._data[entity._index];
+    if (!v || v.gen !== entity._gen || v.removed > 0) return undefined; // TODO - log?  Delete?  throw?
+    v.updated = this._time.currentTick(); // update update time.
+    return v.data;
+  }
+
+  // This is immediate
+  remove(entity: Entity): T | undefined {
+    entity._removeComp(this._comp);
+    const removed = this._data[entity._index];
+    if (removed && removed.gen == entity._gen && removed.removed < 0) {
+      removed.removed = this._time.currentTick();
+      return removed.data;
     }
-    return this.container[entity];
+    return undefined;
   }
 
-  public remove(entity: number): void {
-    delete this.container[entity];
-    this.world.update(entity);
+  has(entity: Entity): boolean {
+    const v = this._data[entity._index];
+    return v && v.gen == entity._gen;
   }
 
-  public has(entity: number): boolean {
-    return this.container[entity] !== undefined;
+  destroyEntity(entity: Entity): void {
+    this.remove(entity);
   }
 
-  public clean(entity: number): void {
-    delete this.container[entity];
+  destroyEntities(entities: Entity[]): void {
+    entities.forEach((e) => this.destroyEntity(e));
+  }
+
+  compactAndRebase(zeroTime: number) {
+    // Typescript/Javascript oddity...
+    Object.entries(this._data).forEach(([is, d]: [string, Data<T>]) => {
+      if (d.removed > 0 && d.removed < zeroTime) {
+        delete this._data[parseInt(is)];
+      } else {
+        d.added = Math.max(0, d.added - zeroTime);
+        d.updated = Math.max(0, d.updated - zeroTime);
+        d.removed = Math.max(-1, d.removed - zeroTime);
+      }
+    });
   }
 }

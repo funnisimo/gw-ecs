@@ -2,6 +2,8 @@ export interface Component<T> extends Function {
   new (...args: any[]): T;
 }
 
+export type AnyComponent = Component<any>;
+
 // class Item {
 //   kind: string;
 

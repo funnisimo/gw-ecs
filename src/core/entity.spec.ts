@@ -10,19 +10,22 @@ class CompA {
 }
 
 describe("Entity", () => {
-  let fetch: jest.Mock;
+  let fetchComponent: jest.Mock;
+  let updateComponent: jest.Mock;
   let addComponent: jest.Mock;
   let removeComponent: jest.Mock;
   let entities: Entities;
   let source: ComponentSource;
 
   beforeEach(() => {
-    fetch = jest.fn();
-    addComponent = jest.fn();
-    removeComponent = jest.fn();
+    fetchComponent = jest.fn();
+    updateComponent = jest.fn();
+    addComponent = jest.fn().mockImplementation((e, _v, c) => e._addComp(c));
+    removeComponent = jest.fn().mockImplementation((e, c) => e._removeComp(c));
 
     source = {
-      fetch,
+      fetchComponent,
+      updateComponent,
       addComponent,
       removeComponent,
     };
@@ -40,35 +43,35 @@ describe("Entity", () => {
 
     expect(e.has(CompA)).toBeFalse();
     expect(e.fetch(CompA)).toBeUndefined();
-    expect(source.fetch).toHaveBeenCalledWith(CompA, e);
-    fetch.mockClear();
+    expect(source.fetchComponent).toHaveBeenCalledWith(e, CompA);
+    fetchComponent.mockClear();
 
     const a = new CompA();
-    expect(e.add(CompA, a)).toBeTrue();
-    expect(addComponent).toHaveBeenCalledWith(CompA, e, a);
+    expect(e.add(a)).toBeUndefined(); // No prior value
+    expect(addComponent).toHaveBeenCalledWith(e, a, CompA);
     addComponent.mockClear();
 
     expect(e.has(CompA)).toBeTrue();
-    fetch.mockReturnValueOnce(a);
+    fetchComponent.mockReturnValueOnce(a);
     expect(e.fetch(CompA)).toBe(a);
-    expect(source.fetch).toHaveBeenCalledWith(CompA, e);
-    fetch.mockClear();
+    expect(source.fetchComponent).toHaveBeenCalledWith(e, CompA);
+    fetchComponent.mockClear();
 
     const a2 = new CompA(2);
-    expect(e.add(CompA, a2)).toBeFalse(); // Not a new component
+    expect(e.add(a2)).toBeUndefined(); // No prior value
     expect(e.has(CompA)).toBeTrue();
-    fetch.mockReturnValueOnce(a2);
+    fetchComponent.mockReturnValueOnce(a2);
     expect(e.fetch(CompA)).toEqual(a2);
-    expect(source.fetch).toHaveBeenCalledWith(CompA, e);
-    fetch.mockClear();
+    expect(source.fetchComponent).toHaveBeenCalledWith(e, CompA);
+    fetchComponent.mockClear();
 
-    expect(e.allComponents()).toEqual([CompA]); // TODO - keep constructors instead of names?
+    expect(e.allComponents()).toEqual([CompA]);
 
-    expect(e.remove(CompA)).toBeTrue();
-    expect(removeComponent).toHaveBeenCalledWith(CompA, e);
+    expect(e.remove(CompA)).toBeUndefined(); // TODO - If using World will be 'a2'
+    expect(removeComponent).toHaveBeenCalledWith(e, CompA);
     removeComponent.mockClear();
-    expect(e.remove(CompA)).toBeFalse(); // Already removed
-    expect(removeComponent).toHaveBeenCalledWith(CompA, e); // But we still ask to remove the component anyway to be safe
+    expect(e.remove(CompA)).toBeUndefined(); // Already removed
+    expect(removeComponent).toHaveBeenCalledWith(e, CompA); // But we still ask to remove the component anyway to be safe
     removeComponent.mockClear();
 
     expect(e.allComponents()).toEqual([]);
@@ -81,13 +84,9 @@ describe("Entity", () => {
 
     expect(e.isAlive()).toBeTrue();
     expect(e._gen).toEqual(1);
-    e.add(CompA, new CompA());
+    e.add(new CompA());
 
-    entities.queueDestroy(e);
-    expect(e.isAlive()).toBeTrue();
-    expect(e.has(CompA)).toBeTrue();
-    expect(removeComponent).not.toHaveBeenCalled();
-    entities.process();
+    e._destroy(); // Done by world
     expect(e.isAlive()).toBeFalse();
     expect(e.has(CompA)).toBeFalse();
     expect(removeComponent).toHaveBeenCalled();
@@ -98,11 +97,13 @@ describe("Entity", () => {
     expect(e2._gen).toEqual(2);
     expect(e2.isAlive()).toBeTrue();
     expect(e2.allComponents()).toEqual([]);
-    e2.add(CompA, new CompA());
+    e2.add(new CompA());
+    expect(e2.allComponents()).toEqual([CompA]);
 
-    entities.destroyNow(e2);
-    expect(e.isAlive()).toBeFalse();
-    expect(e.has(CompA)).toBeFalse();
+    e2._destroy(); // Done by world
+    expect(e2.isAlive()).toBeFalse();
+    expect(e2.has(CompA)).toBeFalse();
     expect(removeComponent).toHaveBeenCalled();
+    expect(e2.allComponents()).toEqual([]);
   });
 });

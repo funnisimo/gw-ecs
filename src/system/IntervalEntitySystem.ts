@@ -1,38 +1,22 @@
-import { EntitySystem } from ".";
+import { IntervalSystem } from "./intervalSystem";
 import { Aspect } from "../core/aspect";
+import { Entity } from "../core";
 
-export abstract class IntervalEntitySystem extends EntitySystem {
-  protected delay: number;
-  protected interval: number;
-  private catchUp: boolean = true;
+export abstract class IntervalEntitySystem extends IntervalSystem {
+  private _aspect: Aspect;
 
-  public constructor(aspect: Aspect, interval: number, delay?: number) {
-    super(aspect);
-    this.interval = interval;
-    this.delay = delay === undefined ? interval : delay;
+  constructor(aspect: Aspect, interval: number, delay?: number) {
+    super(interval, delay);
+    this._aspect = aspect;
   }
 
-  protected updateDelay() {
-    this.delay -= this.world.delta;
-  }
-
-  public enableCatchUpDelay(catchUp: boolean): void {
-    this.catchUp = catchUp;
-  }
-
-  public doProcessSystem(): void {
-    if (this.isEnable()) {
-      this.updateDelay();
-      if (this.delay <= 0) {
-        this.beforeProcess();
-        this.processEntities();
-        this.afterProcess();
-        this.delay += this.interval;
-        // TODO - there is a way to do this without the loop
-        while (this.delay < 0 && !this.catchUp) {
-          this.delay += this.interval;
-        }
+  protected doProcess(): void {
+    for (let e of this.world.entities().alive()) {
+      if (this._aspect.accept(e.allComponents())) {
+        this.processEntity(e);
       }
     }
   }
+
+  protected abstract processEntity(entity: Entity): void;
 }
