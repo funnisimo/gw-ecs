@@ -14,6 +14,10 @@ export abstract class System {
     this.world = world;
   }
 
+  rebase(zeroTime: number) {
+    this.lastTick = Math.max(0, this.lastTick - zeroTime);
+  }
+
   setEnabled(enable: boolean) {
     this.enabled = enable;
   }
@@ -21,15 +25,6 @@ export abstract class System {
   isEnabled() {
     return this.enabled;
   }
-
-  // // TODO - Remove?
-  // accept(_entity: Entity, _components: AnyComponent[]): boolean {
-  //   return false;
-  // }
-
-  // TODO - Remove?
-  /* tslint:disable:no-empty */
-  removeEntities(_entities: Entity[]): void {}
 
   process(): void {
     if (this.isEnabled()) {
@@ -47,4 +42,11 @@ export abstract class System {
 
   /* tslint:disable:no-empty */
   afterProcess(): void {}
+
+  destroyEntities(entities: Entity[]): void {
+    entities.forEach((e) => this.destroyEntity(e));
+  }
+
+  /* tslint:disable:no-empty */
+  destroyEntity(_entity: Entity) {}
 }

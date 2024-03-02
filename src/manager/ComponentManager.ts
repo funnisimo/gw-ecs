@@ -1,5 +1,5 @@
 import { Component, Entity } from "../core";
-import { Manager, TimeSource } from "./manager";
+import { Manager } from "./manager";
 
 interface IManager {
   [name: string]: Manager<any>;
@@ -7,15 +7,13 @@ interface IManager {
 
 export class ComponentManager {
   private managers: IManager;
-  _world: TimeSource;
 
-  constructor(world: TimeSource) {
+  constructor() {
     this.managers = {};
-    this._world = world;
   }
 
   register<T>(comp: Component<T>): void {
-    this.managers[comp.name] = new Manager(this._world, comp);
+    this.managers[comp.name] = new Manager(comp);
   }
 
   getManager<T>(comp: Component<T>): Manager<T> {
@@ -43,11 +41,5 @@ export class ComponentManager {
     Object.values(this.managers).forEach((manager) => {
       manager.destroyEntities(entities);
     });
-  }
-
-  compactAndRebase(zeroTime: number): void {
-    Object.values(this.managers).forEach((mgr) =>
-      mgr.compactAndRebase(zeroTime)
-    );
   }
 }

@@ -17,17 +17,20 @@ describe("component manager", () => {
     managerComponentA.add(entity, new A());
     managerComponentB.add(entity, new B());
 
-    expect(entity.allComponents()).toMatchObject([A, B]);
+    expect(entity.has(A)).toBeTrue();
+    expect(entity.has(B)).toBeTrue();
 
     world.queueDestroy(entity);
-    expect(entity.allComponents()).toMatchObject([A, B]);
+    expect(entity.has(A)).toBeTrue();
+    expect(entity.has(B)).toBeTrue();
     expect(entity.isAlive()).toBeTrue();
     expect(managerComponentA.fetch(entity)).toBeInstanceOf(A);
     expect(managerComponentB.fetch(entity)).toBeInstanceOf(B);
 
     world.process();
     expect(entity.isAlive()).toBeFalse();
-    expect(entity.allComponents()).toMatchObject([]);
+    expect(entity.has(A)).toBeFalse();
+    expect(entity.has(B)).toBeFalse();
 
     expect(managerComponentA.fetch(entity)).toBeUndefined();
     expect(managerComponentB.fetch(entity)).toBeUndefined();

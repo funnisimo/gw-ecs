@@ -1,6 +1,8 @@
 import type { Component, AnyComponent } from "./component";
 
 export interface ComponentSource {
+  currentTick(): number;
+
   fetchComponent<T>(entity: Entity, comp: Component<T>): T | undefined;
   updateComponent<T>(entity: Entity, comp: Component<T>): T | undefined;
   addComponent<T>(entity: Entity, val: T, comp?: Component<T>): T | undefined; // TODO - Return replaced value?
@@ -28,9 +30,28 @@ export class EntityId {
   }
 }
 
+class UsageData {
+  comp: AnyComponent;
+  added: number;
+  updated: number;
+  removed: number;
+
+  constructor(comp: AnyComponent, added: number) {
+    this.comp = comp;
+    this.added = this.updated = added;
+    this.removed = -1;
+  }
+
+  rebase(zeroTick: number) {
+    this.added = Math.max(0, this.added - zeroTick);
+    this.updated = Math.max(0, this.updated - zeroTick);
+    this.removed = Math.max(-1, this.removed - zeroTick);
+  }
+}
+
 export class Entity extends EntityId {
   _source: ComponentSource;
-  _comps: AnyComponent[];
+  _comps: UsageData[];
 
   constructor(source: ComponentSource, index = 0, gen = 1) {
     super(index, gen);
@@ -45,7 +66,7 @@ export class Entity extends EntityId {
   _destroy() {
     if (this.isAlive()) {
       this._gen = -this._gen;
-      this._comps.forEach((c) => this._source.removeComponent(this, c));
+      this._comps.forEach((c) => this._source.removeComponent(this, c.comp));
       this._comps = [];
     }
   }
@@ -63,9 +84,18 @@ export class Entity extends EntityId {
   }
 
   _addComp(comp: AnyComponent): void {
-    if (!this._comps.includes(comp)) {
-      this._comps.push(comp);
+    const data = this._comps.find((d) => d.comp === comp);
+    if (!data) {
+      this._comps.push(new UsageData(comp, this._source.currentTick()));
+    } else {
+      data.added = data.updated = this._source.currentTick();
+      data.removed = -1;
     }
+  }
+
+  isAddedSince(comp: AnyComponent, tick: number): boolean {
+    const data = this._comps.find((d) => d.comp === comp);
+    return !!data && data.added > tick && data.removed < 0;
   }
 
   remove<T>(comp: Component<T>): T | undefined {
@@ -73,14 +103,20 @@ export class Entity extends EntityId {
   }
 
   _removeComp(comp: AnyComponent): void {
-    const index = this._comps.indexOf(comp);
-    if (index >= 0) {
-      this._comps.splice(index, 1);
+    const data = this._comps.find((d) => d.comp === comp);
+    if (data) {
+      data.removed = this._source.currentTick();
     }
   }
 
+  isRemovedSince(comp: AnyComponent, tick: number): boolean {
+    const data = this._comps.find((d) => d.comp === comp);
+    return !!data && data.removed > tick;
+  }
+
   has(comp: AnyComponent): boolean {
-    return this._comps.includes(comp);
+    const data = this._comps.find((d) => d.comp === comp);
+    return !!data && data.removed < 0;
   }
 
   fetch<T>(comp: Component<T>): T | undefined {
@@ -91,8 +127,24 @@ export class Entity extends EntityId {
     return this._source.updateComponent(this, comp);
   }
 
-  allComponents(): AnyComponent[] {
-    return this._comps;
+  _updateComp(comp: AnyComponent): void {
+    const data = this._comps.find((d) => d.comp === comp);
+    if (data) {
+      data.updated = this._source.currentTick();
+    }
+  }
+
+  isUpdatedSince(comp: AnyComponent, tick: number): boolean {
+    const data = this._comps.find((d) => d.comp === comp);
+    return !!data && data.updated > tick && data.removed < 0;
+  }
+
+  // allComponents(): AnyComponent[] {
+  //   return this._comps;
+  // }
+
+  rebase(zeroTick: number) {
+    this._comps.forEach((c) => c.rebase(zeroTick));
   }
 }
 
@@ -124,6 +176,9 @@ export class Entities {
     }
   }
 
+  rebase(zeroTick: number) {
+    this._all.forEach((e) => e.rebase(zeroTick));
+  }
   // queueDestroy(e: Entity) {
   //   if (this._toDelete.includes(e)) return;
   //   this._toDelete.push(e);

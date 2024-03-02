@@ -1,24 +1,34 @@
 import type { AnyComponent } from "./component";
+import { Entity } from "./entity";
 
 export class Aspect {
   protected _allComponents: AnyComponent[];
   protected _oneComponents: AnyComponent[][];
   protected _someComponents: AnyComponent[][];
   protected _noneComponents: AnyComponent[];
+  protected _addedComponents: AnyComponent[];
+  protected _updatedComponents: AnyComponent[];
+  protected _removedComponents: AnyComponent[];
 
   constructor() {
     this._allComponents = [];
     this._oneComponents = [];
     this._noneComponents = [];
     this._someComponents = [];
+    this._addedComponents = [];
+    this._updatedComponents = [];
+    this._removedComponents = [];
   }
 
-  accept(components: AnyComponent[]): boolean {
+  accept(entity: Entity, sinceTick: number = 0): boolean {
     return (
-      this._checkAll(components) &&
-      this._checkOne(components) &&
-      this._checkSome(components) &&
-      this._checkNone(components)
+      this._checkAll(entity) &&
+      this._checkNone(entity) &&
+      this._checkOne(entity) &&
+      this._checkSome(entity) &&
+      this._checkAdded(entity, sinceTick) &&
+      this._checkUpdated(entity, sinceTick) &&
+      this._checkRemoved(entity, sinceTick)
     );
   }
 
@@ -44,24 +54,22 @@ export class Aspect {
     return this;
   }
 
-  protected _checkAll(components: AnyComponent[]) {
+  protected _checkAll(entity: Entity) {
     return (
       this._allComponents.length === 0 ||
-      this._allComponents.every((componentName: AnyComponent) =>
-        components.includes(componentName)
-      )
+      this._allComponents.every((comp: AnyComponent) => entity.has(comp))
     );
   }
 
-  protected _checkOne(components: AnyComponent[]) {
+  protected _checkOne(entity: Entity) {
     return (
       this._oneComponents.length === 0 ||
       this._oneComponents.every((set: AnyComponent[]) => {
         return (
           set.length == 0 ||
           set.reduce(
-            (count: number, componentName: AnyComponent) =>
-              components.includes(componentName) ? count + 1 : count,
+            (count: number, comp: AnyComponent) =>
+              entity.has(comp) ? count + 1 : count,
             0
           ) == 1
         );
@@ -69,25 +77,47 @@ export class Aspect {
     );
   }
 
-  protected _checkSome(components: AnyComponent[]): boolean {
+  protected _checkSome(entity: Entity): boolean {
     return (
       this._someComponents.length === 0 ||
       this._someComponents.some((set: AnyComponent[]): boolean => {
         return (
-          set.length == 0 ||
-          set.some((componentName: AnyComponent) =>
-            components.includes(componentName)
-          )
+          set.length == 0 || set.some((comp: AnyComponent) => entity.has(comp))
         );
       })
     );
   }
 
-  protected _checkNone(components: AnyComponent[]) {
+  protected _checkNone(entity: Entity) {
     return (
       this._noneComponents.length === 0 ||
-      this._noneComponents.every(
-        (componentName: AnyComponent) => !components.includes(componentName)
+      this._noneComponents.every((comp: AnyComponent) => !entity.has(comp))
+    );
+  }
+
+  protected _checkAdded(entity: Entity, sinceTick: number) {
+    return (
+      this._addedComponents.length === 0 ||
+      this._addedComponents.every((comp: AnyComponent) =>
+        entity.isAddedSince(comp, sinceTick)
+      )
+    );
+  }
+
+  protected _checkUpdated(entity: Entity, sinceTick: number) {
+    return (
+      this._updatedComponents.length === 0 ||
+      this._updatedComponents.every((comp: AnyComponent) =>
+        entity.isUpdatedSince(comp, sinceTick)
+      )
+    );
+  }
+
+  protected _checkRemoved(entity: Entity, sinceTick: number) {
+    return (
+      this._removedComponents.length === 0 ||
+      this._removedComponents.every((comp: AnyComponent) =>
+        entity.isRemovedSince(comp, sinceTick)
       )
     );
   }

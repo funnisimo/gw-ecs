@@ -12,7 +12,7 @@ export abstract class IntervalEntitySystem extends IntervalSystem {
 
   protected doProcess(): void {
     for (let e of this.world.entities().alive()) {
-      if (this._aspect.accept(e.allComponents())) {
+      if (this._aspect.accept(e)) {
         this.processEntity(e);
       }
     }

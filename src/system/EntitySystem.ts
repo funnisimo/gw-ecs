@@ -24,7 +24,7 @@ export abstract class EntitySystem extends System {
   // }
 
   accept(entity: Entity): boolean {
-    return this._aspect.accept(entity.allComponents());
+    return this._aspect.accept(entity);
   }
 
   // public removeEntities(entitiesToRemove: Entity[]) {

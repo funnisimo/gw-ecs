@@ -1,9 +1,7 @@
 import "jest-extended";
 import { World } from "../core";
 
-class A {
-  value = 1;
-}
+class A {}
 
 describe("manager", () => {
   describe("manager fetch", () => {

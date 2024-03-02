@@ -14,16 +14,19 @@ describe("Entity", () => {
   let updateComponent: jest.Mock;
   let addComponent: jest.Mock;
   let removeComponent: jest.Mock;
+  let currentTick: jest.Mock;
   let entities: Entities;
   let source: ComponentSource;
 
   beforeEach(() => {
+    currentTick = jest.fn().mockReturnValue(1);
     fetchComponent = jest.fn();
     updateComponent = jest.fn();
     addComponent = jest.fn().mockImplementation((e, _v, c) => e._addComp(c));
     removeComponent = jest.fn().mockImplementation((e, c) => e._removeComp(c));
 
     source = {
+      currentTick,
       fetchComponent,
       updateComponent,
       addComponent,
@@ -39,7 +42,7 @@ describe("Entity", () => {
     expect(e.isAlive()).toBeTrue();
     expect(e._index).toEqual(0);
     expect(e._gen).toEqual(1);
-    expect(e.allComponents()).toEqual([]);
+    expect(e.has(CompA)).toBeFalse();
 
     expect(e.has(CompA)).toBeFalse();
     expect(e.fetch(CompA)).toBeUndefined();
@@ -65,7 +68,7 @@ describe("Entity", () => {
     expect(source.fetchComponent).toHaveBeenCalledWith(e, CompA);
     fetchComponent.mockClear();
 
-    expect(e.allComponents()).toEqual([CompA]);
+    expect(e.has(CompA)).toBeTrue();
 
     expect(e.remove(CompA)).toBeUndefined(); // TODO - If using World will be 'a2'
     expect(removeComponent).toHaveBeenCalledWith(e, CompA);
@@ -73,8 +76,6 @@ describe("Entity", () => {
     expect(e.remove(CompA)).toBeUndefined(); // Already removed
     expect(removeComponent).toHaveBeenCalledWith(e, CompA); // But we still ask to remove the component anyway to be safe
     removeComponent.mockClear();
-
-    expect(e.allComponents()).toEqual([]);
 
     expect(e.has(CompA)).toBeFalse();
   });
@@ -86,24 +87,23 @@ describe("Entity", () => {
     expect(e._gen).toEqual(1);
     e.add(new CompA());
 
-    e._destroy(); // Done by world
+    e._destroy(); // Done by world, managers
     expect(e.isAlive()).toBeFalse();
     expect(e.has(CompA)).toBeFalse();
-    expect(removeComponent).toHaveBeenCalled();
+    expect(removeComponent).toHaveBeenCalledWith(e, CompA);
 
     removeComponent.mockClear();
     const e2 = entities.create();
     expect(e2).toBe(e);
     expect(e2._gen).toEqual(2);
     expect(e2.isAlive()).toBeTrue();
-    expect(e2.allComponents()).toEqual([]);
+    expect(e2.has(CompA)).toBeFalse();
     e2.add(new CompA());
-    expect(e2.allComponents()).toEqual([CompA]);
+    expect(e2.has(CompA)).toBeTrue();
 
     e2._destroy(); // Done by world
     expect(e2.isAlive()).toBeFalse();
     expect(e2.has(CompA)).toBeFalse();
     expect(removeComponent).toHaveBeenCalled();
-    expect(e2.allComponents()).toEqual([]);
   });
 });

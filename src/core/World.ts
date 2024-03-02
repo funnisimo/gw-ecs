@@ -18,7 +18,7 @@ export class World implements ComponentSource {
     this.delta = 0;
     this.time = 0;
     this._currentTick = 0;
-    this._components = new ComponentManager(this);
+    this._components = new ComponentManager();
     this._systems = [];
     this._destroyedEntities = [];
   }
@@ -27,8 +27,10 @@ export class World implements ComponentSource {
     return this._currentTick;
   }
 
-  registerComponent<T>(comp: Component<T>): World {
-    this._components.register(comp);
+  registerComponent<T>(...comp: Component<T>[]): World {
+    comp.forEach((c) => {
+      this._components.register(c);
+    });
     return this;
   }
 
@@ -61,19 +63,21 @@ export class World implements ComponentSource {
   process(delta: number = 0): void {
     this.delta = delta;
     this.time += delta;
+    this._currentTick += 1; // Make sure we always tick at least once
 
     this._systems.forEach((system) => {
-      this._currentTick += 1; // Tick each system
       this._beforeSystemProcess();
       system.process();
       this._afterSystemProcess();
+      this._currentTick += 1; // Tick after each system
     });
 
     this._afterSystemProcess(); // In case no systems run
 
     if (this._currentTick > 100000) {
       this._currentTick -= 100000;
-      this._components.compactAndRebase(100000);
+      this._entities.rebase(100000);
+      this._systems.forEach((system) => system.rebase(100000));
     }
   }
 
@@ -84,6 +88,9 @@ export class World implements ComponentSource {
     // });
 
     if (this._destroyedEntities.length) {
+      this._systems.forEach((system) =>
+        system.destroyEntities(this._destroyedEntities)
+      );
       this._components.destroyEntities(this._destroyedEntities);
       this._destroyedEntities.forEach((e) => e._destroy());
       this._destroyedEntities = [];
