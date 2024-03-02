@@ -1,24 +1,12 @@
-import { Component, Entity, Gen, Index } from "../core";
-
-class Data<T> {
-  gen: Gen;
-  data: T;
-
-  constructor(gen: Gen, data: T) {
-    this.gen = gen;
-    this.data = data;
-  }
-}
+import { Component, Entity, EntityId } from "../core";
 
 export class Manager<T> {
   _comp: Component<T>;
-  _data: {
-    [entity: Index]: Data<T>;
-  };
+  _data: Map<EntityId, T>;
 
   constructor(comp: Component<T>) {
     this._comp = comp;
-    this._data = {};
+    this._data = new Map();
   }
 
   /**
@@ -28,50 +16,48 @@ export class Manager<T> {
    * @returns Prior value - if any
    */
   add(entity: Entity, comp: T): T | undefined {
+    const id = entity.id;
+    if (!id.isAlive()) return undefined;
     entity._addComp(this._comp);
 
-    let current = this._data[entity._index];
-    if (!current) {
-      this._data[entity._index] = new Data(entity._gen, comp);
-      return undefined;
-    }
-
-    const prior = current.data;
-    current.data = comp;
+    let prior = this._data.get(id);
+    this._data.set(id, comp);
     return prior;
   }
 
   fetch(entity: Entity): T | undefined {
-    const v = this._data[entity._index];
-    if (!v || v.gen !== entity._gen) return undefined; // TODO - log?  Delete?  throw?
-    return v.data;
+    const id = entity.id;
+    if (!id.isAlive()) return undefined;
+    return this._data.get(id);
   }
 
   update(entity: Entity): T | undefined {
-    const v = this._data[entity._index];
-    if (!v || v.gen !== entity._gen) return undefined; // TODO - log?  Delete?  throw?
+    const id = entity.id;
+    if (!id.isAlive()) return undefined;
     entity._updateComp(this._comp);
-    return v.data;
+    return this._data.get(id);
   }
 
   // This is immediate
   remove(entity: Entity): T | undefined {
+    const id = entity.id;
+    if (!id.isAlive()) return undefined;
     entity._removeComp(this._comp);
-    const removed = this._data[entity._index];
-    if (removed && removed.gen == entity._gen) {
-      delete this._data[entity._index];
-      return removed.data;
-    }
-    return undefined;
+
+    let prior = this._data.get(id);
+    this._data.delete(id);
+    return prior;
   }
 
   has(entity: Entity): boolean {
-    const v = this._data[entity._index];
-    return v && v.gen == entity._gen;
+    const id = entity.id;
+    if (!id.isAlive()) return false;
+    return this._data.has(id);
   }
 
   destroyEntity(entity: Entity): void {
-    this.remove(entity);
+    const id = entity.id;
+    this._data.delete(id);
   }
 
   destroyEntities(entities: Entity[]): void {

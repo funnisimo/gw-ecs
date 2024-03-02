@@ -13,20 +13,32 @@ export type Index = number;
 export type Gen = number;
 
 export class EntityId {
-  _index: Index;
-  _gen: Gen;
+  index: Index;
+  gen: Gen;
 
   constructor(index = 0, gen = 1) {
-    this._index = index;
-    this._gen = gen;
+    this.index = index;
+    this.gen = gen;
   }
 
   isAlive(): boolean {
-    return this._gen > 0;
+    return this.gen > 0;
+  }
+
+  destroy() {
+    if (this.isAlive()) {
+      this.gen *= -1;
+    }
+  }
+
+  nextGen(): EntityId {
+    if (this.isAlive()) throw new Error("Entity not destroyed.");
+    const gen = 1 - this.gen; // gen is < 0, so this is 1 + -gen
+    return new EntityId(this.index, gen);
   }
 
   equals(other: EntityId): boolean {
-    return this._index == other._index && this._gen == other._gen;
+    return this.index == other.index && this.gen == other.gen;
   }
 }
 
@@ -49,31 +61,36 @@ class UsageData {
   }
 }
 
-export class Entity extends EntityId {
+export class Entity {
+  _id: EntityId;
   _source: ComponentSource;
   _comps: UsageData[];
 
-  constructor(source: ComponentSource, index = 0, gen = 1) {
-    super(index, gen);
+  constructor(source: ComponentSource, id: EntityId) {
+    this._id = id;
     this._source = source;
     this._comps = [];
   }
 
-  id(): EntityId {
-    return new EntityId(this._index, this._gen);
+  get id(): EntityId {
+    return this._id;
+  }
+
+  isAlive(): boolean {
+    return this._id.isAlive();
   }
 
   _destroy() {
     if (this.isAlive()) {
-      this._gen = -this._gen;
+      this._id.destroy();
       this._comps.forEach((c) => this._source.removeComponent(this, c.comp));
       this._comps = [];
     }
   }
 
-  revive() {
+  reviveNextGen() {
     if (this.isAlive()) throw new Error("Entity is not dead.");
-    this._gen = 1 - this._gen; // gen is < 0 so this is 1 + -gen
+    this._id = this._id.nextGen();
     this._comps = [];
   }
 
@@ -167,17 +184,18 @@ export class Entities {
   }
 
   create(): Entity {
-    const e = this._all.find((e) => !e.isAlive());
-    if (e) {
-      e.revive();
-      return e;
+    const entity = this._all.find((e) => !e.isAlive());
+    if (entity) {
+      entity.reviveNextGen();
+      return entity;
     }
-    const newE = new Entity(this._source, this._all.length);
+    const newId = new EntityId(this._all.length);
+    const newE = new Entity(this._source, newId);
     this._all.push(newE);
     return newE;
   }
 
-  *alive() {
+  *[Symbol.iterator]() {
     for (let e of this._all) {
       if (e.isAlive()) yield e;
     }

@@ -40,8 +40,8 @@ describe("Entity", () => {
     const e = entities.create();
     expect(e).toBeObject();
     expect(e.isAlive()).toBeTrue();
-    expect(e._index).toEqual(0);
-    expect(e._gen).toEqual(1);
+    expect(e.id.index).toEqual(0);
+    expect(e.id.gen).toEqual(1);
     expect(e.has(CompA)).toBeFalse();
 
     expect(e.has(CompA)).toBeFalse();
@@ -84,7 +84,7 @@ describe("Entity", () => {
     const e = entities.create();
 
     expect(e.isAlive()).toBeTrue();
-    expect(e._gen).toEqual(1);
+    expect(e.id.gen).toEqual(1);
     e.add(new CompA());
 
     e._destroy(); // Done by world, managers
@@ -95,7 +95,7 @@ describe("Entity", () => {
     removeComponent.mockClear();
     const e2 = entities.create();
     expect(e2).toBe(e);
-    expect(e2._gen).toEqual(2);
+    expect(e2.id.gen).toEqual(2);
     expect(e2.isAlive()).toBeTrue();
     expect(e2.has(CompA)).toBeFalse();
     e2.add(new CompA());

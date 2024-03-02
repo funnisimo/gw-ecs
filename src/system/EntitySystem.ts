@@ -42,7 +42,7 @@ export abstract class EntitySystem extends System {
   // }
 
   protected doProcess(): void {
-    for (let e of this.world.entities().alive()) {
+    for (let e of this.world.entities()) {
       if (this.accept(e)) {
         this.processEntity(e);
       }

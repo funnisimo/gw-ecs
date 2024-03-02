@@ -15,7 +15,7 @@ export abstract class IntervalEntitySystem extends IntervalSystem {
   }
 
   protected doProcess(): void {
-    for (let e of this.world.entities().alive()) {
+    for (let e of this.world.entities()) {
       if (this.accept(e)) {
         this.processEntity(e);
       }
