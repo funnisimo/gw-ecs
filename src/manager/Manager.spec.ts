@@ -11,7 +11,7 @@ describe("manager", () => {
       world.init();
 
       let entity = world.create();
-      let manager = world.getComponentManager(A);
+      let manager = world.getComponent(A);
 
       let component = manager.fetch(entity);
       expect(component).toBeUndefined();

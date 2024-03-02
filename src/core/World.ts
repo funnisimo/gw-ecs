@@ -44,7 +44,7 @@ export class World implements ComponentSource {
     this._systems.forEach((system) => system.init(this));
   }
 
-  getComponentManager<T>(comp: Component<T>): Manager<T> {
+  getComponent<T>(comp: Component<T>): Manager<T> {
     return this._components.getManager(comp);
   }
 

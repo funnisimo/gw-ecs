@@ -9,8 +9,8 @@ describe("component manager", () => {
     let world = new World();
     world.registerComponent(A).registerComponent(B);
 
-    let managerComponentA = world.getComponentManager(A);
-    let managerComponentB = world.getComponentManager(B);
+    let managerComponentA = world.getComponent(A);
+    let managerComponentB = world.getComponent(B);
 
     let entity = world.create();
 

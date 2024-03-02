@@ -51,8 +51,8 @@ describe("interval entity system", () => {
 
     let entityA = world.create();
     let entityB = world.create();
-    world.getComponentManager(A).add(entityA, new A());
-    world.getComponentManager(A).add(entityB, new A());
+    world.getComponent(A).add(entityA, new A());
+    world.getComponent(A).add(entityB, new A());
 
     world.process(5);
     expect(callback).not.toHaveBeenCalled();
@@ -62,7 +62,7 @@ describe("interval entity system", () => {
     expect(callback).toHaveBeenCalledWith(entityB);
 
     callback.mockClear();
-    world.getComponentManager(B).add(entityB, new B());
+    world.getComponent(B).add(entityB, new B());
     world.process(10);
     expect(callback).toHaveBeenCalledWith(entityA);
     expect(!callback).toHaveBeenCalledWith(entityB);
@@ -72,7 +72,7 @@ describe("interval entity system", () => {
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
-    world.getComponentManager(B).remove(entityB);
+    world.getComponent(B).remove(entityB);
     world.process(1);
     expect(callback).toHaveBeenCalledWith(entityA);
     expect(callback).toHaveBeenCalledWith(entityB);

@@ -74,7 +74,7 @@ describe("World", function () {
       world.registerComponent(A).addSystem(system, false);
 
       let entity = world.create();
-      world.getComponentManager(A).add(entity, new A());
+      world.getComponent(A).add(entity, new A());
       world.init();
 
       callback.mockClear();
