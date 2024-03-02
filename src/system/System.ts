@@ -37,13 +37,13 @@ export abstract class System {
   }
 
   /* tslint:disable:no-empty */
-  beforeProcess(): void {}
+  protected beforeProcess(): void {}
 
   // TODO - params => time: number, delta: number
   protected abstract doProcess(): void;
 
   /* tslint:disable:no-empty */
-  afterProcess(): void {}
+  protected afterProcess(): void {}
 
   destroyEntities(entities: Entity[]): void {
     entities.forEach((e) => this.destroyEntity(e));

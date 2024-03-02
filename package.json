@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "jest",
-    "build": "rm -r dist/**/*.js && tsc && cp package.dist.json dist/package.json && cp LICENSE dist/LICENSE && cp README.md dist/README.md"
+    "build": "./scripts/build.js",
+    "compile": "tsc"
   },
   "keywords": [
     "ecs",
@@ -23,6 +24,7 @@
     "@types/jest": "^29.5.12",
     "jest": "^29.7.0",
     "jest-extended": "^4.0.2",
+    "terminal-kit": "^3.0.2",
     "ts-jest": "^29.1.2",
     "typescript": "^5.3.3"
   }

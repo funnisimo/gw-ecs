@@ -77,6 +77,15 @@ export class Entity extends EntityId {
     this._comps = [];
   }
 
+  has(comp: AnyComponent): boolean {
+    const data = this._comps.find((d) => d.comp === comp);
+    return !!data && data.removed < 0;
+  }
+
+  fetch<T>(comp: Component<T>): T | undefined {
+    return this._source.fetchComponent(this, comp);
+  }
+
   add<T>(val: T, comp?: Component<T>): T | undefined {
     // @ts-ignore
     comp = comp || val.constructor;
@@ -114,15 +123,6 @@ export class Entity extends EntityId {
     return !!data && data.removed > tick;
   }
 
-  has(comp: AnyComponent): boolean {
-    const data = this._comps.find((d) => d.comp === comp);
-    return !!data && data.removed < 0;
-  }
-
-  fetch<T>(comp: Component<T>): T | undefined {
-    return this._source.fetchComponent(this, comp);
-  }
-
   update<T>(comp: Component<T>): T | undefined {
     return this._source.updateComponent(this, comp);
   }
@@ -144,7 +144,14 @@ export class Entity extends EntityId {
   // }
 
   rebase(zeroTick: number) {
-    this._comps.forEach((c) => c.rebase(zeroTick));
+    this._comps = this._comps.filter((c) => {
+      if (c.removed > 0 && c.removed < zeroTick) {
+        return false;
+      } else {
+        c.rebase(zeroTick);
+        return true;
+      }
+    });
   }
 }
 
