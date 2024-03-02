@@ -26,6 +26,7 @@ export abstract class System {
     return this.enabled;
   }
 
+  // TODO - params => time: number, delta: number, currentTick: number
   process(): void {
     if (this.isEnabled()) {
       this.beforeProcess();
@@ -38,6 +39,7 @@ export abstract class System {
   /* tslint:disable:no-empty */
   beforeProcess(): void {}
 
+  // TODO - params => time: number, delta: number
   protected abstract doProcess(): void;
 
   /* tslint:disable:no-empty */

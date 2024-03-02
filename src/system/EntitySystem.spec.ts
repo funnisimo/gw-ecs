@@ -51,4 +51,42 @@ describe("entity system", () => {
     entity.add(new C());
     expect(systemB.accept(entity)).toBeFalse();
   });
+
+  it("can use aspect events", () => {
+    const aspectA = new Aspect().added(A);
+    const aspectB = new Aspect().updated(A);
+    const systemA = new MyEntitySytem(aspectA);
+    const systemB = new MyEntitySytem(aspectB);
+
+    const world = new World();
+    world
+      .registerComponent(A)
+      .registerComponent(B)
+      .registerComponent(C)
+      .addSystem(systemA)
+      .addSystem(systemB)
+      .init();
+
+    let entity = world.create();
+
+    world.process(1);
+    expect(systemA.accept(entity)).toBeFalse();
+    expect(systemB.accept(entity)).toBeFalse();
+
+    entity.add(new A());
+    expect(systemA.accept(entity)).toBeTrue();
+    expect(systemB.accept(entity)).toBeTrue();
+
+    world.process(1);
+    expect(systemA.accept(entity)).toBeFalse();
+    expect(systemB.accept(entity)).toBeFalse();
+
+    entity.update(A);
+    expect(systemA.accept(entity)).toBeFalse();
+    expect(systemB.accept(entity)).toBeTrue();
+
+    world.process(1);
+    expect(systemA.accept(entity)).toBeFalse();
+    expect(systemB.accept(entity)).toBeFalse();
+  });
 });

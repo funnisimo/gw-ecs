@@ -54,6 +54,21 @@ export class Aspect {
     return this;
   }
 
+  added(...components: AnyComponent[]): Aspect {
+    this._addedComponents = this._addedComponents.concat(components);
+    return this;
+  }
+
+  updated(...components: AnyComponent[]): Aspect {
+    this._updatedComponents = this._updatedComponents.concat(components);
+    return this;
+  }
+
+  removed(...components: AnyComponent[]): Aspect {
+    this._removedComponents = this._removedComponents.concat(components);
+    return this;
+  }
+
   protected _checkAll(entity: Entity) {
     return (
       this._allComponents.length === 0 ||
