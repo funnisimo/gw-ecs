@@ -68,7 +68,7 @@ const main = async () => {
   packageJson.scripts = {};
   packageJson.main = "index.js";
 
-  term("Writing ^gpackage.json^ to ^bdist\n");
+  term("Writing updated ^gpackage.json^ to ^bdist\n");
   fs.writeFileSync("dist/package.json", JSON.stringify(packageJson, null, 4));
 
   term("^gok\n");

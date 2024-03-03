@@ -18,6 +18,17 @@ describe("World", function () {
     }
   }
 
+  test("stringify", () => {
+    const world = new World();
+    expect(JSON.stringify(world)).toBeString();
+
+    world.registerComponent(A);
+    expect(JSON.stringify(world)).toBeString();
+
+    world.create();
+    expect(JSON.stringify(world)).toBeString();
+  });
+
   describe("Entity creation", function () {
     it("should return a different entity id", function () {
       let world = new World();
@@ -26,7 +37,7 @@ describe("World", function () {
       expect(idA).not.toBe(idB);
     });
 
-    it("should recycles entities when deleted", function () {
+    it("should recycle entities when deleted", function () {
       let world = new World();
       world.init();
       let idA = world.create();
@@ -85,6 +96,22 @@ describe("World", function () {
       callback.mockClear();
       world.process(1);
       expect(callback).toHaveBeenCalledWith(entity);
+    });
+  });
+
+  describe("resources", () => {
+    test("basics", () => {
+      const world = new World();
+      const a = new A();
+      world.set(a);
+      expect(world.get(A)).toBe(a);
+
+      const a2 = new A();
+      world.set(a2);
+      expect(world.get(A)).toBe(a2);
+
+      world.delete(A);
+      expect(world.get(A)).toBeUndefined();
     });
   });
 });

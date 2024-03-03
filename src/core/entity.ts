@@ -45,6 +45,14 @@ export class Entity {
     this._comps = [];
   }
 
+  toJSON(): string {
+    return JSON.stringify({
+      index: this.index,
+      gen: this.gen,
+      _comps: this._comps,
+    });
+  }
+
   isAlive(): boolean {
     return this.gen > 0;
   }
@@ -144,6 +152,10 @@ export class Entities {
     this._source = source;
     this._all = [];
     // this._toDelete = [];
+  }
+
+  toJSON(): string {
+    return JSON.stringify({ _all: this._all });
   }
 
   create(): Entity {

@@ -3,6 +3,7 @@ import { ComponentManager } from "../manager/componentManager";
 import { Manager } from "../manager/manager";
 import { ComponentSource, Entities, Entity } from "./entity";
 import { Component } from "./component";
+import { Resources } from "./resources";
 
 export class World implements ComponentSource {
   _systems: System[];
@@ -12,6 +13,7 @@ export class World implements ComponentSource {
   delta: number;
   time: number;
   _currentTick: number;
+  _resources: Resources;
 
   constructor() {
     this._entities = new Entities(this);
@@ -21,6 +23,7 @@ export class World implements ComponentSource {
     this._components = new ComponentManager();
     this._systems = [];
     this._destroyedEntities = [];
+    this._resources = new Resources();
   }
 
   currentTick(): number {
@@ -48,8 +51,12 @@ export class World implements ComponentSource {
     return this._components.getManager(comp);
   }
 
-  create(): Entity {
-    return this._entities.create();
+  create(...withComps: any[]): Entity {
+    const entity = this._entities.create();
+    withComps.forEach((c) => {
+      entity.add(c);
+    });
+    return entity;
   }
 
   _beforeSystemProcess() {
@@ -115,6 +122,24 @@ export class World implements ComponentSource {
 
   entities(): Entities {
     return this._entities;
+  }
+
+  /// Resources
+
+  resources(): Resources {
+    return this._resources;
+  }
+
+  set<T>(val: T, comp?: Component<T>) {
+    this._resources.set(val, comp);
+  }
+
+  get<T>(comp: Component<T>): T {
+    return this._resources.get(comp);
+  }
+
+  delete<T>(comp: Component<T>) {
+    this._resources.delete(comp);
   }
 
   /// ComponentSource

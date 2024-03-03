@@ -9,6 +9,7 @@ describe("join", () => {
   test("join 2 managers", () => {
     const world = new World();
     world.registerComponent(A).registerComponent(B);
+    world.init();
 
     const e1 = world.create();
     const e2 = world.create();
