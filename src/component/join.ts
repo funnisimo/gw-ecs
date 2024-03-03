@@ -1,4 +1,6 @@
-import { AnyComponent, Aspect, Entity, World } from "../core";
+import { Entity } from "../entity";
+import { Aspect, World } from "../world";
+import { AnyComponent } from "./component";
 
 export function join(
   world: World,

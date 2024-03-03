@@ -1,6 +1,6 @@
 import "jest-extended";
 import { DelayedSystem } from "./delayedSystem";
-import { World } from "../core";
+import { World } from "../world";
 
 describe("delayed system", () => {
   class MyDelayedSystem extends DelayedSystem {

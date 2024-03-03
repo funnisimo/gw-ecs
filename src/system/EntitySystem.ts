@@ -1,5 +1,6 @@
-import { Aspect, Entity } from "../core";
+import { Aspect } from "../world";
 import { System } from ".";
+import { Entity } from "../entity";
 
 export abstract class EntitySystem extends System {
   // protected entities: Entity[];

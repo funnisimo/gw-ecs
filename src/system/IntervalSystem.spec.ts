@@ -1,6 +1,6 @@
 import "jest-extended";
 import { IntervalSystem } from ".";
-import { World } from "../core";
+import { World } from "../world";
 
 describe("interval system", () => {
   class MyIntervalSystem extends IntervalSystem {

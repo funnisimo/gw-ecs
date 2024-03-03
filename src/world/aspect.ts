@@ -1,5 +1,5 @@
-import type { AnyComponent } from "./component";
-import { Entity } from "./entity";
+import type { AnyComponent } from "../component/component";
+import { Entity } from "../entity/entity";
 import { World } from "./world";
 
 export class Aspect {

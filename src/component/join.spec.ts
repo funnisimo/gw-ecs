@@ -1,6 +1,6 @@
 import "jest-extended";
 import { join } from "./join";
-import { World } from "../core";
+import { World } from "../world";
 
 class A {}
 class B {}

@@ -1,4 +1,5 @@
-import { Entity, World } from "../core";
+import { Entity } from "../entity";
+import { World } from "../world";
 
 export abstract class System {
   protected world: World;

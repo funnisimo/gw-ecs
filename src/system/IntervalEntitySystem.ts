@@ -1,6 +1,6 @@
 import { IntervalSystem } from "./intervalSystem";
-import { Aspect } from "../core/aspect";
-import { Entity } from "../core";
+import { Aspect } from "../world/aspect";
+import { Entity } from "../entity";
 
 export abstract class IntervalEntitySystem extends IntervalSystem {
   private _aspect: Aspect;
@@ -15,7 +15,7 @@ export abstract class IntervalEntitySystem extends IntervalSystem {
   }
 
   protected doProcess(): void {
-    for (let e of this._aspect.entities(this.world)) {
+    for (let e of this._aspect.entities(this.world, this.lastTick)) {
       this.processEntity(e);
     }
   }

@@ -1,5 +1,6 @@
 import "jest-extended";
-import { World, Aspect, Entity } from "../core";
+import { World, Aspect } from ".";
+import { Entity } from "../entity";
 import { EntitySystem } from "../system";
 
 class A {}
@@ -85,7 +86,7 @@ describe("World", function () {
       world.registerComponent(A).addSystem(system, false);
 
       let entity = world.create();
-      world.getComponent(A).add(entity, new A());
+      world.getStore(A).add(entity, new A());
       world.init();
 
       callback.mockClear();

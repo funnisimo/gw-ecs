@@ -1,5 +1,5 @@
 import "jest-extended";
-import { World } from "../core";
+import { World } from "../world";
 
 class A {}
 class B {}
@@ -9,13 +9,13 @@ describe("component manager", () => {
     let world = new World();
     world.registerComponent(A).registerComponent(B);
 
-    let managerComponentA = world.getComponent(A);
-    let managerComponentB = world.getComponent(B);
+    let storeA = world.getStore(A);
+    let storeB = world.getStore(B);
 
     let entity = world.create();
 
-    managerComponentA.add(entity, new A());
-    managerComponentB.add(entity, new B());
+    storeA.add(entity, new A());
+    storeB.add(entity, new B());
 
     expect(entity.has(A)).toBeTrue();
     expect(entity.has(B)).toBeTrue();
@@ -24,15 +24,15 @@ describe("component manager", () => {
     expect(entity.has(A)).toBeTrue();
     expect(entity.has(B)).toBeTrue();
     expect(entity.isAlive()).toBeTrue();
-    expect(managerComponentA.fetch(entity)).toBeInstanceOf(A);
-    expect(managerComponentB.fetch(entity)).toBeInstanceOf(B);
+    expect(storeA.fetch(entity)).toBeInstanceOf(A);
+    expect(storeB.fetch(entity)).toBeInstanceOf(B);
 
     world.process();
     expect(entity.isAlive()).toBeFalse();
     expect(entity.has(A)).toBeFalse();
     expect(entity.has(B)).toBeFalse();
 
-    expect(managerComponentA.fetch(entity)).toBeUndefined();
-    expect(managerComponentB.fetch(entity)).toBeUndefined();
+    expect(storeA.fetch(entity)).toBeUndefined();
+    expect(storeB.fetch(entity)).toBeUndefined();
   });
 });

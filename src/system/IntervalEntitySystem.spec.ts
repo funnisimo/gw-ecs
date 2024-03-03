@@ -1,6 +1,7 @@
 import "jest-extended";
-import { World, Aspect, Entity } from "../core";
+import { World, Aspect } from "../world";
 import { IntervalEntitySystem } from "./index";
+import { Entity } from "../entity";
 
 class A {}
 class B {}
@@ -51,8 +52,8 @@ describe("interval entity system", () => {
 
     let entityA = world.create();
     let entityB = world.create();
-    world.getComponent(A).add(entityA, new A());
-    world.getComponent(A).add(entityB, new A());
+    world.getStore(A).add(entityA, new A());
+    world.getStore(A).add(entityB, new A());
 
     world.process(5);
     expect(callback).not.toHaveBeenCalled();
@@ -62,7 +63,7 @@ describe("interval entity system", () => {
     expect(callback).toHaveBeenCalledWith(entityB);
 
     callback.mockClear();
-    world.getComponent(B).add(entityB, new B());
+    world.getStore(B).add(entityB, new B());
     world.process(10);
     expect(callback).toHaveBeenCalledWith(entityA);
     expect(callback).not.toHaveBeenCalledWith(entityB);
@@ -72,7 +73,7 @@ describe("interval entity system", () => {
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
-    world.getComponent(B).remove(entityB);
+    world.getStore(B).remove(entityB);
     world.process(1);
     expect(callback).toHaveBeenCalledWith(entityA);
     expect(callback).toHaveBeenCalledWith(entityB);

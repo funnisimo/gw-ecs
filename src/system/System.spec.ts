@@ -1,5 +1,5 @@
 import "jest-extended";
-import { World } from "../core";
+import { World } from "../world";
 import { System } from "./index";
 
 describe("System", () => {

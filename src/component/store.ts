@@ -1,6 +1,7 @@
-import { Component, Entity } from "../core";
+import { Entity } from "../entity";
+import { Component } from "./component";
 
-export class Manager<T> {
+export class ComponentStore<T> {
   _comp: Component<T>;
   _data: Map<Entity, T>;
 
@@ -74,4 +75,4 @@ export class Manager<T> {
   }
 }
 
-export type AnyManager = Manager<any>;
+export type AnyComponentStore = ComponentStore<any>;

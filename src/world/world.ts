@@ -1,8 +1,8 @@
 import { System } from "../system/system";
-import { ComponentManager } from "../manager/componentManager";
-import { Manager } from "../manager/manager";
-import { ComponentSource, Entities, Entity } from "./entity";
-import { Component } from "./component";
+import { ComponentManager } from "../component/manager";
+import { ComponentStore } from "../component/store";
+import { ComponentSource, Entities, Entity } from "../entity/entity";
+import { Component } from "../component/component";
 import { Resources } from "./resources";
 
 export class World implements ComponentSource {
@@ -47,7 +47,7 @@ export class World implements ComponentSource {
     this._systems.forEach((system) => system.init(this));
   }
 
-  getComponent<T>(comp: Component<T>): Manager<T> {
+  getStore<T>(comp: Component<T>): ComponentStore<T> {
     return this._components.getManager(comp);
   }
 

@@ -1,4 +1,4 @@
-import { AnyComponent, Component } from "../core";
+import { AnyComponent, Component } from "../component/component";
 
 export class Resources {
   _data: Map<AnyComponent, any> = new Map();

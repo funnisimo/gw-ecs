@@ -1,19 +1,20 @@
-import { AnyComponent, Component, Entity } from "../core";
-import { AnyManager, Manager } from "./manager";
+import { Entity } from "../entity";
+import { AnyComponent, Component } from "./component";
+import { AnyComponentStore, ComponentStore } from "./store";
 
 export class ComponentManager {
-  private managers: Map<AnyComponent, AnyManager>;
+  private managers: Map<AnyComponent, AnyComponentStore>;
 
   constructor() {
     this.managers = new Map();
   }
 
   register<T>(comp: Component<T>): void {
-    this.managers.set(comp, new Manager(comp));
+    this.managers.set(comp, new ComponentStore(comp));
   }
 
-  getManager<T>(comp: Component<T>): Manager<T> {
-    return this.managers.get(comp) as Manager<T>;
+  getManager<T>(comp: Component<T>): ComponentStore<T> {
+    return this.managers.get(comp) as ComponentStore<T>;
   }
 
   destroyEntity(entity: Entity): void {

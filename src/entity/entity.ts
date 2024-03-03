@@ -1,4 +1,4 @@
-import type { Component, AnyComponent } from "./component";
+import type { Component, AnyComponent } from "../component/component";
 
 export interface ComponentSource {
   currentTick(): number;

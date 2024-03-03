@@ -1,6 +1,6 @@
 import { DelayedSystem } from "./delayedSystem";
-import { Entity } from "../core";
-import { Aspect } from "../core/aspect";
+import { Entity } from "../entity";
+import { Aspect } from "../world/aspect";
 
 export abstract class DelayedEntitySystem extends DelayedSystem {
   private _aspect: Aspect;
