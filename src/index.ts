@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 export * as component from "./component";
 export * as entity from "./entity";
 export * as system from "./system";

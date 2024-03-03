@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 export * from "./system";
 export * from "./delayedSystem";
 export * from "./intervalSystem";
