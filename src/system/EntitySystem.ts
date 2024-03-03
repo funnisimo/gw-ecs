@@ -24,7 +24,7 @@ export abstract class EntitySystem extends System {
   // }
 
   accept(entity: Entity): boolean {
-    return this._aspect.accept(entity, this.lastTick);
+    return this._aspect.match(entity, this.lastTick);
   }
 
   // public removeEntities(entitiesToRemove: Entity[]) {
@@ -42,10 +42,8 @@ export abstract class EntitySystem extends System {
   // }
 
   protected doProcess(): void {
-    for (let e of this.world.entities()) {
-      if (this.accept(e)) {
-        this.processEntity(e);
-      }
+    for (let e of this._aspect.entities(this.world, this.lastTick)) {
+      this.processEntity(e);
     }
   }
 

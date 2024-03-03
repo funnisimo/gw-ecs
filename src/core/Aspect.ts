@@ -1,5 +1,6 @@
 import type { AnyComponent } from "./component";
 import { Entity } from "./entity";
+import { World } from "./world";
 
 export class Aspect {
   protected _allComponents: AnyComponent[];
@@ -18,18 +19,6 @@ export class Aspect {
     this._addedComponents = [];
     this._updatedComponents = [];
     this._removedComponents = [];
-  }
-
-  accept(entity: Entity, sinceTick: number = 0): boolean {
-    return (
-      this._checkAll(entity) &&
-      this._checkNone(entity) &&
-      this._checkOne(entity) &&
-      this._checkSome(entity) &&
-      this._checkAdded(entity, sinceTick) &&
-      this._checkUpdated(entity, sinceTick) &&
-      this._checkRemoved(entity, sinceTick)
-    );
   }
 
   all(...components: AnyComponent[]): Aspect {
@@ -68,6 +57,39 @@ export class Aspect {
     this._removedComponents = this._removedComponents.concat(components);
     return this;
   }
+
+  /////////
+
+  match(entity: Entity, sinceTick: number = 0): boolean {
+    return (
+      this._checkAll(entity) &&
+      this._checkNone(entity) &&
+      this._checkOne(entity) &&
+      this._checkSome(entity) &&
+      this._checkAdded(entity, sinceTick) &&
+      this._checkUpdated(entity, sinceTick) &&
+      this._checkRemoved(entity, sinceTick)
+    );
+  }
+
+  *entities(world: World, sinceTick: number = 0): Iterable<Entity> {
+    for (let entity of world.entities()) {
+      if (this.match(entity, sinceTick)) {
+        yield entity;
+      }
+    }
+  }
+
+  *entries(
+    world: World,
+    sinceTick: number = 0
+  ): Iterable<[Entity, AnyComponent[]]> {
+    for (let entity of this.entities(world, sinceTick)) {
+      yield [entity, this._allComponents.map((c) => entity.fetch(c))];
+    }
+  }
+
+  /////////
 
   protected _checkAll(entity: Entity) {
     return (

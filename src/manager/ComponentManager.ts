@@ -1,35 +1,20 @@
-import { Component, Entity } from "../core";
-import { Manager } from "./manager";
-
-interface IManager {
-  [name: string]: Manager<any>;
-}
+import { AnyComponent, Component, Entity } from "../core";
+import { AnyManager, Manager } from "./manager";
 
 export class ComponentManager {
-  private managers: IManager;
+  private managers: Map<AnyComponent, AnyManager>;
 
   constructor() {
-    this.managers = {};
+    this.managers = new Map();
   }
 
   register<T>(comp: Component<T>): void {
-    this.managers[comp.name] = new Manager(comp);
+    this.managers.set(comp, new Manager(comp));
   }
 
   getManager<T>(comp: Component<T>): Manager<T> {
-    return this.managers[comp.name] as Manager<T>;
+    return this.managers.get(comp) as Manager<T>;
   }
-
-  // getAllComponents(entity: Entity): AnyComponent[] {
-  //   // const components: string[] = [];
-  //   // Object.keys(this.managers).forEach((name) => {
-  //   //   if (this.managers[name].has(entity)) {
-  //   //     components.push(name);
-  //   //   }
-  //   // });
-  //   // return components;
-  //   return entity.allComponents();
-  // }
 
   destroyEntity(entity: Entity): void {
     Object.values(this.managers).forEach((manager) => {

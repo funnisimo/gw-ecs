@@ -65,7 +65,7 @@ describe("interval entity system", () => {
     world.getComponent(B).add(entityB, new B());
     world.process(10);
     expect(callback).toHaveBeenCalledWith(entityA);
-    expect(!callback).toHaveBeenCalledWith(entityB);
+    expect(callback).not.toHaveBeenCalledWith(entityB);
 
     callback.mockClear();
     world.process(9);
@@ -94,26 +94,26 @@ describe("interval entity system", () => {
     let entity = world.create();
 
     callback.mockClear();
-    world.process(10);
+    world.process(10); // 15 - 10 = 5
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
     system.setEnabled(false);
-    world.process(10);
+    world.process(10); // no change
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
     system.setEnabled(true);
-    world.process(10);
-    expect(callback).not.toHaveBeenCalled();
+    world.process(10); // 5 - 10 = -5, -5 + 10 = 5
+    expect(callback).toHaveBeenCalled();
 
     callback.mockClear();
-    world.process(5);
+    world.process(5); // 5 - 5 = 0, 0 + 10 = 10
     expect(callback).toHaveBeenCalledWith(entity);
 
     callback.mockClear();
-    world.process(10);
-    expect(callback).toHaveBeenCalledWith(entity);
+    world.process(5); // 10 - 5 = 5
+    expect(callback).not.toHaveBeenCalledWith(entity);
   });
 
   describe("delta time bigger than system's interval", () => {
@@ -149,7 +149,7 @@ describe("interval entity system", () => {
       expect(callback).not.toHaveBeenCalled();
     });
 
-    it.only("only calls process once if catchUpDelay is set to false", () => {
+    it("only calls process once if catchUpDelay is set to false", () => {
       let callback = jest.fn();
       let world = new World();
       let aspect = new Aspect();
