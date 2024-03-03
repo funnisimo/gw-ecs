@@ -12,36 +12,6 @@ export interface ComponentSource {
 export type Index = number;
 export type Gen = number;
 
-export class EntityId {
-  index: Index;
-  gen: Gen;
-
-  constructor(index = 0, gen = 1) {
-    this.index = index;
-    this.gen = gen;
-  }
-
-  isAlive(): boolean {
-    return this.gen > 0;
-  }
-
-  destroy() {
-    if (this.isAlive()) {
-      this.gen *= -1;
-    }
-  }
-
-  nextGen(): EntityId {
-    if (this.isAlive()) throw new Error("Entity not destroyed.");
-    const gen = 1 - this.gen; // gen is < 0, so this is 1 + -gen
-    return new EntityId(this.index, gen);
-  }
-
-  equals(other: EntityId): boolean {
-    return this.index == other.index && this.gen == other.gen;
-  }
-}
-
 class UsageData {
   comp: AnyComponent;
   added: number;
@@ -62,36 +32,29 @@ class UsageData {
 }
 
 export class Entity {
-  _id: EntityId;
+  index: Index;
+  gen: Gen;
+
   _source: ComponentSource;
   _comps: UsageData[];
 
-  constructor(source: ComponentSource, id: EntityId) {
-    this._id = id;
+  constructor(source: ComponentSource, index: Index, gen: Gen = 1) {
+    this.index = index;
+    this.gen = gen;
     this._source = source;
     this._comps = [];
   }
 
-  get id(): EntityId {
-    return this._id;
-  }
-
   isAlive(): boolean {
-    return this._id.isAlive();
+    return this.gen > 0;
   }
 
   _destroy() {
     if (this.isAlive()) {
-      this._id.destroy();
+      this.gen *= -1;
       this._comps.forEach((c) => this._source.removeComponent(this, c.comp));
       this._comps = [];
     }
-  }
-
-  reviveNextGen() {
-    if (this.isAlive()) throw new Error("Entity is not dead.");
-    this._id = this._id.nextGen();
-    this._comps = [];
   }
 
   has(comp: AnyComponent): boolean {
@@ -173,7 +136,7 @@ export class Entity {
 }
 
 export class Entities {
-  _all: Entity[];
+  _all: (Entity | number)[];
   _source: ComponentSource;
   // _toDelete: Entity[];
 
@@ -184,26 +147,42 @@ export class Entities {
   }
 
   create(): Entity {
-    const entity = this._all.find((e) => !e.isAlive());
-    if (entity) {
-      entity.reviveNextGen();
+    const index = this._all.findIndex((e) => typeof e === "number");
+    if (index >= 0) {
+      const oldGen = this._all[index] as number;
+      const entity = new Entity(this._source, index, oldGen + 1);
+      this._all[index] = entity;
       return entity;
     }
-    const newId = new EntityId(this._all.length);
-    const newE = new Entity(this._source, newId);
+    const newE = new Entity(this._source, this._all.length);
     this._all.push(newE);
     return newE;
   }
 
+  destroy(entity: Entity) {
+    const oldGen = entity.gen;
+    this._all[entity.index] = oldGen;
+    entity._destroy();
+  }
+
+  destroyEntities(entities: Entity[]) {
+    entities.forEach((e) => this.destroy(e));
+  }
+
   *[Symbol.iterator]() {
     for (let e of this._all) {
-      if (e.isAlive()) yield e;
+      if (e instanceof Entity && e.isAlive()) yield e;
     }
   }
 
   rebase(zeroTick: number) {
-    this._all.forEach((e) => e.rebase(zeroTick));
+    this._all.forEach((e) => {
+      if (e instanceof Entity) {
+        e.rebase(zeroTick);
+      }
+    });
   }
+
   // queueDestroy(e: Entity) {
   //   if (this._toDelete.includes(e)) return;
   //   this._toDelete.push(e);

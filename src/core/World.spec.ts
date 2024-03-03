@@ -35,10 +35,10 @@ describe("World", function () {
       world.process();
       let idC = world.create();
       let idD = world.create();
-      expect(idA.id.index).toEqual(0);
-      expect(idB.id.index).toEqual(1);
-      expect(idC.id.index).toEqual(0);
-      expect(idD.id.index).toEqual(2);
+      expect(idA.index).toEqual(0);
+      expect(idB.index).toEqual(1);
+      expect(idC.index).toEqual(0);
+      expect(idD.index).toEqual(2);
     });
 
     it("should remove an entity from a system when it' deleted from world", () => {

@@ -92,7 +92,7 @@ export class World implements ComponentSource {
         system.destroyEntities(this._destroyedEntities)
       );
       this._components.destroyEntities(this._destroyedEntities);
-      this._destroyedEntities.forEach((e) => e._destroy());
+      this._entities.destroyEntities(this._destroyedEntities);
       this._destroyedEntities = [];
     }
   }
