@@ -19,7 +19,7 @@ export class World implements ComponentSource {
     this._entities = new Entities(this);
     this.delta = 0;
     this.time = 0;
-    this._currentTick = 0;
+    this._currentTick = 1;
     this._components = new ComponentManager();
     this._systems = [];
     this._destroyedEntities = [];
@@ -156,16 +156,17 @@ export class World implements ComponentSource {
     return mgr.update(entity);
   }
 
-  addComponent<T>(entity: Entity, val: T, comp?: Component<T>): T | undefined {
+  addComponent<T>(entity: Entity, val: T, comp?: Component<T>): void {
     // @ts-ignore
     comp = comp || val.constructor;
     if (!comp) throw new Error("Missing constructor!");
     const mgr = this._components.getManager(comp);
     if (!mgr) throw new Error("Using unregistered component: " + comp.name);
-    return mgr.add(entity, val);
+    mgr.add(entity, val);
   }
 
-  removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined {
-    return this._components.getManager(comp).remove(entity);
+  removeComponent<T>(entity: Entity, comp: Component<T>): void {
+    const mgr = this._components.getManager(comp);
+    mgr && mgr.remove(entity);
   }
 }

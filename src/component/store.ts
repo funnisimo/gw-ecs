@@ -3,11 +3,11 @@ import { Component } from "./component";
 
 export class ComponentStore<T> {
   _comp: Component<T>;
-  _data: Map<Entity, T>;
+  _data: Set<Entity>;
 
   constructor(comp: Component<T>) {
     this._comp = comp;
-    this._data = new Map();
+    this._data = new Set();
   }
 
   /**
@@ -16,34 +16,28 @@ export class ComponentStore<T> {
    * @param comp
    * @returns Prior value - if any
    */
-  add(entity: Entity, comp: T): T | undefined {
+  add(entity: Entity, comp: T): void {
     if (!entity.isAlive()) return undefined;
-    entity._addComp(this._comp);
-
-    let prior = this._data.get(entity);
-    this._data.set(entity, comp);
-    return prior;
+    entity._addComp(this._comp, comp);
+    this._data.add(entity);
   }
 
   fetch(entity: Entity): T | undefined {
     if (!entity.isAlive()) return undefined;
-    return this._data.get(entity);
+    return entity.fetch(this._comp);
   }
 
   update(entity: Entity): T | undefined {
     if (!entity.isAlive()) return undefined;
-    entity._updateComp(this._comp);
-    return this._data.get(entity);
+    return entity.update(this._comp);
   }
 
   // This is immediate
-  remove(entity: Entity): T | undefined {
+  remove(entity: Entity): void {
     if (!entity.isAlive()) return undefined;
     entity._removeComp(this._comp);
 
-    let prior = this._data.get(entity);
     this._data.delete(entity);
-    return prior;
   }
 
   has(entity: Entity): boolean {
@@ -51,16 +45,20 @@ export class ComponentStore<T> {
     return this._data.has(entity);
   }
 
-  keys() {
+  entities() {
     return this._data.keys();
   }
 
-  values() {
-    return this._data.values();
+  *values() {
+    for (let entity of this._data.keys()) {
+      yield entity.fetch(this._comp);
+    }
   }
 
-  entries() {
-    return this._data.entries();
+  *entries() {
+    for (let entity of this._data.keys()) {
+      yield [entity, entity.fetch(this._comp)];
+    }
   }
 
   // *added(sinceTick): Iterable<[Entity,T]> {}

@@ -3,23 +3,21 @@ import type { Component, AnyComponent } from "../component/component";
 export interface ComponentSource {
   currentTick(): number;
 
-  fetchComponent<T>(entity: Entity, comp: Component<T>): T | undefined;
-  updateComponent<T>(entity: Entity, comp: Component<T>): T | undefined;
-  addComponent<T>(entity: Entity, val: T, comp?: Component<T>): T | undefined; // TODO - Return replaced value?
-  removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined; // TODO - Return deleted value?
+  addComponent<T>(entity: Entity, val: T, comp?: Component<T>): void; // TODO - Return replaced value?
+  removeComponent<T>(entity: Entity, comp: Component<T>): void; // TODO - Return deleted value?
 }
 
 export type Index = number;
 export type Gen = number;
 
-class UsageData {
-  comp: AnyComponent;
+class CompData {
+  data: any;
   added: number;
   updated: number;
   removed: number;
 
-  constructor(comp: AnyComponent, added: number) {
-    this.comp = comp;
+  constructor(data: any, added: number) {
+    this.data = data;
     this.added = this.updated = added;
     this.removed = -1;
   }
@@ -36,13 +34,13 @@ export class Entity {
   gen: Gen;
 
   _source: ComponentSource;
-  _comps: UsageData[];
+  _comps: Map<AnyComponent, CompData>;
 
   constructor(source: ComponentSource, index: Index, gen: Gen = 1) {
     this.index = index;
     this.gen = gen;
     this._source = source;
-    this._comps = [];
+    this._comps = new Map();
   }
 
   toJSON(): string {
@@ -60,70 +58,75 @@ export class Entity {
   _destroy() {
     if (this.isAlive()) {
       this.gen *= -1;
-      this._comps.forEach((c) => this._source.removeComponent(this, c.comp));
-      this._comps = [];
+      this._comps.clear();
     }
   }
 
   has(comp: AnyComponent): boolean {
-    const data = this._comps.find((d) => d.comp === comp);
+    const data = this._comps.get(comp);
     return !!data && data.removed < 0;
   }
 
   fetch<T>(comp: Component<T>): T | undefined {
-    return this._source.fetchComponent(this, comp);
+    const data = this._comps.get(comp);
+    if (!data || data.removed >= 0) return undefined;
+    return data.data;
   }
 
-  add<T>(val: T, comp?: Component<T>): T | undefined {
+  add<T>(val: T, comp?: Component<T>): void {
     // @ts-ignore
     comp = comp || val.constructor;
-    return this._source.addComponent(this, val, comp);
+    this._source.addComponent(this, val, comp);
   }
 
-  _addComp(comp: AnyComponent): void {
-    const data = this._comps.find((d) => d.comp === comp);
+  _addComp(comp: AnyComponent, val: any): void {
+    const data = this._comps.get(comp);
     if (!data) {
-      this._comps.push(new UsageData(comp, this._source.currentTick()));
+      this._comps.set(comp, new CompData(val, this._source.currentTick()));
     } else {
       data.added = data.updated = this._source.currentTick();
       data.removed = -1;
+      data.data = val;
     }
   }
 
   isAddedSince(comp: AnyComponent, tick: number): boolean {
-    const data = this._comps.find((d) => d.comp === comp);
+    const data = this._comps.get(comp);
     return !!data && data.added > tick && data.removed < 0;
   }
 
-  remove<T>(comp: Component<T>): T | undefined {
-    return this._source.removeComponent(this, comp);
+  remove<T>(comp: Component<T>): void {
+    this._source.removeComponent(this, comp);
   }
 
   _removeComp(comp: AnyComponent): void {
-    const data = this._comps.find((d) => d.comp === comp);
+    const data = this._comps.get(comp);
     if (data) {
       data.removed = this._source.currentTick();
     }
   }
 
   isRemovedSince(comp: AnyComponent, tick: number): boolean {
-    const data = this._comps.find((d) => d.comp === comp);
+    const data = this._comps.get(comp);
     return !!data && data.removed > tick;
   }
 
   update<T>(comp: Component<T>): T | undefined {
-    return this._source.updateComponent(this, comp);
+    const data = this._comps.get(comp);
+    if (!data || data.removed >= 0) return undefined;
+    this._updateComp(comp);
+    return data.data;
   }
 
   _updateComp(comp: AnyComponent): void {
-    const data = this._comps.find((d) => d.comp === comp);
+    const data = this._comps.get(comp);
     if (data) {
       data.updated = this._source.currentTick();
     }
   }
 
   isUpdatedSince(comp: AnyComponent, tick: number): boolean {
-    const data = this._comps.find((d) => d.comp === comp);
+    const data = this._comps.get(comp);
     return !!data && data.updated > tick && data.removed < 0;
   }
 
@@ -132,14 +135,13 @@ export class Entity {
   // }
 
   rebase(zeroTick: number) {
-    this._comps = this._comps.filter((c) => {
-      if (c.removed > 0 && c.removed < zeroTick) {
-        return false;
+    for (let [comp, data] of this._comps.entries()) {
+      if (data.removed > 0 && data.removed < zeroTick) {
+        this._comps.delete(comp);
       } else {
-        c.rebase(zeroTick);
-        return true;
+        data.rebase(zeroTick);
       }
-    });
+    }
   }
 }
 
