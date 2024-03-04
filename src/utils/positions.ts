@@ -54,7 +54,7 @@ export class PosManager {
     }
   }
 
-  delete(entity: Entity) {
+  remove(entity: Entity) {
     if (this._entities.delete(entity.index)) {
       entity._removeComp(Pos);
     }

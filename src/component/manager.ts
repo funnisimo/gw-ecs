@@ -1,20 +1,21 @@
 import { Entity } from "../entity";
 import { AnyComponent, Component } from "./component";
-import { AnyComponentStore, ComponentStore } from "./store";
+import { AnyStore, SetStore, Store } from "./store";
 
 export class ComponentManager {
-  private stores: Map<AnyComponent, AnyComponentStore>;
+  private stores: Map<AnyComponent, AnyStore>;
 
   constructor() {
     this.stores = new Map();
   }
 
-  register<T>(comp: Component<T>): void {
-    this.stores.set(comp, new ComponentStore(comp));
+  register<T>(comp: Component<T>, store?: Store<T>): void {
+    store = store || new SetStore(comp);
+    this.stores.set(comp, store);
   }
 
-  getManager<T>(comp: Component<T>): ComponentStore<T> {
-    return this.stores.get(comp) as ComponentStore<T>;
+  getManager<T>(comp: Component<T>): SetStore<T> {
+    return this.stores.get(comp) as SetStore<T>;
   }
 
   destroyEntity(entity: Entity): void {

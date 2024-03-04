@@ -1,7 +1,25 @@
 import { Entity } from "../entity";
 import { Component } from "./component";
 
-export class ComponentStore<T> {
+export interface Store<T> {
+  has(entity: Entity): boolean;
+
+  add(entity: Entity, comp: T): void;
+  fetch(entity: Entity): T | undefined;
+  update(entity: Entity): T | undefined;
+  remove(entity: Entity): void; // This is immediate
+
+  entities(): Iterator<Entity>;
+  values(): Iterator<T>;
+  entries(): Iterator<[Entity, T]>;
+
+  destroyEntity(entity: Entity): void;
+  destroyEntities(entities: Entity[]): void;
+}
+
+export type AnyStore = Store<any>;
+
+export class SetStore<T> implements Store<T> {
   _comp: Component<T>;
   _data: Set<Entity>;
 
@@ -51,13 +69,13 @@ export class ComponentStore<T> {
 
   *values() {
     for (let entity of this._data.keys()) {
-      yield entity.fetch(this._comp);
+      yield entity.fetch(this._comp) as T;
     }
   }
 
   *entries() {
     for (let entity of this._data.keys()) {
-      yield [entity, entity.fetch(this._comp)];
+      yield [entity, entity.fetch(this._comp)] as [Entity, T];
     }
   }
 
@@ -72,5 +90,3 @@ export class ComponentStore<T> {
     entities.forEach((e) => this.destroyEntity(e));
   }
 }
-
-export type AnyComponentStore = ComponentStore<any>;

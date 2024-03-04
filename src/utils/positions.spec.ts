@@ -32,7 +32,7 @@ describe("Positions", () => {
     expect(mgr.getAt(2, 3)).toEqual([]);
     expect(mgr.getAt(3, 4)).toEqual([e1]);
 
-    mgr.delete(e1);
+    mgr.remove(e1);
     expect(e1.has(Pos)).toBeFalse();
     expect(mgr.getAt(3, 4)).toEqual([]);
     expect(e1.isRemovedSince(Pos, 0)).toBeTrue();

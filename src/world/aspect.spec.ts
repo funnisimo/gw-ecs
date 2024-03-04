@@ -15,7 +15,7 @@ describe("Aspect", () => {
     let world: World;
     beforeAll(() => {
       world = new World();
-      world.registerComponent(A, B, C, D, E, F, G);
+      world.registerComponents(A, B, C, D, E, F, G);
       world.init();
     });
 
@@ -41,7 +41,7 @@ describe("Aspect", () => {
     let world: World;
     beforeAll(() => {
       world = new World();
-      world.registerComponent(A, B, C, D, E, F, G);
+      world.registerComponents(A, B, C, D, E, F, G);
       world.init();
     });
 
@@ -74,7 +74,7 @@ describe("Aspect", () => {
     let world: World;
     beforeAll(() => {
       world = new World();
-      world.registerComponent(A, B, C, D, E, F, G);
+      world.registerComponents(A, B, C, D, E, F, G);
       world.init();
     });
 
@@ -100,7 +100,7 @@ describe("Aspect", () => {
     let world: World;
     beforeAll(() => {
       world = new World();
-      world.registerComponent(A, B, C, D, E, F, G);
+      world.registerComponents(A, B, C, D, E, F, G);
       world.init();
     });
 

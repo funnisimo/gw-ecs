@@ -1,8 +1,8 @@
 import { System } from "../system/system";
 import { ComponentManager } from "../component/manager";
-import { ComponentStore } from "../component/store";
+import { SetStore, Store } from "../component/store";
 import { ComponentSource, Entities, Entity } from "../entity/entity";
-import { Component } from "../component/component";
+import { AnyComponent, Component } from "../component/component";
 import { Resources } from "./resources";
 
 export class World implements ComponentSource {
@@ -30,7 +30,12 @@ export class World implements ComponentSource {
     return this._currentTick;
   }
 
-  registerComponent<T>(...comp: Component<T>[]): World {
+  registerComponent<T>(comp: Component<T>, store?: Store<T>): World {
+    this._components.register(comp, store);
+    return this;
+  }
+
+  registerComponents(...comp: AnyComponent[]): World {
     comp.forEach((c) => {
       this._components.register(c);
     });
@@ -47,7 +52,7 @@ export class World implements ComponentSource {
     this._systems.forEach((system) => system.init(this));
   }
 
-  getStore<T>(comp: Component<T>): ComponentStore<T> {
+  getStore<T>(comp: Component<T>): SetStore<T> {
     return this._components.getManager(comp);
   }
 

@@ -25,7 +25,7 @@ describe("World", function () {
     const world = new World();
     expect(JSON.stringify(world)).toBeString();
 
-    world.registerComponent(A);
+    world.registerComponents(A);
     expect(JSON.stringify(world)).toBeString();
 
     world.create();
@@ -59,7 +59,7 @@ describe("World", function () {
       let world = new World();
       let callback = jest.fn();
       let system = new MockSystem(new Aspect().all(A), callback);
-      world.registerComponent(A).addSystem(system);
+      world.registerComponents(A).addSystem(system);
       world.init();
 
       let entity = world.create();
@@ -85,7 +85,7 @@ describe("World", function () {
       let world = new World();
       let callback = jest.fn();
       let system = new MockSystem(new Aspect().all(A), callback);
-      world.registerComponent(A).addSystem(system, false);
+      world.registerComponents(A).addSystem(system, false);
 
       let entity = world.create();
       world.getStore(A).add(entity, new A());
@@ -142,7 +142,7 @@ describe("World", function () {
       const sysDelete = new DeleteSystem(new Aspect().all(A, B));
       const world = new World();
       world
-        .registerComponent(A, B, C)
+        .registerComponents(A, B, C)
         .addSystem(sysCreate)
         .addSystem(sysDelete, false)
         .init();
@@ -163,7 +163,7 @@ describe("World", function () {
       const sysDelete = new DeleteNowSystem(new Aspect().all(A, B));
       const world = new World();
       world
-        .registerComponent(A, B, C)
+        .registerComponents(A, B, C)
         .addSystem(sysCreate)
         .addSystem(sysDelete, false)
         .init();

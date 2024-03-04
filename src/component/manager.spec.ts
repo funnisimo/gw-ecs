@@ -7,7 +7,7 @@ class B {}
 describe("component manager", () => {
   it("should delete all components when an entity is removed", () => {
     let world = new World();
-    world.registerComponent(A).registerComponent(B);
+    world.registerComponents(A).registerComponents(B);
 
     let storeA = world.getStore(A);
     let storeB = world.getStore(B);
