@@ -114,14 +114,15 @@ const world = new World()
   .registerComponents(Wall, Player, Move)
   .init((w: World) => {
     const player = w.create(new Player());
+    w.set(player);
     const posMgr = new PosManager(21, 21).init(w);
     posMgr.set(player, 11, 11);
-
-    buildMaze(w);
   })
   .addSystem(new MoveSystem())
   .addSystem(new DrawSystem())
   .start();
+
+buildMaze(world);
 
 const wallAspect = new Aspect().all(Wall);
 
@@ -129,7 +130,7 @@ const wallAspect = new Aspect().all(Wall);
 
 async function play(world: World) {
   let running = true;
-  const player = world.getStore(Player).singleEntity()!;
+  const player = world.get(Entity); // getStore(Player).singleEntity()!;
 
   while (running) {
     world.process();
