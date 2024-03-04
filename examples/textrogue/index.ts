@@ -31,21 +31,27 @@ function buildMaze(world: World) {
   const mgr = world.get(PosManager);
   const [width, height] = mgr.size;
 
-  for (let x = 0; x < width; ++x) {
-    const top = world.create(new Wall());
-    mgr.set(top, x, 0);
+  // surround with walls
 
-    const bottom = world.create(new Wall());
-    mgr.set(bottom, x, height - 1);
+  for (let x = 0; x < width; ++x) {
+    mgr.set(world.create(new Wall()), x, 0);
+    mgr.set(world.create(new Wall()), x, height - 1);
   }
 
   for (let y = 1; y < height - 1; ++y) {
-    const left = world.create(new Wall());
-    mgr.set(left, 0, y);
-
-    const right = world.create(new Wall());
-    mgr.set(right, width - 1, y);
+    mgr.set(world.create(new Wall()), 0, y);
+    mgr.set(world.create(new Wall()), width - 1, y);
   }
+
+  // put pillars every other square
+
+  for (let x = 2; x < width; x += 2) {
+    for (let y = 2; y < height; y += 2) {
+      mgr.set(world.create(new Wall()), x, y);
+    }
+  }
+
+  // now make it a maze...
 }
 
 // SYSTEMS
