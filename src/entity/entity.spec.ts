@@ -42,7 +42,7 @@ describe("Entity", () => {
     expect(e.fetch(CompA)).toBeUndefined();
 
     const a = new CompA();
-    expect(e.add(a)).toBeUndefined(); // No prior value
+    expect(e.add(a)).toBeUndefined();
     expect(addComponent).toHaveBeenCalledWith(e, a, CompA);
     addComponent.mockClear();
 
@@ -50,7 +50,7 @@ describe("Entity", () => {
     expect(e.fetch(CompA)).toBe(a);
 
     const a2 = new CompA(2);
-    expect(e.add(a2)).toBeUndefined(); // No prior value
+    expect(e.add(a2)).toBeUndefined();
     expect(e.has(CompA)).toBeTrue();
     expect(e.fetch(CompA)).toEqual(a2);
 

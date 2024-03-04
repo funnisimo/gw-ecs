@@ -27,7 +27,7 @@ export abstract class System {
     return this.enabled;
   }
 
-  // TODO - params => time: number, delta: number, currentTick: number
+  // TODO - params? => time: number, delta: number, currentTick: number
   process(): void {
     if (this.isEnabled()) {
       this.beforeProcess();

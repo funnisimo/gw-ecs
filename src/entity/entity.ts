@@ -189,6 +189,12 @@ export class Entities {
     }
   }
 
+  count(): number {
+    return this._all.reduce((c: number, e) => {
+      return typeof e !== "number" ? c + 1 : c;
+    }, 0);
+  }
+
   rebase(zeroTick: number) {
     this._all.forEach((e) => {
       if (e instanceof Entity) {

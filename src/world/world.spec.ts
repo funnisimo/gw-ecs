@@ -1,9 +1,11 @@
 import "jest-extended";
 import { World, Aspect } from ".";
 import { Entity } from "../entity";
-import { EntitySystem } from "../system";
+import { EntitySystem, System } from "../system";
 
 class A {}
+class B {}
+class C {}
 
 describe("World", function () {
   class MockSystem extends EntitySystem {
@@ -113,6 +115,68 @@ describe("World", function () {
 
       world.delete(A);
       expect(world.get(A)).toBeUndefined();
+    });
+  });
+
+  describe("entity lifecycle", () => {
+    class CreateSystem extends System {
+      protected doProcess(): void {
+        this.world.create(new A(), new B());
+      }
+    }
+
+    class DeleteSystem extends EntitySystem {
+      protected processEntity(entity: Entity): void {
+        this.world.queueDestroy(entity);
+      }
+    }
+
+    class DeleteNowSystem extends EntitySystem {
+      protected processEntity(entity: Entity): void {
+        this.world.destroyNow(entity);
+      }
+    }
+
+    test("queueDelete", () => {
+      const sysCreate = new CreateSystem();
+      const sysDelete = new DeleteSystem(new Aspect().all(A, B));
+      const world = new World();
+      world
+        .registerComponent(A, B, C)
+        .addSystem(sysCreate)
+        .addSystem(sysDelete, false)
+        .init();
+
+      expect(world.entities().count()).toEqual(0);
+      world.process();
+      world.process();
+      world.process();
+      expect(world.entities().count()).toEqual(3);
+      sysCreate.setEnabled(false);
+      sysDelete.setEnabled(true);
+      world.process();
+      expect(world.entities().count()).toEqual(0);
+    });
+
+    test("queueDelete", () => {
+      const sysCreate = new CreateSystem();
+      const sysDelete = new DeleteNowSystem(new Aspect().all(A, B));
+      const world = new World();
+      world
+        .registerComponent(A, B, C)
+        .addSystem(sysCreate)
+        .addSystem(sysDelete, false)
+        .init();
+
+      expect(world.entities().count()).toEqual(0);
+      world.process();
+      world.process();
+      world.process();
+      expect(world.entities().count()).toEqual(3);
+      sysCreate.setEnabled(false);
+      sysDelete.setEnabled(true);
+      world.process();
+      expect(world.entities().count()).toEqual(0);
     });
   });
 });

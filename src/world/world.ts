@@ -9,7 +9,7 @@ export class World implements ComponentSource {
   _systems: System[];
   _components: ComponentManager;
   _entities: Entities;
-  _destroyedEntities: Entity[];
+  _toDestroy: Entity[];
   delta: number;
   time: number;
   _currentTick: number;
@@ -22,7 +22,7 @@ export class World implements ComponentSource {
     this._currentTick = 1;
     this._components = new ComponentManager();
     this._systems = [];
-    this._destroyedEntities = [];
+    this._toDestroy = [];
     this._resources = new Resources();
   }
 
@@ -94,13 +94,13 @@ export class World implements ComponentSource {
     //   this._components.cleanEntities(deleted);
     // });
 
-    if (this._destroyedEntities.length) {
+    if (this._toDestroy.length) {
       this._systems.forEach((system) =>
-        system.destroyEntities(this._destroyedEntities)
+        system.destroyEntities(this._toDestroy)
       );
-      this._components.destroyEntities(this._destroyedEntities);
-      this._entities.destroyEntities(this._destroyedEntities);
-      this._destroyedEntities = [];
+      this._components.destroyEntities(this._toDestroy);
+      this._entities.destroyEntities(this._toDestroy);
+      this._toDestroy = [];
     }
   }
 
@@ -112,11 +112,13 @@ export class World implements ComponentSource {
 
   queueDestroy(entity: Entity): void {
     // this._entities.queueDestroy(entity);
-    this._destroyedEntities.push(entity);
+    this._toDestroy.push(entity);
   }
 
   destroyNow(entity: Entity): void {
+    this._systems.forEach((system) => system.destroyEntity(entity));
     this._components.destroyEntity(entity);
+    this._entities.destroy(entity);
     entity._destroy();
   }
 
