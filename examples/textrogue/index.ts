@@ -59,7 +59,7 @@ function buildMaze(world: World) {
 class DrawSystem extends System {
   _pos!: Pos;
   _mgr!: PosManager;
-  _walls: Aspect = new Aspect().all(Wall);
+  _walls: Aspect = new Aspect(Wall);
 
   start(world: World) {
     super.start(world);
@@ -90,7 +90,7 @@ class DrawSystem extends System {
 
 class MoveSystem extends EntitySystem {
   constructor() {
-    super(new Aspect().all(Move, Pos));
+    super(new Aspect(Move, Pos));
   }
   protected processEntity(entity: Entity): void {
     const posMgr = this.world.get(PosManager)!;
@@ -126,7 +126,7 @@ const world = new World()
 
 buildMaze(world);
 
-const wallAspect = new Aspect().all(Wall);
+const wallAspect = new Aspect(Wall);
 
 // PLAY
 
