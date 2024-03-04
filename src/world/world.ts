@@ -5,6 +5,10 @@ import { ComponentSource, Entities, Entity } from "../entity/entity";
 import { AnyComponent, Component } from "../component/component";
 import { Resources } from "./resources";
 
+export interface WorldEventHandler {
+  destroyEntity(entity: Entity): void;
+}
+
 export class World implements ComponentSource {
   _systems: System[];
   _components: ComponentManager;
@@ -14,6 +18,7 @@ export class World implements ComponentSource {
   time: number;
   _currentTick: number;
   _resources: Resources;
+  notify: WorldEventHandler[];
 
   constructor() {
     this._entities = new Entities(this);
@@ -24,6 +29,7 @@ export class World implements ComponentSource {
     this._systems = [];
     this._toDestroy = [];
     this._resources = new Resources();
+    this.notify = [];
   }
 
   currentTick(): number {
@@ -100,6 +106,9 @@ export class World implements ComponentSource {
     // });
 
     if (this._toDestroy.length) {
+      this._toDestroy.forEach((entity) => {
+        this.notify.forEach((n) => n.destroyEntity(entity));
+      });
       this._systems.forEach((system) =>
         system.destroyEntities(this._toDestroy)
       );
@@ -121,6 +130,7 @@ export class World implements ComponentSource {
   }
 
   destroyNow(entity: Entity): void {
+    this.notify.forEach((n) => n.destroyEntity(entity));
     this._systems.forEach((system) => system.destroyEntity(entity));
     this._components.destroyEntity(entity);
     this._entities.destroy(entity);

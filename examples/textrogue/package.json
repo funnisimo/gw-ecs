@@ -1,0 +1,20 @@
+{
+  "name": "textrogue",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "bun index.ts"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/terminal-kit": "^2.5.6",
+    "bun": "^1.0.30",
+    "gw-ecs": "file:../../dist",
+    "terminal-kit": "^3.0.2",
+    "typescript": "^5.3.3"
+  }
+}

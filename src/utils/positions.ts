@@ -1,4 +1,5 @@
 import { Entity, Index } from "../entity";
+import { Aspect, World, WorldEventHandler } from "../world";
 
 export class Pos {
   x: number;
@@ -21,7 +22,11 @@ export class Pos {
   }
 }
 
-export class PosManager {
+// Need World Hook for Destroy Entity
+// ??? world.notify.push(this);
+// interface WorldEvent { destroyEntity(entity: Entity): void; }
+
+export class PosManager implements WorldEventHandler {
   _size: [number, number];
   _entities: Map<Index, Entity>;
 
@@ -30,11 +35,27 @@ export class PosManager {
     this._entities = new Map();
   }
 
-  getAt(x: number, y: number): Entity[] {
+  get size(): [number, number] {
+    return this._size;
+  }
+
+  hasXY(x: number, y: number): boolean {
+    return x >= 0 && x < this._size[0] && y >= 0 && y < this._size[1];
+  }
+
+  init(world: World): PosManager {
+    world.set(this); // Add as a resource
+    world.notify.push(this); // Register interest in destroy events
+    return this;
+  }
+
+  getAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): Entity[] {
     const out: Entity[] = [];
     for (let entity of this._entities.values()) {
       if (entity.fetch(Pos)!.equals(x, y)) {
-        out.push(entity);
+        if (!aspect || aspect.match(entity, sinceTick)) {
+          out.push(entity);
+        }
       }
     }
     return out;
@@ -58,5 +79,9 @@ export class PosManager {
     if (this._entities.delete(entity.index)) {
       entity._removeComp(Pos);
     }
+  }
+
+  destroyEntity(entity: Entity): void {
+    this.remove(entity);
   }
 }
