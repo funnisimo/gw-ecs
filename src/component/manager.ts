@@ -1,6 +1,6 @@
-import { Entity } from "../entity";
-import { AnyComponent, Component } from "./component";
-import { AnyStore, SetStore, Store } from "./store";
+import { Entity } from "../entity/entity.js";
+import { AnyComponent, Component } from "./component.js";
+import { AnyStore, SetStore, Store } from "./store.js";
 
 export class ComponentManager {
   private stores: Map<AnyComponent, AnyStore>;
@@ -14,8 +14,8 @@ export class ComponentManager {
     this.stores.set(comp, store);
   }
 
-  getManager<T>(comp: Component<T>): SetStore<T> {
-    return this.stores.get(comp) as SetStore<T>;
+  getStore<T>(comp: Component<T>): Store<T> {
+    return this.stores.get(comp) as Store<T>;
   }
 
   destroyEntity(entity: Entity): void {

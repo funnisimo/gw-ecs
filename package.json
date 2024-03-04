@@ -3,6 +3,7 @@
   "version": "0.6.0",
   "description": "A simple ECS for making games with Goblinwerks",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "test": "jest",

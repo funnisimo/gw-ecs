@@ -1,6 +1,6 @@
-import type { AnyComponent } from "../component/component";
-import { Entity } from "../entity/entity";
-import { World } from "./world";
+import type { AnyComponent } from "../component/component.js";
+import { Entity } from "../entity/entity.js";
+import { World } from "./world.js";
 
 export class Aspect {
   protected _allComponents: AnyComponent[];

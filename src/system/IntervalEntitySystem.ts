@@ -1,6 +1,6 @@
-import { IntervalSystem } from "./intervalSystem";
-import { Aspect } from "../world/aspect";
-import { Entity } from "../entity";
+import { IntervalSystem } from "./intervalSystem.js";
+import { Aspect } from "../world/aspect.js";
+import { Entity } from "../entity/entity.js";
 
 export abstract class IntervalEntitySystem extends IntervalSystem {
   private _aspect: Aspect;

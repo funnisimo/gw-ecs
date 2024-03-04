@@ -1,6 +1,6 @@
-import { Entity } from "../entity";
-import { Aspect, World } from "../world";
-import { AnyComponent } from "./component";
+import { Entity } from "../entity/entity.js";
+import { Aspect, World } from "../world/index.js";
+import { AnyComponent } from "./component.js";
 
 export function join(
   world: World,

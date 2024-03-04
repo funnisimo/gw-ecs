@@ -1,10 +1,10 @@
-import type { Component, AnyComponent } from "../component/component";
+import type { Component, AnyComponent } from "../component/component.js";
 
 export interface ComponentSource {
   currentTick(): number;
 
   addComponent<T>(entity: Entity, val: T, comp?: Component<T>): void; // TODO - Return replaced value?
-  removeComponent<T>(entity: Entity, comp: Component<T>): void; // TODO - Return deleted value?
+  removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined; // TODO - Return deleted value?
 }
 
 export type Index = number;
@@ -95,15 +95,17 @@ export class Entity {
     return !!data && data.added > tick && data.removed < 0;
   }
 
-  remove<T>(comp: Component<T>): void {
-    this._source.removeComponent(this, comp);
+  remove<T>(comp: Component<T>): T | undefined {
+    return this._source.removeComponent(this, comp);
   }
 
-  _removeComp(comp: AnyComponent): void {
+  _removeComp<T>(comp: AnyComponent): T | undefined {
     const data = this._comps.get(comp);
     if (data) {
       data.removed = this._source.currentTick();
+      return data.data;
     }
+    return undefined;
   }
 
   isRemovedSince(comp: AnyComponent, tick: number): boolean {

@@ -1,4 +1,4 @@
-import { IntervalSystem } from "./intervalSystem";
+import { IntervalSystem } from "./intervalSystem.js";
 
 export abstract class DelayedSystem extends IntervalSystem {
   public constructor(delay: number) {

@@ -1,4 +1,4 @@
-import { System } from "./system";
+import { System } from "./system.js";
 
 export abstract class IntervalSystem extends System {
   protected delay: number;

@@ -1,9 +1,9 @@
-import { System } from "../system/system";
-import { ComponentManager } from "../component/manager";
-import { SetStore, Store } from "../component/store";
-import { ComponentSource, Entities, Entity } from "../entity/entity";
-import { AnyComponent, Component } from "../component/component";
-import { Resources } from "./resources";
+import { System } from "../system/system.js";
+import { ComponentManager } from "../component/manager.js";
+import { Store } from "../component/store.js";
+import { ComponentSource, Entities, Entity } from "../entity/entity.js";
+import { AnyComponent, Component } from "../component/component.js";
+import { Resources } from "./resources.js";
 
 export interface WorldEventHandler {
   destroyEntity(entity: Entity): void;
@@ -54,12 +54,18 @@ export class World implements ComponentSource {
     return this;
   }
 
-  init(): void {
-    this._systems.forEach((system) => system.init(this));
+  init(fn: (world: World) => void): World {
+    fn(this);
+    return this;
   }
 
-  getStore<T>(comp: Component<T>): SetStore<T> {
-    return this._components.getManager(comp);
+  start(): World {
+    this._systems.forEach((system) => system.start(this));
+    return this;
+  }
+
+  getStore<T>(comp: Component<T>): Store<T> {
+    return this._components.getStore(comp);
   }
 
   create(...withComps: any[]): Entity {
@@ -162,13 +168,13 @@ export class World implements ComponentSource {
   /// ComponentSource
 
   fetchComponent<T>(entity: Entity, comp: Component<T>): T | undefined {
-    const mgr = this._components.getManager(comp);
+    const mgr = this._components.getStore(comp);
     if (!mgr) return undefined;
     return mgr.fetch(entity);
   }
 
   updateComponent<T>(entity: Entity, comp: Component<T>): T | undefined {
-    const mgr = this._components.getManager(comp);
+    const mgr = this._components.getStore(comp);
     if (!mgr) return undefined;
     return mgr.update(entity);
   }
@@ -177,13 +183,13 @@ export class World implements ComponentSource {
     // @ts-ignore
     comp = comp || val.constructor;
     if (!comp) throw new Error("Missing constructor!");
-    const mgr = this._components.getManager(comp);
+    const mgr = this._components.getStore(comp);
     if (!mgr) throw new Error("Using unregistered component: " + comp.name);
     mgr.add(entity, val);
   }
 
-  removeComponent<T>(entity: Entity, comp: Component<T>): void {
-    const mgr = this._components.getManager(comp);
-    mgr && mgr.remove(entity);
+  removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined {
+    const mgr = this._components.getStore(comp);
+    return mgr && mgr.remove(entity);
   }
 }

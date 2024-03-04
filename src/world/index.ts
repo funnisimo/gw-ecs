@@ -1,5 +1,5 @@
 /* istanbul ignore file */
 
-export * from "./aspect";
-export * from "./resources";
-export * from "./world";
+export * from "./aspect.js";
+export * from "./resources.js";
+export * from "./world.js";

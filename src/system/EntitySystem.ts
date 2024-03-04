@@ -1,6 +1,6 @@
-import { Aspect } from "../world";
-import { System } from ".";
-import { Entity } from "../entity";
+import { Aspect } from "../world/aspect.js";
+import { System } from "./system.js";
+import { Entity } from "../entity/entity.js";
 
 export abstract class EntitySystem extends System {
   // protected entities: Entity[];

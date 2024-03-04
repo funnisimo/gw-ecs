@@ -1,5 +1,5 @@
-import { Entity } from "../entity";
-import { World } from "../world";
+import { Entity } from "../entity/entity.js";
+import { World } from "../world/world.js";
 
 export abstract class System {
   protected world: World;
@@ -11,7 +11,7 @@ export abstract class System {
     this.world = new World();
   }
 
-  init(world: World) {
+  start(world: World) {
     this.world = world;
   }
 

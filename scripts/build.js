@@ -67,6 +67,7 @@ const main = async () => {
   packageJson.devDependencies = {};
   packageJson.scripts = {};
   packageJson.main = "index.js";
+  packageJson.types = "index.d.ts";
 
   term("Writing updated ^gpackage.json^ to ^bdist\n");
   fs.writeFileSync("dist/package.json", JSON.stringify(packageJson, null, 4));

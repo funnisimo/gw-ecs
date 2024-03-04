@@ -1,5 +1,5 @@
-import { Entity } from "../entity";
-import { Component } from "./component";
+import { Entity } from "../entity/entity.js";
+import { Component } from "./component.js";
 
 export interface Store<T> {
   has(entity: Entity): boolean;
@@ -7,8 +7,9 @@ export interface Store<T> {
   add(entity: Entity, comp: T): void;
   fetch(entity: Entity): T | undefined;
   update(entity: Entity): T | undefined;
-  remove(entity: Entity): void; // This is immediate
+  remove(entity: Entity): T | undefined; // This is immediate
 
+  singleEntity(): Entity | undefined;
   entities(): Iterator<Entity>;
   values(): Iterator<T>;
   entries(): Iterator<[Entity, T]>;
@@ -51,11 +52,12 @@ export class SetStore<T> implements Store<T> {
   }
 
   // This is immediate
-  remove(entity: Entity): void {
+  remove(entity: Entity): T | undefined {
     if (!entity.isAlive()) return undefined;
+    const v = entity.fetch(this._comp);
     entity._removeComp(this._comp);
-
     this._data.delete(entity);
+    return v;
   }
 
   has(entity: Entity): boolean {
@@ -63,14 +65,28 @@ export class SetStore<T> implements Store<T> {
     return this._data.has(entity);
   }
 
+  singleEntity(): Entity | undefined {
+    return this._data.keys().next().value;
+  }
+
   entities() {
     return this._data.keys();
+  }
+
+  singleValue(): T | undefined {
+    const entity = this.singleEntity();
+    return entity && (entity.fetch(this._comp) as T);
   }
 
   *values() {
     for (let entity of this._data.keys()) {
       yield entity.fetch(this._comp) as T;
     }
+  }
+
+  singleEntry(): [Entity, T] | undefined {
+    const entity = this.singleEntity();
+    return entity && [entity, entity.fetch(this._comp) as T];
   }
 
   *entries() {

@@ -1,3 +1,3 @@
 /* istanbul ignore file */
 
-export * from "./entity";
+export * from "./entity.js";

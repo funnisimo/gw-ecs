@@ -1,6 +1,6 @@
-import { DelayedSystem } from "./delayedSystem";
-import { Entity } from "../entity";
-import { Aspect } from "../world/aspect";
+import { DelayedSystem } from "./delayedSystem.js";
+import { Entity } from "../entity/entity.js";
+import { Aspect } from "../world/aspect.js";
 
 export abstract class DelayedEntitySystem extends DelayedSystem {
   private _aspect: Aspect;
