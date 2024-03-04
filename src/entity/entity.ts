@@ -101,7 +101,7 @@ export class Entity {
 
   _removeComp<T>(comp: AnyComponent): T | undefined {
     const data = this._comps.get(comp);
-    if (data) {
+    if (data && data.removed < 0) {
       data.removed = this._source.currentTick();
       return data.data;
     }

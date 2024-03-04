@@ -11,8 +11,8 @@ export class Aspect {
   protected _updatedComponents: AnyComponent[];
   protected _removedComponents: AnyComponent[];
 
-  constructor() {
-    this._allComponents = [];
+  constructor(...allComponents: AnyComponent[]) {
+    this._allComponents = allComponents;
     this._oneComponents = [];
     this._noneComponents = [];
     this._someComponents = [];
@@ -21,7 +21,7 @@ export class Aspect {
     this._removedComponents = [];
   }
 
-  all(...components: AnyComponent[]): Aspect {
+  with(...components: AnyComponent[]): Aspect {
     this._allComponents = this._allComponents.concat(components);
     return this;
   }
@@ -38,7 +38,7 @@ export class Aspect {
     return this;
   }
 
-  none(...components: AnyComponent[]): Aspect {
+  without(...components: AnyComponent[]): Aspect {
     this._noneComponents = this._noneComponents.concat(components);
     return this;
   }

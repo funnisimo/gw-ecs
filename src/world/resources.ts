@@ -3,9 +3,8 @@ import { AnyComponent, Component } from "../component/component.js";
 export class Resources {
   _data: Map<AnyComponent, any> = new Map();
 
-  set<T>(val: T, comp?: Component<T>) {
-    // @ts-ignore
-    comp = comp || val.constructor;
+  set<T>(val: T) {
+    const comp = (<any>val).constructor;
     this._data.set(comp!, val);
   }
 

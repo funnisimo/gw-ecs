@@ -56,9 +56,10 @@ describe("Entity", () => {
 
     expect(e.has(CompA)).toBeTrue();
 
-    expect(e.remove(CompA)).toBeUndefined(); // TODO - If using World will be 'a2'
+    expect(e.remove(CompA)).toBe(a2);
     expect(removeComponent).toHaveBeenCalledWith(e, CompA);
     removeComponent.mockClear();
+    expect(e.fetch(CompA)).toBeUndefined();
     expect(e.remove(CompA)).toBeUndefined(); // Already removed
     expect(removeComponent).toHaveBeenCalledWith(e, CompA); // But we still ask to remove the component anyway to be safe
     removeComponent.mockClear();

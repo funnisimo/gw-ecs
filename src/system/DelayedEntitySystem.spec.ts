@@ -12,10 +12,6 @@ describe("delayed entity system", () => {
       this.fakeCallback = callback;
     }
 
-    public init(world: World) {
-      super.init(world);
-    }
-
     // public updateEntityDelay(entity: Entity): boolean {
     //   let manager = this.world.getComponentManager(Timer);
     //   let timer = manager.fetch(entity)!;
@@ -37,10 +33,10 @@ describe("delayed entity system", () => {
     let myDelayedEntitySystem = new MyDelayedEntitySystem(
       fakeCallback,
       10,
-      new Aspect().all(A)
+      new Aspect().with(A)
     );
 
-    world.registerComponent(A).addSystem(myDelayedEntitySystem).init();
+    world.registerComponent(A).addSystem(myDelayedEntitySystem).start();
 
     let entity = world.create();
     entity.add(new A());

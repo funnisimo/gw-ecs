@@ -10,9 +10,9 @@ export interface Store<T> {
   remove(entity: Entity): T | undefined; // This is immediate
 
   singleEntity(): Entity | undefined;
-  entities(): Iterator<Entity>;
-  values(): Iterator<T>;
-  entries(): Iterator<[Entity, T]>;
+  entities(): IterableIterator<Entity>;
+  values(): IterableIterator<T>;
+  entries(): IterableIterator<[Entity, T]>;
 
   destroyEntity(entity: Entity): void;
   destroyEntities(entities: Entity[]): void;

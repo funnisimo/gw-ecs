@@ -36,7 +36,7 @@ describe("interval entity system", () => {
   it("should process matching entities at regular interval", () => {
     let callback = jest.fn();
     let world = new World();
-    let aspect = new Aspect().all(A).none(B);
+    let aspect = new Aspect().with(A).without(B);
     let interval = 10;
     let myIntervalSystem = new MyIntervalEntitySystem(
       aspect,
@@ -48,7 +48,7 @@ describe("interval entity system", () => {
       .registerComponent(A)
       .registerComponent(B)
       .addSystem(myIntervalSystem)
-      .init();
+      .start();
 
     let entityA = world.create();
     let entityB = world.create();
@@ -90,7 +90,7 @@ describe("interval entity system", () => {
       callback
     );
 
-    world.addSystem(system).init();
+    world.addSystem(system).start();
 
     let entity = world.create();
 
@@ -129,7 +129,7 @@ describe("interval entity system", () => {
         callback
       );
 
-      world.addSystem(myIntervalSystem).init();
+      world.addSystem(myIntervalSystem).start();
 
       let entity = world.create();
 
@@ -162,7 +162,7 @@ describe("interval entity system", () => {
       );
       myIntervalSystem.enableCatchUpDelay(false);
 
-      world.addSystem(myIntervalSystem).init();
+      world.addSystem(myIntervalSystem).start();
 
       let entity = world.create();
 

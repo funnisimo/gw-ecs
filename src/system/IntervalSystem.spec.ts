@@ -22,7 +22,7 @@ describe("interval system", () => {
     let interval = 10;
     let myIntervalSystem = new MyIntervalSystem(interval, 10, callback);
 
-    world.addSystem(myIntervalSystem).init();
+    world.addSystem(myIntervalSystem).start();
 
     world.process(5);
     expect(callback).not.toHaveBeenCalled();
@@ -50,7 +50,7 @@ describe("interval system", () => {
     let interval = 10;
     let myIntervalSystem = new MyIntervalSystem(interval, 10, callback);
 
-    world.addSystem(myIntervalSystem).init();
+    world.addSystem(myIntervalSystem).start();
 
     callback.mockClear();
     world.process(10);
@@ -78,7 +78,7 @@ describe("interval system", () => {
       let interval = 10;
       let myIntervalSystem = new MyIntervalSystem(interval, 10, callback);
 
-      world.addSystem(myIntervalSystem).init();
+      world.addSystem(myIntervalSystem).start();
 
       callback.mockClear();
       world.process(30);
@@ -108,7 +108,7 @@ describe("interval system", () => {
       let myIntervalSystem = new MyIntervalSystem(interval, interval, callback);
       myIntervalSystem.enableCatchUpDelay(false);
 
-      world.addSystem(myIntervalSystem).init();
+      world.addSystem(myIntervalSystem).start();
 
       callback.mockClear();
       world.process(30);

@@ -30,7 +30,7 @@ describe("System", () => {
     let system = new SystemTest(callback);
 
     world.addSystem(system);
-    world.init();
+    world.start();
     world.process();
 
     expect(callback).toHaveBeenCalledWith("beforeProcess");
@@ -45,7 +45,7 @@ describe("System", () => {
 
     world.addSystem(system);
     system.setEnabled(false);
-    world.init();
+    world.start();
     world.process();
 
     expect(callback).toHaveBeenCalledTimes(0);

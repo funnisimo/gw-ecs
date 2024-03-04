@@ -19,7 +19,7 @@ describe("delayed system", () => {
   it("should call process after the given delay", () => {
     let world = new World();
     let callback = jest.fn();
-    world.addSystem(new MyDelayedSystem(10, callback)).init();
+    world.addSystem(new MyDelayedSystem(10, callback)).start();
 
     world.process(5);
     expect(callback).not.toHaveBeenCalled();
@@ -35,7 +35,7 @@ describe("delayed system", () => {
   it("should not update delay if the system is disabled", () => {
     let world = new World();
     let callback = jest.fn();
-    world.addSystem(new MyDelayedSystem(10, callback), false).init();
+    world.addSystem(new MyDelayedSystem(10, callback), false).start();
 
     world.process(20);
     expect(callback).not.toHaveBeenCalled();
@@ -46,7 +46,7 @@ describe("delayed system", () => {
       let world = new World();
       let callback = jest.fn();
       let system = new MyDelayedSystem(10, callback);
-      world.addSystem(system).init();
+      world.addSystem(system).start();
 
       world.process(5);
       expect(callback).not.toHaveBeenCalled();
@@ -65,7 +65,7 @@ describe("delayed system", () => {
       let world = new World();
       let callback = jest.fn();
       let system = new MyDelayedSystem(10, callback);
-      world.addSystem(system).init();
+      world.addSystem(system).start();
 
       world.process(5);
       expect(callback).not.toHaveBeenCalled();

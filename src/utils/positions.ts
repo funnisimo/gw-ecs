@@ -44,7 +44,7 @@ export class PosManager implements WorldEventHandler {
   }
 
   init(world: World): PosManager {
-    world.set(this); // Add as a resource
+    world.set(this); // Add as a resource (just in case)
     world.notify.push(this); // Register interest in destroy events
     return this;
   }

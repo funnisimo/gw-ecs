@@ -17,8 +17,8 @@ describe("entity system", () => {
   }
 
   it("use its aspect to check whether an entity match or not", () => {
-    let aspectA = new Aspect().all(A).one(B);
-    let aspectB = new Aspect().one(B).none(C);
+    let aspectA = new Aspect().with(A).one(B);
+    let aspectB = new Aspect().one(B).without(C);
     let systemA = new MyEntitySytem(aspectA);
     let systemB = new MyEntitySytem(aspectB);
 
@@ -29,7 +29,7 @@ describe("entity system", () => {
       .registerComponent(C)
       // .addSystem(systemA)
       // .addSystem(systemB)
-      .init();
+      .start();
 
     let entity = world.create();
 
@@ -66,7 +66,7 @@ describe("entity system", () => {
       .registerComponent(C)
       .addSystem(systemA)
       .addSystem(systemB)
-      .init();
+      .start();
 
     let entity = world.create();
 

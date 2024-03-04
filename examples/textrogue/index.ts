@@ -112,11 +112,13 @@ class MoveSystem extends EntitySystem {
 
 const world = new World()
   .registerComponents(Wall, Player, Move)
+  .registerResource(new PosManager(21, 21), (w, r) => {
+    r.init(w);
+  })
   .init((w: World) => {
     const player = w.create(new Player());
-    w.set(player);
-    const posMgr = new PosManager(21, 21).init(w);
-    posMgr.set(player, 11, 11);
+    w.set(player); // put player entity in as resource to make getting it easier in systems
+    w.get(PosManager).set(player, 11, 11);
   })
   .addSystem(new MoveSystem())
   .addSystem(new DrawSystem())

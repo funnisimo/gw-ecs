@@ -16,11 +16,11 @@ describe("Aspect", () => {
     beforeAll(() => {
       world = new World();
       world.registerComponents(A, B, C, D, E, F, G);
-      world.init();
+      world.start();
     });
 
     it("should matchs entity if it has all the required components", () => {
-      let aspect = new Aspect().all(A, B, C);
+      let aspect = new Aspect().with(A, B, C);
       const entity = world.create();
       entity.add(new A());
       entity.add(new B());
@@ -29,7 +29,7 @@ describe("Aspect", () => {
     });
 
     it("should refuses entity if it has not all the required components", () => {
-      let aspect = new Aspect().all(A, B, C);
+      let aspect = new Aspect().with(A, B, C);
       const entity = world.create();
       entity.add(new A());
       entity.add(new C());
@@ -42,7 +42,7 @@ describe("Aspect", () => {
     beforeAll(() => {
       world = new World();
       world.registerComponents(A, B, C, D, E, F, G);
-      world.init();
+      world.start();
     });
 
     it("should matchs entity if it has at least one of the required components", () => {
@@ -75,18 +75,18 @@ describe("Aspect", () => {
     beforeAll(() => {
       world = new World();
       world.registerComponents(A, B, C, D, E, F, G);
-      world.init();
+      world.start();
     });
 
     it("should accepts entity if it has none of the excluded components", () => {
-      let aspect = new Aspect().none(A, B, C);
+      let aspect = new Aspect().without(A, B, C);
       const entity = world.create();
       expect(aspect.match(entity)).toBeTrue();
       entity.add(new E());
       expect(aspect.match(entity)).toBeTrue();
     });
     it("should refuses entity if it has any of the excluded components", () => {
-      let aspect = new Aspect().none(A, B, C);
+      let aspect = new Aspect().without(A, B, C);
       const entity = world.create();
       expect(aspect.match(entity)).toBeTrue();
       entity.add(new A());
@@ -101,11 +101,11 @@ describe("Aspect", () => {
     beforeAll(() => {
       world = new World();
       world.registerComponents(A, B, C, D, E, F, G);
-      world.init();
+      world.start();
     });
 
     it("all and one", () => {
-      let aspect = new Aspect().all(A, B).one(C, D);
+      let aspect = new Aspect().with(A, B).one(C, D);
       const entity = world.create();
       entity.add(new A());
       entity.add(new B());
@@ -126,7 +126,7 @@ describe("Aspect", () => {
     });
 
     it("all and none", () => {
-      let aspect = new Aspect().all(A, B).none(C, D);
+      let aspect = new Aspect().with(A, B).without(C, D);
       const entity = world.create();
       entity.add(new A());
       entity.add(new B());
@@ -147,7 +147,7 @@ describe("Aspect", () => {
     });
 
     it("one and none", () => {
-      let aspect = new Aspect().one(A, B).none(C, D);
+      let aspect = new Aspect().one(A, B).without(C, D);
       let entity = world.create();
       expect(aspect.match(entity)).toBeFalse(); // []
       entity.add(new A());
@@ -167,7 +167,7 @@ describe("Aspect", () => {
     });
 
     it("all, one and none", () => {
-      let aspect = new Aspect().all(A, B).one(C, D).none(E);
+      let aspect = new Aspect().with(A, B).one(C, D).without(E);
       let entity = world.create();
       entity.add(new A());
       entity.add(new B());
@@ -193,7 +193,7 @@ describe("Aspect", () => {
     });
 
     it("all, one, some, and none", () => {
-      let aspect = new Aspect().all(A, B).one(C, D).some(E, F).none(G);
+      let aspect = new Aspect().with(A, B).one(C, D).some(E, F).without(G);
       let entity = world.create();
       entity.add(new A());
       entity.add(new B());
@@ -220,14 +220,14 @@ describe("Aspect", () => {
     test.todo(".added(A)");
     test.todo(".updated(A)");
     test.todo(".removed(A)");
-    test.todo(".added(A).updated(B).removed(C).all(D,E).none(F)");
+    test.todo(".added(A).updated(B).removed(C).with(D,E).without(F)");
   });
 
   describe("keys, entries", () => {
     test("simple", () => {
       const world = new World();
       world.registerComponent(A).registerComponent(B);
-      world.init();
+      world.start();
 
       const e1 = world.create();
       const e2 = world.create();
@@ -245,7 +245,7 @@ describe("Aspect", () => {
       // 2 = A
       // 3 = B
 
-      const aspect = new Aspect().all(A, B);
+      const aspect = new Aspect().with(A, B);
       expect([...aspect.entities(world)]).toEqual([e1]);
       expect([...aspect.entries(world)]).toEqual([[e1, [a, b]]]);
     });

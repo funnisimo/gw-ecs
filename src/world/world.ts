@@ -48,6 +48,12 @@ export class World implements ComponentSource {
     return this;
   }
 
+  registerResource<T>(val: T, init?: (world: World, res: T) => void): World {
+    this.set(val);
+    init && init(this, val);
+    return this;
+  }
+
   addSystem(system: System, enable: boolean = true): World {
     system.setEnabled(enable);
     this._systems.push(system);
@@ -153,8 +159,8 @@ export class World implements ComponentSource {
     return this._resources;
   }
 
-  set<T>(val: T, comp?: Component<T>) {
-    this._resources.set(val, comp);
+  set<T>(val: T) {
+    this._resources.set(val);
   }
 
   get<T>(comp: Component<T>): T {

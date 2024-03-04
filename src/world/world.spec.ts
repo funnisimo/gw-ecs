@@ -42,7 +42,7 @@ describe("World", function () {
 
     it("should recycle entities when deleted", function () {
       let world = new World();
-      world.init();
+      world.start();
       let idA = world.create();
       let idB = world.create();
       world.queueDestroy(idA);
@@ -58,9 +58,9 @@ describe("World", function () {
     it("should remove an entity from a system when it' deleted from world", () => {
       let world = new World();
       let callback = jest.fn();
-      let system = new MockSystem(new Aspect().all(A), callback);
+      let system = new MockSystem(new Aspect().with(A), callback);
       world.registerComponents(A).addSystem(system);
-      world.init();
+      world.start();
 
       let entity = world.create();
       entity.add(new A());
@@ -84,12 +84,12 @@ describe("World", function () {
     it("should not process systems that are initially disabled", () => {
       let world = new World();
       let callback = jest.fn();
-      let system = new MockSystem(new Aspect().all(A), callback);
+      let system = new MockSystem(new Aspect().with(A), callback);
       world.registerComponents(A).addSystem(system, false);
 
       let entity = world.create();
       world.getStore(A).add(entity, new A());
-      world.init();
+      world.start();
 
       callback.mockClear();
       world.process(1);
@@ -139,13 +139,13 @@ describe("World", function () {
 
     test("queueDelete", () => {
       const sysCreate = new CreateSystem();
-      const sysDelete = new DeleteSystem(new Aspect().all(A, B));
+      const sysDelete = new DeleteSystem(new Aspect().with(A, B));
       const world = new World();
       world
         .registerComponents(A, B, C)
         .addSystem(sysCreate)
         .addSystem(sysDelete, false)
-        .init();
+        .start();
 
       expect(world.entities().count()).toEqual(0);
       world.process();
@@ -160,13 +160,13 @@ describe("World", function () {
 
     test("queueDelete", () => {
       const sysCreate = new CreateSystem();
-      const sysDelete = new DeleteNowSystem(new Aspect().all(A, B));
+      const sysDelete = new DeleteNowSystem(new Aspect().with(A, B));
       const world = new World();
       world
         .registerComponents(A, B, C)
         .addSystem(sysCreate)
         .addSystem(sysDelete, false)
-        .init();
+        .start();
 
       expect(world.entities().count()).toEqual(0);
       world.process();

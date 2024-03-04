@@ -8,7 +8,7 @@ describe("Store", () => {
     it("lifecycle", () => {
       let world = new World();
       world.registerComponent(A);
-      world.init();
+      world.start();
 
       let entity = world.create();
       let store = world.getStore(A);
@@ -49,7 +49,7 @@ describe("Store", () => {
     test("iterators", () => {
       const world = new World();
       world.registerComponent(A);
-      world.init();
+      world.start();
 
       const store = world.getStore(A);
       const a1 = new A();
