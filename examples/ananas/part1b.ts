@@ -3,15 +3,6 @@ import * as ROT from "rot-js";
 import { Aspect, World } from "gw-ecs/world";
 import { System } from "gw-ecs/system";
 import { PosManager } from "gw-ecs/utils";
-import { Entity } from "gw-ecs/entity/entity";
-
-// function ifDo<T>(maybeTrueVal: T, doFn: (t: T) => any): boolean {
-//   if (maybeTrueVal) {
-//     doFn(maybeTrueVal);
-//     return true;
-//   }
-//   return false;
-// }
 
 class Term {
   term: terminal.Terminal;
@@ -39,10 +30,6 @@ const WALL = new Tile("#", "gray", true);
 const FLOOR = new Tile(".", "white");
 
 const TILE_ASPECT = new Aspect(Tile);
-
-function HAS_TILE(e: Entity): boolean {
-  return TILE_ASPECT.match(e);
-}
 
 class DrawSystem extends System {
   _buf!: terminal.ScreenBuffer;
@@ -80,6 +67,20 @@ function digMap(world: World) {
 }
 
 const term = terminal.terminal;
+
+term.grabInput(true);
+
+term.on("key", function (name, matches, data) {
+  if (name === "CTRL_C" || name === "q") {
+    term.moveTo(0, 26).eraseLine.blue("QUIT");
+    term.grabInput(false);
+    term.processExit(0);
+  } else {
+    term.moveTo(0, 26).eraseLine.defaultColor("'key' event: ", name);
+    // TODO - Handle input
+  }
+});
+
 const world = new World()
   .registerComponent(Tile)
   .setGlobal(new PosManager(80, 25), (w, r) => r.init(w))
@@ -87,18 +88,6 @@ const world = new World()
   .addSystem(new DrawSystem())
   .init(digMap)
   .start();
-
-term.grabInput(true);
-
-term.on("key", function (name, matches, data) {
-  console.log("'key' event:", name);
-  if (name === "CTRL_C" || name === "q") {
-    term.grabInput(false);
-    term.processExit(0);
-  } else {
-    // TODO - Handle input
-  }
-});
 
 function run() {
   world.process(16);

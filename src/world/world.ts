@@ -17,7 +17,7 @@ export class World implements ComponentSource {
   delta: number;
   time: number;
   _currentTick: number;
-  _resources: Resources;
+  _globals: Resources;
   notify: WorldEventHandler[];
 
   constructor() {
@@ -28,7 +28,7 @@ export class World implements ComponentSource {
     this._components = new ComponentManager();
     this._systems = [];
     this._toDestroy = [];
-    this._resources = new Resources();
+    this._globals = new Resources();
     this.notify = [];
   }
 
@@ -48,8 +48,8 @@ export class World implements ComponentSource {
     return this;
   }
 
-  registerResource<T>(val: T, init?: (world: World, res: T) => void): World {
-    this.set(val);
+  setGlobal<T>(val: T, init?: (world: World, res: T) => void): World {
+    this._globals.set(val);
     init && init(this, val);
     return this;
   }
@@ -155,20 +155,20 @@ export class World implements ComponentSource {
 
   /// Resources
 
-  resources(): Resources {
-    return this._resources;
+  globals(): Resources {
+    return this._globals;
   }
 
-  set<T>(val: T) {
-    this._resources.set(val);
+  // set<T>(val: T) {
+  //   this._resources.set(val);
+  // }
+
+  getGlobal<T>(comp: Component<T>): T {
+    return this._globals.get(comp);
   }
 
-  get<T>(comp: Component<T>): T {
-    return this._resources.get(comp);
-  }
-
-  delete<T>(comp: Component<T>) {
-    this._resources.delete(comp);
+  deleteGlobal<T>(comp: Component<T>) {
+    this._globals.delete(comp);
   }
 
   /// ComponentSource

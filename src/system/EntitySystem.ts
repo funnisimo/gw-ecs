@@ -43,7 +43,7 @@ export abstract class EntitySystem extends System {
   // }
 
   protected doProcess(): void {
-    for (let e of this._aspect.entities(this.world, this.lastTick)) {
+    for (let e of this._aspect.all(this.world, this.lastTick)) {
       this.processEntity(e);
     }
   }

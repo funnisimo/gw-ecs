@@ -246,8 +246,8 @@ describe("Aspect", () => {
       // 3 = B
 
       const aspect = new Aspect().with(A, B);
-      expect([...aspect.entities(world)]).toEqual([e1]);
-      expect([...aspect.entries(world)]).toEqual([[e1, [a, b]]]);
+      expect([...aspect.all(world)]).toEqual([e1]);
+      expect([...aspect.allEntries(world)]).toEqual([[e1, [a, b]]]);
     });
   });
 });

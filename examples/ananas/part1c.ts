@@ -3,15 +3,12 @@ import * as ROT from "rot-js";
 import { Aspect, World } from "gw-ecs/world";
 import { System } from "gw-ecs/system";
 import { PosManager } from "gw-ecs/utils";
-import { Entity } from "gw-ecs/entity/entity";
 
-// function ifDo<T>(maybeTrueVal: T, doFn: (t: T) => any): boolean {
-//   if (maybeTrueVal) {
-//     doFn(maybeTrueVal);
-//     return true;
-//   }
-//   return false;
-// }
+function ifDo<T>(maybeVal: T, doFn: (t: NonNullable<T>) => any): boolean {
+  if (!maybeVal) return false;
+  doFn(maybeVal);
+  return true;
+}
 
 class Term {
   term: terminal.Terminal;
@@ -20,6 +17,20 @@ class Term {
     this.term = term;
   }
 }
+
+// BOXES
+
+class Box {
+  ch: string;
+  attr: terminal.ScreenBuffer.Attributes;
+
+  constructor() {
+    this.ch = "*";
+    this.attr = { color: "blue" };
+  }
+}
+
+const BOX_ASPECT = new Aspect(Box);
 
 // TILES
 
@@ -40,10 +51,6 @@ const FLOOR = new Tile(".", "white");
 
 const TILE_ASPECT = new Aspect(Tile);
 
-function HAS_TILE(e: Entity): boolean {
-  return TILE_ASPECT.match(e);
-}
-
 class DrawSystem extends System {
   _buf!: terminal.ScreenBuffer;
 
@@ -58,10 +65,15 @@ class DrawSystem extends System {
     const map = this.world.getGlobal(PosManager);
 
     map.everyXY((x, y, es) => {
-      const tileEntity = es[0]; // Every x,y has a tile so we know we will get an entity
-      const tile = tileEntity.fetch(Tile)!;
-      buf.put({ x, y, attr: tile.attr, dx: 1, dy: 0, wrap: true }, tile.ch);
-    }, TILE_ASPECT);
+      ifDo(BOX_ASPECT.first(es), (e) => {
+        const box = e.fetch(Box)!;
+        buf.put({ x, y, attr: box.attr, dx: 1, dy: 0, wrap: true }, box.ch);
+      }) ||
+        ifDo(TILE_ASPECT.first(es), (e) => {
+          const tile = e.fetch(Tile)!;
+          buf.put({ x, y, attr: tile.attr, dx: 1, dy: 0, wrap: true }, tile.ch);
+        });
+    });
 
     buf.draw();
   }
@@ -70,35 +82,62 @@ class DrawSystem extends System {
 function digMap(world: World) {
   const digger = new ROT.Map.Digger(80, 25);
   const posMgr = world.getGlobal(PosManager);
+  const floors: { x: number; y: number }[] = [];
 
   function digCallback(x: number, y: number, value: number) {
     const tile = value ? WALL : FLOOR;
     posMgr.set(world.create(tile), x, y);
+
+    if (!value) {
+      floors.push({ x, y });
+    }
   }
 
   digger.create(digCallback);
+
+  placeBoxes(world, 10, floors);
+}
+
+function placeBoxes(
+  world: World,
+  count: number,
+  locs: { x: number; y: number }[]
+) {
+  count = Math.min(count, locs.length);
+  const posMgr = world.getGlobal(PosManager);
+
+  while (count) {
+    var index = Math.floor(ROT.RNG.getUniform() * locs.length);
+    var loc = locs.splice(index, 1)[0];
+    posMgr.set(world.create(new Box()), loc.x, loc.y);
+    count -= 1;
+  }
 }
 
 const term = terminal.terminal;
+term.clear();
+
+term.grabInput(true);
+
+term.on("key", function (name, matches, data) {
+  if (name === "CTRL_C" || name === "q") {
+    term.moveTo(0, 26).eraseLine.blue("QUIT");
+    term.grabInput(false);
+    term.processExit(0);
+  } else {
+    term.moveTo(0, 26).eraseLine.defaultColor("'key' event: ", name);
+    // TODO - Handle input
+  }
+});
+
 const world = new World()
   .registerComponent(Tile)
+  .registerComponent(Box)
   .setGlobal(new PosManager(80, 25), (w, r) => r.init(w))
   .setGlobal(new Term(term))
   .addSystem(new DrawSystem())
   .init(digMap)
   .start();
-
-term.grabInput(true);
-
-term.on("key", function (name, matches, data) {
-  console.log("'key' event:", name);
-  if (name === "CTRL_C" || name === "q") {
-    term.grabInput(false);
-    term.processExit(0);
-  } else {
-    // TODO - Handle input
-  }
-});
 
 function run() {
   world.process(16);

@@ -28,7 +28,7 @@ const term = terminal.terminal;
 // HELPERS
 
 function buildMaze(world: World) {
-  const mgr = world.get(PosManager);
+  const mgr = world.getGlobal(PosManager);
   const [width, height] = mgr.size;
 
   // surround with walls
@@ -63,7 +63,7 @@ class DrawSystem extends System {
 
   start(world: World) {
     super.start(world);
-    this._mgr = world.get(PosManager);
+    this._mgr = world.getGlobal(PosManager);
     const store = world.getStore(Player);
     const entity = store.singleEntity()!;
     this._pos = entity.fetch(Pos)!;
@@ -93,7 +93,7 @@ class MoveSystem extends EntitySystem {
     super(new Aspect(Move, Pos));
   }
   protected processEntity(entity: Entity): void {
-    const posMgr = this.world.get(PosManager)!;
+    const posMgr = this.world.getGlobal(PosManager)!;
     const pos = entity.update(Pos)!;
     const dir = entity.remove(Move)!.dir;
     const dxy = DIR[dir];
@@ -112,19 +112,18 @@ class MoveSystem extends EntitySystem {
 
 const world = new World()
   .registerComponents(Wall, Player, Move)
-  .registerResource(new PosManager(21, 21), (w, r) => {
+  .setGlobal(new PosManager(21, 21), (w, r) => {
     r.init(w);
   })
   .init((w: World) => {
     const player = w.create(new Player());
-    w.set(player); // put player entity in as resource to make getting it easier in systems
-    w.get(PosManager).set(player, 11, 11);
+    w.setGlobal(player); // put player entity in as resource to make getting it easier in systems
+    w.getGlobal(PosManager).set(player, 11, 11);
   })
   .addSystem(new MoveSystem())
   .addSystem(new DrawSystem())
+  .init(buildMaze)
   .start();
-
-buildMaze(world);
 
 const wallAspect = new Aspect(Wall);
 
@@ -132,7 +131,7 @@ const wallAspect = new Aspect(Wall);
 
 async function play(world: World) {
   let running = true;
-  const player = world.get(Entity); // getStore(Player).singleEntity()!;
+  const player = world.getGlobal(Entity); // getStore(Player).singleEntity()!;
 
   while (running) {
     world.process();
@@ -148,7 +147,7 @@ async function play(world: World) {
 
     if (cmd[0] == "q") {
       term("^gok\n");
-      process.exit(0);
+      term.processExit(0);
     } else if (cmd[0] == "h") {
       term("^bCommands:\n");
       term(" - move: ^gleft^, ^gright^, ^gup^, ^gdown\n");

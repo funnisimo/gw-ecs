@@ -44,9 +44,20 @@ export class PosManager implements WorldEventHandler {
   }
 
   init(world: World): PosManager {
-    world.set(this); // Add as a resource (just in case)
+    world.setGlobal(this); // Add to world just in case
     world.notify.push(this); // Register interest in destroy events
     return this;
+  }
+
+  hasAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): boolean {
+    for (let entity of this._entities.values()) {
+      if (entity.fetch(Pos)!.equals(x, y)) {
+        if (!aspect || aspect.match(entity, sinceTick)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   getAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): Entity[] {
@@ -83,12 +94,13 @@ export class PosManager implements WorldEventHandler {
 
   eachXY(
     cb: (x: number, y: number, entities: Entity[]) => any,
-    aspect?: Aspect
+    aspect?: Aspect,
+    sinceTick = 0
   ) {
     const [width, height] = this._size;
     for (let x = 0; x < width; ++x) {
       for (let y = 0; y < height; ++y) {
-        const entities = this.getAt(x, y, aspect);
+        const entities = this.getAt(x, y, aspect, sinceTick);
         if (entities.length) {
           cb(x, y, entities);
         }
@@ -98,12 +110,13 @@ export class PosManager implements WorldEventHandler {
 
   everyXY(
     cb: (x: number, y: number, entities: Entity[]) => any,
-    aspect?: Aspect
+    aspect?: Aspect,
+    sinceTick = 0
   ) {
     const [width, height] = this._size;
     for (let x = 0; x < width; ++x) {
       for (let y = 0; y < height; ++y) {
-        const entities = this.getAt(x, y, aspect);
+        const entities = this.getAt(x, y, aspect, sinceTick);
         cb(x, y, entities);
       }
     }

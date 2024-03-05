@@ -72,7 +72,15 @@ export class Aspect {
     );
   }
 
-  *entities(world: World, sinceTick: number = 0): Iterable<Entity> {
+  first(entities: Entity[], sinceTick = 0): Entity | undefined {
+    return entities.find((e) => this.match(e, sinceTick));
+  }
+
+  every(entities: Entity[], sinceTick = 0): Entity[] {
+    return entities.filter((e) => this.match(e, sinceTick));
+  }
+
+  *all(world: World, sinceTick: number = 0): Iterable<Entity> {
     for (let entity of world.entities()) {
       if (this.match(entity, sinceTick)) {
         yield entity;
@@ -80,11 +88,11 @@ export class Aspect {
     }
   }
 
-  *entries(
+  *allEntries(
     world: World,
     sinceTick: number = 0
   ): Iterable<[Entity, AnyComponent[]]> {
-    for (let entity of this.entities(world, sinceTick)) {
+    for (let entity of this.all(world, sinceTick)) {
       yield [entity, this._allComponents.map((c) => entity.fetch(c))];
     }
   }

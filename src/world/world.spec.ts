@@ -102,19 +102,19 @@ describe("World", function () {
     });
   });
 
-  describe("resources", () => {
+  describe("globals", () => {
     test("basics", () => {
       const world = new World();
       const a = new A();
-      world.set(a);
-      expect(world.get(A)).toBe(a);
+      world.setGlobal(a);
+      expect(world.getGlobal(A)).toBe(a);
 
       const a2 = new A();
-      world.set(a2);
-      expect(world.get(A)).toBe(a2);
+      world.setGlobal(a2);
+      expect(world.getGlobal(A)).toBe(a2);
 
-      world.delete(A);
-      expect(world.get(A)).toBeUndefined();
+      world.deleteGlobal(A);
+      expect(world.getGlobal(A)).toBeUndefined();
     });
   });
 
