@@ -81,6 +81,34 @@ export class PosManager implements WorldEventHandler {
     }
   }
 
+  eachXY(
+    cb: (x: number, y: number, entities: Entity[]) => any,
+    aspect?: Aspect
+  ) {
+    const [width, height] = this._size;
+    for (let x = 0; x < width; ++x) {
+      for (let y = 0; y < height; ++y) {
+        const entities = this.getAt(x, y, aspect);
+        if (entities.length) {
+          cb(x, y, entities);
+        }
+      }
+    }
+  }
+
+  everyXY(
+    cb: (x: number, y: number, entities: Entity[]) => any,
+    aspect?: Aspect
+  ) {
+    const [width, height] = this._size;
+    for (let x = 0; x < width; ++x) {
+      for (let y = 0; y < height; ++y) {
+        const entities = this.getAt(x, y, aspect);
+        cb(x, y, entities);
+      }
+    }
+  }
+
   destroyEntity(entity: Entity): void {
     this.remove(entity);
   }
