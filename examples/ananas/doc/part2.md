@@ -246,3 +246,5 @@ Lastly, we add a handler for putting the `Open` component onto the Hero if we pr
 That about does it. If you walk around and press space or enter on the boxes you can open them. When you find the ananas, the game is over and you win!
 
 You can find the full code to this part [here](../part2c.ts)
+
+The next part of the tutorial is [here](./part3.md)
