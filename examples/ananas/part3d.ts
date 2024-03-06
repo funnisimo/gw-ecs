@@ -32,21 +32,6 @@ class GameInfo {
   }
 }
 
-// class GameOverSystem extends System {
-//   protected doProcess(): void {
-//     const heroEntity = this.world.getGlobal(GameInfo).hero;
-//     const pedroEntity = this.world.getStore(Pedro).singleEntity()!;
-
-//     const heroPos = heroEntity.fetch(Pos)!;
-//     const pedroPos = pedroEntity.fetch(Pos)!;
-
-//     if (heroPos.equals(pedroPos)) {
-//       term.moveTo(0, 27).eraseLine.red("Got you!");
-//       this.world.getGlobal(Term).term.processExit(0);
-//     }
-//   }
-// }
-
 abstract class EntityTurnSystem extends EntitySystem {
   isEnabled(): boolean {
     return super.isEnabled() && this.world.getGlobal(GameInfo).takeTurn;
