@@ -269,7 +269,7 @@ class FovSystem extends EntitySystem {
     function lightPasses(x, y) {
       const tileEntity = posMgr.getAt(x, y, TILE_ASPECT)[0];
       if (!tileEntity) return false;
-      return !tileEntity.has(Collider);
+      return !tileEntity.has(Collider); // TODO - tile.blocksVision?
     }
 
     fov.reset(posMgr.width, posMgr.height);
