@@ -83,6 +83,12 @@ export class PosManager implements WorldEventHandler {
     this._entities = new Map();
   }
 
+  get width(): number {
+    return this._size[0];
+  }
+  get height(): number {
+    return this._size[1];
+  }
   get size(): [number, number] {
     return this._size;
   }
