@@ -5,6 +5,10 @@ import { ComponentSource, Entities, Entity } from "../entity/entity.js";
 import { AnyComponent, Component } from "../component/component.js";
 import { Resources } from "./resources.js";
 
+export interface WorldInit {
+  worldInit?(world: World): void;
+}
+
 export interface WorldEventHandler {
   destroyEntity(entity: Entity): void;
 }
@@ -48,9 +52,18 @@ export class World implements ComponentSource {
     return this;
   }
 
-  setGlobal<T>(val: T, init?: (world: World, res: T) => any): World {
+  setGlobal<T>(
+    val: T & WorldInit,
+    initFn?: (global: T, world: World) => void
+  ): World {
     this._globals.set(val);
-    init && init(this, val);
+    const worldInit = val["worldInit"];
+    if (worldInit) {
+      worldInit.call(val, this);
+    }
+    if (initFn) {
+      initFn(val, this);
+    }
     return this;
   }
 

@@ -444,7 +444,7 @@ function placePedro(world: World, avoidLoc: XY, locs: XY[]) {
 
 function gameOver(_a: Entity, _b: Entity, world: World) {
   const term = world.getGlobal(Term).term;
-  term.moveTo(0, 27).eraseLine.red("You ran into me!");
+  term.moveTo(0, 27).eraseLine.red("Got you!");
   term.processExit(0);
 }
 
@@ -480,12 +480,12 @@ const world = new World()
   .registerComponent(Open)
   .registerComponent(Sprite)
   .registerComponent(FOV)
-  .setGlobal(new PosManager(80, 25), (w, pm) => pm.init(w))
+  .setGlobal(new PosManager(80, 25))
   .setGlobal(new Term(term))
-  .setGlobal(new CollisionManager(), (w, col) => {
-    col.init(w);
-    col.register(HERO_ASPECT, PEDRO_ASPECT, gameOver);
-    col.register(PEDRO_ASPECT, HERO_ASPECT, gameOver);
+  .setGlobal(new CollisionManager(), (col) => {
+    col
+      .register(HERO_ASPECT, PEDRO_ASPECT, gameOver)
+      .register(PEDRO_ASPECT, HERO_ASPECT, gameOver);
   })
   .addSystem(new PedroSystem())
   .addSystem(new MoveSystem())

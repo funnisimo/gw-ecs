@@ -11,7 +11,9 @@ describe("CollisionManager", () => {
 
     const world = new World();
     const manager = new CollisionManager();
-    manager.init(world);
+    const init = jest.spyOn(manager, "worldInit");
+    world.setGlobal(manager);
+    expect(init).toHaveBeenCalled();
 
     manager.register(new Aspect(), new Aspect(), collideFn);
 
@@ -27,7 +29,7 @@ describe("CollisionManager", () => {
 
     const world = new World().registerComponents(A, B);
     const manager = new CollisionManager();
-    manager.init(world);
+    world.setGlobal(manager);
 
     manager.register(new Aspect(A), new Aspect(B), collideFn);
 

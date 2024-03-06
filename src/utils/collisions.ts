@@ -1,6 +1,6 @@
 import { Entity } from "../entity/entity.js";
 import { Aspect } from "../world/aspect.js";
-import { World } from "../world/world.js";
+import { World, WorldInit } from "../world/world.js";
 
 export class Collider {}
 
@@ -24,7 +24,7 @@ export type CollideFn = (
   world: World
 ) => false | any;
 
-export class CollisionManager {
+export class CollisionManager implements WorldInit {
   _world!: World;
   _collisions: Collision[];
 
@@ -32,15 +32,18 @@ export class CollisionManager {
     this._collisions = [];
   }
 
-  init(world: World): CollisionManager {
-    world.setGlobal(this); // just in case
+  worldInit(world: World) {
     world.registerComponent(Collider); // just in case
     this._world = world;
-    return this;
   }
 
-  register(actor: Aspect, target: Aspect, collideFn: CollideFn) {
+  register(
+    actor: Aspect,
+    target: Aspect,
+    collideFn: CollideFn
+  ): CollisionManager {
     this._collisions.push(new Collision(actor, target, collideFn));
+    return this;
   }
 
   collide(actor: Entity, target: Entity): boolean {

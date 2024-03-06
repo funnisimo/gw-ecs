@@ -101,7 +101,7 @@ term.on("key", function (name, matches, data) {
 const world = new World()
   .registerComponent(Sprite)
   .registerComponent(Tile)
-  .setGlobal(new PosManager(80, 25), (w, r) => r.init(w))
+  .setGlobal(new PosManager(80, 25))
   .setGlobal(new Term(term))
   .addSystem(new DrawSystem())
   .init(digMap)

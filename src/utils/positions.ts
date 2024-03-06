@@ -1,5 +1,5 @@
 import { Entity, Index } from "../entity/entity.js";
-import { Aspect, World, WorldEventHandler } from "../world/index.js";
+import { Aspect, World, WorldEventHandler, WorldInit } from "../world/index.js";
 
 export class Pos {
   x: number;
@@ -74,7 +74,7 @@ export class Pos {
 // ??? world.notify.push(this);
 // interface WorldEvent { destroyEntity(entity: Entity): void; }
 
-export class PosManager implements WorldEventHandler {
+export class PosManager implements WorldEventHandler, WorldInit {
   _size: [number, number];
   _entities: Map<Index, Entity>;
 
@@ -97,10 +97,8 @@ export class PosManager implements WorldEventHandler {
     return x >= 0 && x < this._size[0] && y >= 0 && y < this._size[1];
   }
 
-  init(world: World): PosManager {
-    world.setGlobal(this); // Add to world just in case
+  worldInit(world: World): void {
     world.notify.push(this); // Register interest in destroy events
-    return this;
   }
 
   hasAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): boolean {
