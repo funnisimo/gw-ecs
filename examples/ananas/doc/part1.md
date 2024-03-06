@@ -58,13 +58,15 @@ We are ready to start building our game.
 
 Here is the [full code](../part1a.ts) so far.
 
-## Empty World
+## Creating the Map
 
-We are building an app that uses our ECS, so the first thing we will need is a `World`. Lets add that and incorporate it into the game loop. Add the following to your `index.ts` file:
+We are building an app that uses our ECS, so the first thing we will need is a `World`. Lets add that and incorporate it into the game loop. Add the following imports:
 
-    import { World } from "gw-ecs/world";
+    import { Aspect, World } from "gw-ecs/world";
+    import { System } from "gw-ecs/system";
+    import { PosManager, Pos } from "gw-ecs/utils";
 
-We are going to add a `global` variable that holds a reference to the terminal object. This will make it easier to pass around the term to our services. Globals are any Javascript Object instance (important: they have a constructor). In our case it is a wrapper class that holds the terminal (we have to do this because the terminal does not have a prototype/constructor).
+We are going to add a "global" variable that holds a reference to the terminal object. This will make it easier to pass around the term to our services. ECS globals are any Javascript Object instance (important: they have a constructor). In our case it is a wrapper class that holds the terminal (we have to do this because the terminal does not have a prototype/constructor).
 
     class Term {
         term: terminal.Terminal;
@@ -85,69 +87,32 @@ We are going to add a `global` variable that holds a reference to the terminal o
 
 This creates our `World`, stores the `Term`, and runs its systems every game loop iteration.
 
-## Adding a Map
+### Drawing
 
-The next step is to add a map that we can later explore. Our map will be made of `Tile` objects that represent walls and floors.
+To make drawing simpler and consistent across many entity types, we are going to have a `Sprite` component that we place on entities.
 
-Now add the following code to `index.ts`:
+    // SPRITE
 
-    import { Aspect, World } from "gw-ecs/world";
-    import { System } from "gw-ecs/system";
-    import { PosManager } from "gw-ecs/utils";
-
-Next we define our `Tile` component. The `ch` and `attr` are for drawing the tile, the blocks lets us have walls.
-
-    // ...
-    class Tile {
+    class Sprite {
         ch: string;
         attr: terminal.ScreenBuffer.Attributes;
-        blocks: boolean;
 
-        constructor(ch: string, color: string, blocks = false) {
+        constructor(ch: string, color: string) {
             this.ch = ch;
             this.attr = { color };
-            this.blocks = blocks;
         }
     }
 
-    const WALL = new Tile("#", "gray", true);
-    const FLOOR = new Tile(".", "white");
+    const SPRITE_ASPECT = new Aspect(Sprite);
 
-We need to register our component, we also need to add a `PosManager` that will track our entities' positions.
+    const WALL_SPRITE = new Sprite("#", "gray");
+    const FLOOR_SPRITE = new Sprite(".", "white");
 
-    // ...
-    const world = new World()
-        // ... existing
-        .registerComponent(Tile)
-        .setGlobal(new PosManager(80, 25), (w, pm) => pm.init(w))
-        .start();
+Not much of interest here, except maybe the fact that we cache our wall and floor sprites for use on many entities.
 
-Now lets dig the map using `rot.js` and its `Digger`. We are going to add a function that digs the map and call it via the `World.init` method. Every tile is represented by an `Entity` that has a `Tile` component. The tile is either a wall or a floor.
+Any entity with a `Sprite` and a `Pos` will be eligible to be drawn. The drawing will be handled in a system called the `DrawSystem`. This system gets the map info (via the `PosManager`) and iterates over all of the entities that it contains. For each location (x,y) it gets the first entity that has a sprite component and draws that component into the buffer. Then when finished it renders the whole buffer to the terminal.
 
-    function digMap(world: World) {
-        const digger = new ROT.Map.Digger(80, 25);
-        const posMgr = world.getGlobal(PosManager);
-
-        function digCallback(x: number, y: number, value: number) {
-            const tile = value ? WALL : FLOOR;
-            posMgr.set(world.create(tile), x, y);
-        }
-
-        digger.create(digCallback);
-    }
-
-    const world = new World()
-        // ... existing
-        .init(digMap)
-        .start();
-
-Finally, lets add a `System` that draws our map every loop interation. This system creates a `ScreenBuffer` on startup and then draws every tile into the buffer on each loop iteration.
-
-Systems have their `start` method called when the `World.start()` call is made. They can use it to do any initialization code. Our `start` creates a buffer that we will use to do our drawing.
-
-Then, everytime `world.process()` is called, the system's `doProcess` is called if the system is enabled. Our `doProcess` method iterates the `PosManager` and uses the data to fill a buffer with the tile information. Then it draws the buffer onto the terminal.
-
-    const TILE_ASPECT = new Aspect(Tile);
+    // DRAW SYSTEM
 
     class DrawSystem extends System {
         _buf!: terminal.ScreenBuffer;
@@ -163,18 +128,66 @@ Then, everytime `world.process()` is called, the system's `doProcess` is called 
             const map = this.world.getGlobal(PosManager);
 
             map.everyXY((x, y, es) => {
-                const tileEntity = es[0]; // Every x,y has a tile so we know we will get an entity
-                const tile = tileEntity.fetch(Tile)!;
-                buf.put({ x, y, attr: tile.attr, dx: 1, dy: 0, wrap: true }, tile.ch);
-            }, TILE_ASPECT);
+                const entity = SPRITE_ASPECT.first(es)!;
+
+                const sprite = entity.fetch(Sprite)!;
+                buf.put({ x, y, attr: sprite.attr, dx: 1, dy: 0, wrap: true }, sprite.ch);
+            }, new Aspect(Pos, Sprite));
 
             buf.draw();
         }
     }
 
+    // ...
     const world = new World()
-        // ... existing
+        .registerComponent(Sprite)
+        .setGlobal(new Term(term))
+        .setGlobal(new PosManager(80, 25), (w, r) => r.init(w))
         .addSystem(new DrawSystem())
+        .start();
+
+We are now ready to build our map.
+
+### Building the Map
+
+The next step is to add a map that we can later explore. Our map will be made of `Tile` objects that represent walls and floors. Each location on the map will have a `Tile`. Tiles will also have `Sprite` components so that they can be drawn.
+
+Here we define our `Tile` component. The only thing we need to know right now is whether or not the tile blocks movement/sight.
+
+    // ...
+    class Tile {
+        blocks: boolean;
+
+        constructor(blocks = false) {
+            this.blocks = blocks;
+        }
+    }
+
+    const WALL_TILE = new Tile(true);
+    const FLOOR_TILE = new Tile(false);
+
+Now lets dig the map using `rot.js` and its `Digger`. We are going to add a function that digs the map and call it via the `World.init` method. Every tile is represented by an `Entity` that has a `Tile` and a `Sprite` component. The tile is either a wall or a floor.
+
+    function digMap(world: World) {
+        const digger = new ROT.Map.Digger(80, 25);
+        const posMgr = world.getGlobal(PosManager);
+
+        function digCallback(x: number, y: number, blocks: number) {
+            const comps = blocks > 0 ? [WALL_TILE, WALL_SPRITE] : [FLOOR_TILE, FLOOR_SPRITE];
+            posMgr.set(world.create(...comps), x, y);
+        }
+
+        digger.create(digCallback);
+    }
+
+    // ... register
+    const world = new World()
+        .registerComponent(Sprite)
+        .registerComponent(Tile)
+        .setGlobal(new PosManager(80, 25), (w, r) => r.init(w))
+        .setGlobal(new Term(term))
+        .addSystem(new DrawSystem())
+        .init(digMap)
         .start();
 
 Now when we run the game we see the map. You will see something like...
@@ -216,16 +229,18 @@ Our game involves moving around the map, looking in boxes until we find the `ana
 First we need to create our `Box` component and register it...
 
     class Box {
-        ch: string;
-        attr: terminal.ScreenBuffer.Attributes;
+        ananas: boolean;
 
-        constructor() {
-            this.ch = "*";
-            this.attr = { color: "blue" };
+        constructor(ananas = false) {
+            this.ananas = ananas;
         }
     }
 
     const BOX_ASPECT = new Aspect(Box);
+
+    // ... Sprite
+
+    const BOX_SPRITE = new Sprite("*", "brightBlue");
 
     // ...
     const world = new World()
@@ -235,18 +250,20 @@ First we need to create our `Box` component and register it...
 
 Next, we will update `digMap` to track the floor locations and use them to place the boxes...
 
+    // A helper interface
+    type XY = { x: number; y: number };
+
     function digMap(world: World) {
         const digger = new ROT.Map.Digger(80, 25);
         const posMgr = world.getGlobal(PosManager);
-        const floors: { x: number; y: number }[] = [];
+        const floors: XY[] = [];
 
-        function digCallback(x: number, y: number, value: number) {
-            const tile = value ? WALL : FLOOR;
-            posMgr.set(world.create(tile), x, y);
+        function digCallback(x: number, y: number, blocks: number) {
+            const comps =
+            blocks > 0 ? [WALL_TILE, WALL_SPRITE] : [FLOOR_TILE, FLOOR_SPRITE];
+            posMgr.set(world.create(...comps), x, y);
 
-            if (!value) {
-                floors.push({ x, y });
-            }
+            if (!blocks) floors.push({ x, y });
         }
 
         digger.create(digCallback);
@@ -254,51 +271,29 @@ Next, we will update `digMap` to track the floor locations and use them to place
         placeBoxes(world, 10, floors);
     }
 
-    function placeBoxes(
-        world: World,
-        count: number,
-        locs: { x: number; y: number }[]
-    ) {
+    function placeBoxes(world: World, count: number, locs: XY[]) {
         count = Math.min(count, locs.length);
         const posMgr = world.getGlobal(PosManager);
 
         while (count) {
             var index = Math.floor(ROT.RNG.getUniform() * locs.length);
             var loc = locs.splice(index, 1)[0];
-            posMgr.set(world.create(new Box()), loc.x, loc.y);
+            posMgr.set(world.create(new Box(count == 1), BOX_SPRITE), loc.x, loc.y);
             count -= 1;
         }
     }
 
-And finally, we have to update our drawing code. The update tries first to draw a box and if not draws a tile. Add the following helper function:
+And finally, we have to update our drawing code. The update tries first to draw a box and if not draws a tile.
 
-    function ifDo<T>(maybeVal: T, doFn: (t: NonNullable<T>) => any): boolean {
-        if (!maybeVal) return false;
-        doFn(maybeVal);
-        return true;
-    }
+    // ... DrawSystem.doProcess
+    map.everyXY((x, y, es) => {
+        const entity = BOX_ASPECT.first(es) || TILE_ASPECT.first(es)!;
 
-And update the `doProcess` of our `DrawSystem`...
+        const sprite = entity.fetch(Sprite)!;
+        buf.put({ x, y, attr: sprite.attr, dx: 1, dy: 0, wrap: true }, sprite.ch);
+    }, new Aspect(Sprite));
 
-    protected doProcess(): void {
-        const buf = this._buf;
-        const map = this.world.getGlobal(PosManager);
-
-        map.everyXY((x, y, es) => {
-            ifDo(BOX_ASPECT.first(es), (e) => {
-                const box = e.fetch(Box)!;
-                buf.put({ x, y, attr: box.attr, dx: 1, dy: 0, wrap: true }, box.ch);
-            }) ||
-                ifDo(TILE_ASPECT.first(es), (e) => {
-                    const tile = e.fetch(Tile)!;
-                    buf.put({ x, y, attr: tile.attr, dx: 1, dy: 0, wrap: true }, tile.ch);
-                });
-        });
-
-        buf.draw();
-    }
-
-Now you should see something like this:
+Now you should see something like this when you run the app:
 
     ################################################################################
     ################################################################################

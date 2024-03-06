@@ -229,4 +229,14 @@ One thing that will need to change right away is the fact that we are removing t
     // this.world.queueDestroy(boxEntity);
     boxEntity.add(EMPTY_BOX_SPRITE);
 
-This changes our
+This changes our box sprite so that we don't have to remember the boxes that we have checked.
+
+Now, lets do the Pedro logic...
+
+## Checking his Boxes
+
+Pedro will move around the map checking on his boxes to make sure they are all ok.
+
+## Chasing the Hero
+
+If Pedro sees the Hero, he will start to chase them. If Pedro catches the Hero, the game is over and the Hero loses.

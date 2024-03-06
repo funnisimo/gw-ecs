@@ -2,13 +2,9 @@ import terminal from "terminal-kit";
 import * as ROT from "rot-js";
 import { Aspect, World } from "gw-ecs/world";
 import { System } from "gw-ecs/system";
-import { PosManager } from "gw-ecs/utils";
+import { PosManager, Pos } from "gw-ecs/utils";
 
-function ifDo<T>(maybeVal: T, doFn: (t: NonNullable<T>) => any): boolean {
-  if (!maybeVal) return false;
-  doFn(maybeVal);
-  return true;
-}
+type XY = { x: number; y: number };
 
 class Term {
   term: terminal.Terminal;
@@ -21,35 +17,49 @@ class Term {
 // BOXES
 
 class Box {
-  ch: string;
-  attr: terminal.ScreenBuffer.Attributes;
+  ananas: boolean;
 
-  constructor() {
-    this.ch = "*";
-    this.attr = { color: "blue" };
+  constructor(ananas = false) {
+    this.ananas = ananas;
   }
 }
 
 const BOX_ASPECT = new Aspect(Box);
 
+// SPRITE
+
+class Sprite {
+  ch: string;
+  attr: terminal.ScreenBuffer.Attributes;
+
+  constructor(ch: string, color: string) {
+    this.ch = ch;
+    this.attr = { color };
+  }
+}
+
+const SPRITE_ASPECT = new Aspect(Sprite);
+
+const WALL_SPRITE = new Sprite("#", "gray");
+const FLOOR_SPRITE = new Sprite(".", "white");
+const BOX_SPRITE = new Sprite("*", "brightBlue");
+
 // TILES
 
 class Tile {
-  ch: string;
-  attr: terminal.ScreenBuffer.Attributes;
   blocks: boolean;
 
-  constructor(ch: string, color: string, blocks = false) {
-    this.ch = ch;
-    this.attr = { color };
+  constructor(blocks = false) {
     this.blocks = blocks;
   }
 }
 
-const WALL = new Tile("#", "gray", true);
-const FLOOR = new Tile(".", "white");
-
 const TILE_ASPECT = new Aspect(Tile);
+
+const WALL_TILE = new Tile(true);
+const FLOOR_TILE = new Tile(false);
+
+// DRAW SYSTEM
 
 class DrawSystem extends System {
   _buf!: terminal.ScreenBuffer;
@@ -65,15 +75,11 @@ class DrawSystem extends System {
     const map = this.world.getGlobal(PosManager);
 
     map.everyXY((x, y, es) => {
-      ifDo(BOX_ASPECT.first(es), (e) => {
-        const box = e.fetch(Box)!;
-        buf.put({ x, y, attr: box.attr, dx: 1, dy: 0, wrap: true }, box.ch);
-      }) ||
-        ifDo(TILE_ASPECT.first(es), (e) => {
-          const tile = e.fetch(Tile)!;
-          buf.put({ x, y, attr: tile.attr, dx: 1, dy: 0, wrap: true }, tile.ch);
-        });
-    });
+      const entity = BOX_ASPECT.first(es) || TILE_ASPECT.first(es)!;
+
+      const sprite = entity.fetch(Sprite)!;
+      buf.put({ x, y, attr: sprite.attr, dx: 1, dy: 0, wrap: true }, sprite.ch);
+    }, new Aspect(Sprite));
 
     buf.draw();
   }
@@ -82,15 +88,14 @@ class DrawSystem extends System {
 function digMap(world: World) {
   const digger = new ROT.Map.Digger(80, 25);
   const posMgr = world.getGlobal(PosManager);
-  const floors: { x: number; y: number }[] = [];
+  const floors: XY[] = [];
 
-  function digCallback(x: number, y: number, value: number) {
-    const tile = value ? WALL : FLOOR;
-    posMgr.set(world.create(tile), x, y);
+  function digCallback(x: number, y: number, blocks: number) {
+    const comps =
+      blocks > 0 ? [WALL_TILE, WALL_SPRITE] : [FLOOR_TILE, FLOOR_SPRITE];
+    posMgr.set(world.create(...comps), x, y);
 
-    if (!value) {
-      floors.push({ x, y });
-    }
+    if (!blocks) floors.push({ x, y });
   }
 
   digger.create(digCallback);
@@ -98,18 +103,14 @@ function digMap(world: World) {
   placeBoxes(world, 10, floors);
 }
 
-function placeBoxes(
-  world: World,
-  count: number,
-  locs: { x: number; y: number }[]
-) {
+function placeBoxes(world: World, count: number, locs: XY[]) {
   count = Math.min(count, locs.length);
   const posMgr = world.getGlobal(PosManager);
 
   while (count) {
     var index = Math.floor(ROT.RNG.getUniform() * locs.length);
     var loc = locs.splice(index, 1)[0];
-    posMgr.set(world.create(new Box()), loc.x, loc.y);
+    posMgr.set(world.create(new Box(count == 1), BOX_SPRITE), loc.x, loc.y);
     count -= 1;
   }
 }
@@ -131,6 +132,7 @@ term.on("key", function (name, matches, data) {
 });
 
 const world = new World()
+  .registerComponent(Sprite)
   .registerComponent(Tile)
   .registerComponent(Box)
   .setGlobal(new PosManager(80, 25), (w, r) => r.init(w))

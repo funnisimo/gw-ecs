@@ -2,7 +2,7 @@ import terminal from "terminal-kit";
 import * as ROT from "rot-js";
 import { Aspect, World } from "gw-ecs/world";
 import { System } from "gw-ecs/system";
-import { PosManager } from "gw-ecs/utils";
+import { PosManager, Pos } from "gw-ecs/utils";
 
 class Term {
   term: terminal.Terminal;
@@ -12,24 +12,39 @@ class Term {
   }
 }
 
+// SPRITE
+
+class Sprite {
+  ch: string;
+  attr: terminal.ScreenBuffer.Attributes;
+
+  constructor(ch: string, color: string) {
+    this.ch = ch;
+    this.attr = { color };
+  }
+}
+
+const SPRITE_ASPECT = new Aspect(Sprite);
+
+const WALL_SPRITE = new Sprite("#", "gray");
+const FLOOR_SPRITE = new Sprite(".", "white");
+
 // TILES
 
 class Tile {
-  ch: string;
-  attr: terminal.ScreenBuffer.Attributes;
   blocks: boolean;
 
-  constructor(ch: string, color: string, blocks = false) {
-    this.ch = ch;
-    this.attr = { color };
+  constructor(blocks = false) {
     this.blocks = blocks;
   }
 }
 
-const WALL = new Tile("#", "gray", true);
-const FLOOR = new Tile(".", "white");
-
 const TILE_ASPECT = new Aspect(Tile);
+
+const WALL_TILE = new Tile(true);
+const FLOOR_TILE = new Tile(false);
+
+// DRAW SYSTEM
 
 class DrawSystem extends System {
   _buf!: terminal.ScreenBuffer;
@@ -45,10 +60,11 @@ class DrawSystem extends System {
     const map = this.world.getGlobal(PosManager);
 
     map.everyXY((x, y, es) => {
-      const tileEntity = es[0]; // Every x,y has a tile so we know we will get an entity
-      const tile = tileEntity.fetch(Tile)!;
-      buf.put({ x, y, attr: tile.attr, dx: 1, dy: 0, wrap: true }, tile.ch);
-    }, TILE_ASPECT);
+      const entity = TILE_ASPECT.first(es)!;
+
+      const sprite = entity.fetch(Sprite)!;
+      buf.put({ x, y, attr: sprite.attr, dx: 1, dy: 0, wrap: true }, sprite.ch);
+    }, new Aspect(Sprite));
 
     buf.draw();
   }
@@ -58,9 +74,10 @@ function digMap(world: World) {
   const digger = new ROT.Map.Digger(80, 25);
   const posMgr = world.getGlobal(PosManager);
 
-  function digCallback(x: number, y: number, value: number) {
-    const tile = value ? WALL : FLOOR;
-    posMgr.set(world.create(tile), x, y);
+  function digCallback(x: number, y: number, blocks: number) {
+    const comps =
+      blocks > 0 ? [WALL_TILE, WALL_SPRITE] : [FLOOR_TILE, FLOOR_SPRITE];
+    posMgr.set(world.create(...comps), x, y);
   }
 
   digger.create(digCallback);
@@ -82,6 +99,7 @@ term.on("key", function (name, matches, data) {
 });
 
 const world = new World()
+  .registerComponent(Sprite)
   .registerComponent(Tile)
   .setGlobal(new PosManager(80, 25), (w, r) => r.init(w))
   .setGlobal(new Term(term))

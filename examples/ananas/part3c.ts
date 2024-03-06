@@ -5,6 +5,8 @@ import { EntitySystem, System } from "gw-ecs/system";
 import { Pos, PosManager } from "gw-ecs/utils";
 import { Entity } from "gw-ecs/entity";
 
+type XY = { x: number; y: number };
+
 class Term {
   term: terminal.Terminal;
 
@@ -63,7 +65,7 @@ class OpenSystem extends EntityTurnSystem {
     const box = boxEntity.fetch(Box)!;
 
     if (!box.ananas) {
-      term.moveTo(0, 26).eraseLine.blue("Empty");
+      term.moveTo(0, 26).eraseLine.green("Empty");
       boxEntity.add(EMPTY_BOX_SPRITE);
     } else {
       term.moveTo(0, 26).eraseLine.green("You found the ^yananas^ !");
@@ -73,7 +75,6 @@ class OpenSystem extends EntityTurnSystem {
 }
 
 // MOVE
-type XY = { x: number; y: number };
 
 const DIRS: { [key: string]: XY } = {
   LEFT: { x: -1, y: 0 },
@@ -257,7 +258,7 @@ class DrawSystem extends System {
 
       const sprite = entity.fetch(Sprite)!;
       buf.put({ x, y, attr: sprite.attr, dx: 1, dy: 0, wrap: true }, sprite.ch);
-    }, new Aspect(Pos, Sprite));
+    }, new Aspect(Sprite));
 
     buf.draw();
   }
