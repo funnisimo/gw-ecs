@@ -110,22 +110,16 @@ class MoveSystem extends EntityTurnSystem {
     const newX = pos.x + dxy.x;
     const newY = pos.y + dxy.y;
 
-    // There has to be a Tile entity on every square
-    const tile = posMgr.getAt(newX, newY, TILE_ASPECT)[0]!.fetch(Tile)!;
-
     const others = posMgr.getAt(newX, newY, COLLIDER_ASPECT);
     if (others.length > 0) {
-      if (this.world.getGlobal(CollisionManager).collide(entity, others[0])) {
+      if (this.world.getGlobal(CollisionManager).collide(entity, others)) {
         return;
       }
-      if (entity.has(Hero)) {
-        term.moveTo(0, 26).eraseLine.red("Blocked");
-      }
-    } else {
-      posMgr.set(entity, newX, newY);
-      if (entity.has(Hero)) {
-        term.moveTo(0, 26).eraseLine.green("Move");
-      }
+    }
+
+    posMgr.set(entity, newX, newY);
+    if (entity.has(Hero)) {
+      term.moveTo(0, 26).eraseLine.green("Move");
     }
   }
 }

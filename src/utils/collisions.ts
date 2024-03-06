@@ -46,7 +46,10 @@ export class CollisionManager implements WorldInit {
     return this;
   }
 
-  collide(actor: Entity, target: Entity): boolean {
+  collide(actor: Entity, target: Entity | Entity[]): boolean {
+    if (Array.isArray(target)) {
+      return target.some((e) => this.collide(actor, e));
+    }
     return this._collisions.some(
       (c) =>
         c.actor.match(actor) &&
