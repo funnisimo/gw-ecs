@@ -6,7 +6,7 @@ export class Pos {
   y: number;
   //   _mgr: PosManager;
 
-  constructor(/* mgr: PosManager, */ x: number, y: number) {
+  constructor(/* mgr: PosManager, */ x = 0, y = 0) {
     this.x = x;
     this.y = y;
     // this._mgr = mgr;
@@ -17,8 +17,56 @@ export class Pos {
     this.y = y;
   }
 
-  equals(x: number, y: number): boolean {
-    return this.x == x && this.y == y;
+  copy(pos: { x: number; y: number }): void {
+    this.x = pos.x;
+    this.y = pos.y;
+  }
+
+  add(pos: { x: number; y: number }): void;
+  add(x: number, y: number): void;
+  add(x: number | { x: number; y: number }, y?: number): void {
+    if (typeof x === "object") {
+      return this.add(x.x, x.y);
+    }
+    this.x += x || 0;
+    this.y += y || 0;
+  }
+
+  sub(pos: { x: number; y: number }): void;
+  sub(x: number, y: number): void;
+  sub(x: number | { x: number; y: number }, y?: number): void {
+    if (typeof x === "object") {
+      return this.sub(x.x, x.y);
+    }
+    this.x -= x || 0;
+    this.y -= y || 0;
+  }
+
+  plus(pos: { x: number; y: number }): Pos;
+  plus(x: number, y: number): Pos;
+  plus(x: number | { x: number; y: number }, y?: number): Pos {
+    if (typeof x === "object") {
+      return this.plus(x.x, x.y);
+    }
+    return new Pos((x || 0) + this.x, (y || 0) + this.y);
+  }
+
+  minus(pos: { x: number; y: number }): Pos;
+  minus(x: number, y: number): Pos;
+  minus(x: number | { x: number; y: number }, y?: number): Pos {
+    if (typeof x === "object") {
+      return this.minus(x.x, x.y);
+    }
+    return new Pos(this.x - (x || 0), this.y - (y || 0));
+  }
+
+  equals(pos: { x: number; y: number }): boolean;
+  equals(x: number, y: number): boolean;
+  equals(x: number | { x: number; y: number }, y?: number): boolean {
+    if (typeof x === "object") {
+      return this.equals(x.x, x.y);
+    }
+    return this.x == (x || 0) && this.y == (y || 0);
   }
 }
 
