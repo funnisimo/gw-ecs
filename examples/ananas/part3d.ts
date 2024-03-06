@@ -4,6 +4,11 @@ import { Aspect, World } from "gw-ecs/world";
 import { EntitySystem, System } from "gw-ecs/system";
 import { Pos, PosManager } from "gw-ecs/utils";
 import { Entity } from "gw-ecs/entity";
+import {
+  CollisionManager,
+  Collider,
+  COLLIDER_ASPECT,
+} from "gw-ecs/utils/collisions";
 
 type XY = { x: number; y: number };
 
@@ -27,20 +32,20 @@ class GameInfo {
   }
 }
 
-class GameOverSystem extends System {
-  protected doProcess(): void {
-    const heroEntity = this.world.getGlobal(GameInfo).hero;
-    const pedroEntity = this.world.getStore(Pedro).singleEntity()!;
+// class GameOverSystem extends System {
+//   protected doProcess(): void {
+//     const heroEntity = this.world.getGlobal(GameInfo).hero;
+//     const pedroEntity = this.world.getStore(Pedro).singleEntity()!;
 
-    const heroPos = heroEntity.fetch(Pos)!;
-    const pedroPos = pedroEntity.fetch(Pos)!;
+//     const heroPos = heroEntity.fetch(Pos)!;
+//     const pedroPos = pedroEntity.fetch(Pos)!;
 
-    if (heroPos.equals(pedroPos)) {
-      term.moveTo(0, 27).eraseLine.red("Got you!");
-      this.world.getGlobal(Term).term.processExit(0);
-    }
-  }
-}
+//     if (heroPos.equals(pedroPos)) {
+//       term.moveTo(0, 27).eraseLine.red("Got you!");
+//       this.world.getGlobal(Term).term.processExit(0);
+//     }
+//   }
+// }
 
 abstract class EntityTurnSystem extends EntitySystem {
   isEnabled(): boolean {
@@ -124,10 +129,11 @@ class MoveSystem extends EntityTurnSystem {
     const tile = posMgr.getAt(newX, newY, TILE_ASPECT)[0]!.fetch(Tile)!;
 
     if (!tile.blocks) {
-      // TODO - make this check for any collidable
-      const pedros = posMgr.getAt(newX, newY, PEDRO_ASPECT);
-      if (pedros.length > 0) {
-        // TODO - push collision(a,b)
+      const others = posMgr.getAt(newX, newY, COLLIDER_ASPECT);
+      if (others.length > 0) {
+        if (this.world.getGlobal(CollisionManager).collide(entity, others[0])) {
+          return;
+        }
         if (entity.has(Hero)) {
           term.moveTo(0, 26).eraseLine.red("Blocked");
         }
@@ -414,7 +420,7 @@ function placeHero(world: World, locs: XY[]): XY {
   const posMgr = world.getGlobal(PosManager);
   var index = Math.floor(ROT.RNG.getUniform() * locs.length);
   var loc = locs.splice(index, 1)[0];
-  const hero = world.create(new Hero(), HERO_SPRITE, new FOV());
+  const hero = world.create(new Hero(), HERO_SPRITE, new FOV(), new Collider());
   posMgr.set(hero, loc.x, loc.y);
   world.setGlobal(new GameInfo(hero));
   return loc;
@@ -432,8 +438,14 @@ function placePedro(world: World, avoidLoc: XY, locs: XY[]) {
   const index = dist.indexOf(maxDist);
   var loc = locs.splice(index, 1)[0];
 
-  const pedro = world.create(new Pedro(), PEDRO_SPRITE);
+  const pedro = world.create(new Pedro(), PEDRO_SPRITE, new Collider());
   posMgr.set(pedro, loc.x, loc.y);
+}
+
+function gameOver(_a: Entity, _b: Entity, world: World) {
+  const term = world.getGlobal(Term).term;
+  term.moveTo(0, 27).eraseLine.red("You ran into me!");
+  term.processExit(0);
 }
 
 const term = terminal.terminal;
@@ -468,15 +480,19 @@ const world = new World()
   .registerComponent(Open)
   .registerComponent(Sprite)
   .registerComponent(FOV)
-  .setGlobal(new PosManager(80, 25), (w, r) => r.init(w))
+  .setGlobal(new PosManager(80, 25), (w, pm) => pm.init(w))
   .setGlobal(new Term(term))
+  .setGlobal(new CollisionManager(), (w, col) => {
+    col.init(w);
+    col.register(HERO_ASPECT, PEDRO_ASPECT, gameOver);
+    col.register(PEDRO_ASPECT, HERO_ASPECT, gameOver);
+  })
   .addSystem(new PedroSystem())
   .addSystem(new MoveSystem())
   .addSystem(new OpenSystem())
   .addSystem(new DrawSystem())
   .addSystem(new TurnOverSystem())
   .addSystem(new FovSystem())
-  .addSystem(new GameOverSystem())
   .init(digMap)
   .start();
 

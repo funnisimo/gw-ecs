@@ -10,6 +10,7 @@ export class ComponentManager {
   }
 
   register<T>(comp: Component<T>, store?: Store<T>): void {
+    if (this.stores.get(comp) && !store) return;
     store = store || new SetStore(comp);
     this.stores.set(comp, store);
   }

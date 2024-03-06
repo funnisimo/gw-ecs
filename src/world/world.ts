@@ -48,7 +48,7 @@ export class World implements ComponentSource {
     return this;
   }
 
-  setGlobal<T>(val: T, init?: (world: World, res: T) => void): World {
+  setGlobal<T>(val: T, init?: (world: World, res: T) => any): World {
     this._globals.set(val);
     init && init(this, val);
     return this;
