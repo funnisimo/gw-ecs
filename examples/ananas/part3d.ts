@@ -113,24 +113,18 @@ class MoveSystem extends EntityTurnSystem {
     // There has to be a Tile entity on every square
     const tile = posMgr.getAt(newX, newY, TILE_ASPECT)[0]!.fetch(Tile)!;
 
-    if (!tile.blocks) {
-      const others = posMgr.getAt(newX, newY, COLLIDER_ASPECT);
-      if (others.length > 0) {
-        if (this.world.getGlobal(CollisionManager).collide(entity, others[0])) {
-          return;
-        }
-        if (entity.has(Hero)) {
-          term.moveTo(0, 26).eraseLine.red("Blocked");
-        }
-      } else {
-        posMgr.set(entity, newX, newY);
-        if (entity.has(Hero)) {
-          term.moveTo(0, 26).eraseLine.green("Move");
-        }
+    const others = posMgr.getAt(newX, newY, COLLIDER_ASPECT);
+    if (others.length > 0) {
+      if (this.world.getGlobal(CollisionManager).collide(entity, others[0])) {
+        return;
       }
-    } else {
       if (entity.has(Hero)) {
         term.moveTo(0, 26).eraseLine.red("Blocked");
+      }
+    } else {
+      posMgr.set(entity, newX, newY);
+      if (entity.has(Hero)) {
+        term.moveTo(0, 26).eraseLine.green("Move");
       }
     }
   }
@@ -185,8 +179,7 @@ class PedroSystem extends EntityTurnSystem {
         goal.y,
         (x, y) => {
           const entity = posMgr.getAt(x, y, TILE_ASPECT)[0]!;
-          const tile = entity.fetch(Tile)!;
-          return !tile.blocks;
+          return !entity.has(Collider);
         },
         { topology: 4 } // Only cardinal directions
       );
@@ -282,8 +275,7 @@ class FovSystem extends EntitySystem {
     function lightPasses(x, y) {
       const tileEntity = posMgr.getAt(x, y, TILE_ASPECT)[0];
       if (!tileEntity) return false;
-      const tile = tileEntity.fetch(Tile)!;
-      return !tile.blocks;
+      return !tileEntity.has(Collider);
     }
 
     fov.reset(posMgr.width, posMgr.height);
@@ -330,15 +322,11 @@ const BOX_ASPECT = new Aspect(Box);
 
 // TILES
 
-class Tile {
-  blocks: boolean;
-
-  constructor(blocks = false) {
-    this.blocks = blocks;
-  }
-}
+class Tile {}
 
 const TILE_ASPECT = new Aspect(Tile);
+
+// Draw System
 
 class DrawSystem extends System {
   _buf!: terminal.ScreenBuffer;
@@ -375,11 +363,14 @@ function digMap(world: World) {
 
   function digCallback(x: number, y: number, blocks: number) {
     const sprite = blocks ? WALL_SPRITE : FLOOR_SPRITE;
-    posMgr.set(world.create(new Tile(!!blocks), sprite), x, y);
-
-    if (!blocks) {
+    const tile = world.create(new Tile(), sprite);
+    if (blocks) {
+      tile.add(new Collider());
+    } else {
       floors.push({ x, y });
     }
+
+    posMgr.set(tile, x, y);
   }
 
   digger.create(digCallback);
@@ -433,6 +424,13 @@ function gameOver(_a: Entity, _b: Entity, world: World) {
   term.processExit(0);
 }
 
+function blockedMove(actor: Entity, _b: Entity, world: World) {
+  if (actor.has(Hero)) {
+    const term = world.getGlobal(Term).term;
+    term.moveTo(0, 26).eraseLine.red("Blocked");
+  }
+}
+
 const term = terminal.terminal;
 term.clear();
 
@@ -470,7 +468,9 @@ const world = new World()
   .setGlobal(new CollisionManager(), (col) => {
     col
       .register(HERO_ASPECT, PEDRO_ASPECT, gameOver)
-      .register(PEDRO_ASPECT, HERO_ASPECT, gameOver);
+      .register(PEDRO_ASPECT, HERO_ASPECT, gameOver)
+      .register(HERO_ASPECT, TILE_ASPECT, blockedMove)
+      .register(PEDRO_ASPECT, TILE_ASPECT, blockedMove);
   })
   .addSystem(new PedroSystem())
   .addSystem(new MoveSystem())
