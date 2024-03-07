@@ -15,7 +15,7 @@ export abstract class IntervalEntitySystem extends IntervalSystem {
     return this._aspect.match(entity, this.lastTick);
   }
 
-  protected process(world: World, time: number, delta: number): void {
+  run(world: World, time: number, delta: number): void {
     for (let e of this._aspect.all(world, this.lastTick)) {
       this.processEntity(e, world, time, delta);
     }

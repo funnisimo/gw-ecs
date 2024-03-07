@@ -43,7 +43,7 @@ export abstract class EntitySystem extends System {
   //   }
   // }
 
-  protected process(world: World, time: number, delta: number): void {
+  run(world: World, time: number, delta: number): void {
     for (let e of this._aspect.all(world, this.lastTick)) {
       this.processEntity(e, world, time, delta);
     }

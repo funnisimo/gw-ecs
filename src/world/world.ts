@@ -4,6 +4,7 @@ import { Store } from "../component/store.js";
 import { ComponentSource, Entities, Entity } from "../entity/entity.js";
 import { AnyComponent, Component } from "../component/component.js";
 import { Resources } from "./resources.js";
+import { AddStepOpts, SystemManager } from "../system/manager.js";
 
 export interface WorldInit {
   worldInit?(world: World): void;
@@ -14,7 +15,7 @@ export interface WorldEventHandler {
 }
 
 export class World implements ComponentSource {
-  _systems: System[];
+  _systems: SystemManager;
   _components: ComponentManager;
   _entities: Entities;
   _toDestroy: Entity[];
@@ -30,7 +31,7 @@ export class World implements ComponentSource {
     this.time = 0;
     this._currentTick = 1;
     this._components = new ComponentManager();
-    this._systems = [];
+    this._systems = new SystemManager();
     this._toDestroy = [];
     this._globals = new Resources();
     this.notify = [];
@@ -67,9 +68,35 @@ export class World implements ComponentSource {
     return this;
   }
 
-  addSystem(system: System, enable: boolean = true): World {
-    system.setEnabled(enable);
-    this._systems.push(system);
+  addSystemSet(name: string, steps?: string[]): World {
+    this._systems.addSet(name, steps);
+    return this;
+  }
+
+  addSystemStep(set: string, step: string, opts?: AddStepOpts): World;
+  addSystemStep(step: string, opts?: AddStepOpts): World;
+  addSystemStep(
+    ...args: [string, AddStepOpts?] | [string, string, AddStepOpts?]
+  ): World {
+    // @ts-ignore
+    this._systems.addStep(...args);
+    return this;
+  }
+
+  addSystem(system: System, enable?: boolean): World;
+  addSystem(system: System, inStep: string, enable?: boolean): World;
+  addSystem(
+    system: System,
+    inSet: string,
+    inStep: string,
+    enable?: boolean
+  ): World;
+  addSystem(system: System, ...args: any[]): World {
+    if (typeof args.at(-1) === "boolean") {
+      system.setEnabled(args.at(-1));
+      args.pop();
+    }
+    this._systems.addSystem(system, ...args);
     return this;
   }
 
@@ -79,7 +106,7 @@ export class World implements ComponentSource {
   }
 
   start(): World {
-    this._systems.forEach((system) => system.start(this));
+    this._systems.start(this);
     return this;
   }
 
@@ -95,7 +122,7 @@ export class World implements ComponentSource {
     return entity;
   }
 
-  _beforeSystemProcess() {
+  _beforeSystemRun() {
     // this.toUpdate.forEach((entity) => {
     //   const components = entity.allComponents(); // this.componentManager.getAllComponents(entity);
     //   this.systems.forEach((system) => system.accept(entity, components));
@@ -106,29 +133,29 @@ export class World implements ComponentSource {
   process(delta: number = 0): void {
     this.delta = delta;
     this.time += delta;
-    this._currentTick += 1; // Make sure we always tick at least once
+    this._currentTick += 1; // Tick for each system
 
-    this._systems.forEach((system) => {
-      this._beforeSystemProcess();
-      system.run(this, this.time, this.delta);
-      this._afterSystemProcess();
-      this._currentTick += 1; // Tick after each system
-    });
+    this._systems.run(this, this.time, this.delta);
 
-    this._afterSystemProcess(); // In case no systems run
+    // (system) => {
+    //   this._beforeSystemProcess();
+    //   system.run(this, this.time, this.delta);
+    //   this._afterSystemProcess();
+    //   this._currentTick += 1; // Tick after each system
+    // };
+
+    this._afterSystemRun(); // force a cleanup in case no systems run (mainly for testing)
 
     if (this._currentTick > 100000) {
       this._currentTick -= 100000;
       this._entities.rebase(100000);
-      this._systems.forEach((system) => system.rebase(100000));
+      this._systems.rebase(100000);
+      // this._systems.forEach((system) => system.rebase(100000));
     }
   }
 
-  _afterSystemProcess(): void {
-    // TODO - Should this be done less often?  Once per process cycle?
-    // this._entities.processDestroyed((deleted) => {
-    //   this._components.cleanEntities(deleted);
-    // });
+  _afterSystemRun(): void {
+    this._currentTick += 1; // Tick for each system
 
     if (this._toDestroy.length) {
       this._toDestroy.forEach((entity) => {
@@ -140,6 +167,8 @@ export class World implements ComponentSource {
       this._components.destroyEntities(this._toDestroy);
       this._entities.destroyEntities(this._toDestroy);
       this._toDestroy = [];
+
+      this._currentTick += 1; // Tick for destroy
     }
   }
 

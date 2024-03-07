@@ -2,7 +2,7 @@ import { World } from "../world/world.js";
 
 export abstract class System {
   private _enabled: boolean = true;
-  protected lastTick = 0;
+  lastTick = 0;
 
   constructor() {
     this._enabled = true;
@@ -14,8 +14,9 @@ export abstract class System {
     this.lastTick = Math.max(0, this.lastTick - zeroTime);
   }
 
-  setEnabled(enable: boolean) {
+  setEnabled(enable: boolean): this {
     this._enabled = enable;
+    return this;
   }
 
   isEnabled(): boolean {
@@ -26,14 +27,14 @@ export abstract class System {
     return this._enabled;
   }
 
-  // TODO - params? => time: number, delta: number, currentTick: number
-  run(world: World, time: number, delta: number): void {
-    if (!this.shouldRun(world, time, delta)) {
-      return;
-    }
-    this.process(world, time, delta);
-    this.lastTick = world.currentTick();
-  }
+  // run(world: World, time: number, delta: number): boolean {
+  //   if (!this.shouldRun(world, time, delta)) {
+  //     return false;
+  //   }
+  //   this.process(world, time, delta);
+  //   this.lastTick = world.currentTick();
+  //   return true;
+  // }
 
-  protected abstract process(world: World, time: number, delta: number): void;
+  abstract run(world: World, time: number, delta: number): void;
 }

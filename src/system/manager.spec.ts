@@ -24,7 +24,7 @@ describe("SystemManager", () => {
       this.name = name;
     }
 
-    protected process(world: World): void {
+    run(world: World): void {
       world.getGlobal(RunOrder).push(this.name);
     }
   }

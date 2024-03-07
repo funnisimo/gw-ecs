@@ -69,7 +69,7 @@ class DrawSystem extends System {
     this._pos = entity.fetch(Pos)!;
   }
 
-  protected process(): void {
+  run(): void {
     for (let y = this._pos.y - 2; y <= this._pos.y + 2; ++y) {
       let out = ["^K.", "^K.", "^K.", "^K.", "^K."];
       for (let dx = 0; dx <= 4; ++dx) {

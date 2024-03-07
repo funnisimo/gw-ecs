@@ -15,7 +15,7 @@ describe("interval entity system", () => {
       this.fakeCallback = callback;
     }
 
-    protected processEntity(entity: Entity): void {
+    processEntity(entity: Entity): void {
       this.fakeCallback(entity);
     }
   }
@@ -28,7 +28,7 @@ describe("interval entity system", () => {
       this.fakeCallback = callback;
     }
 
-    protected processEntity(entity: Entity): void {
+    processEntity(entity: Entity): void {
       this.fakeCallback(entity);
     }
   }

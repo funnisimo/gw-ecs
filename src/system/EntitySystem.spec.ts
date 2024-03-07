@@ -13,7 +13,7 @@ describe("entity system", () => {
       super(aspect);
     }
 
-    protected processEntity(_entity: Entity): void {}
+    processEntity(_entity: Entity): void {}
   }
 
   it("use its aspect to check whether an entity match or not", () => {

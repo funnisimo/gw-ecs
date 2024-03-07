@@ -41,7 +41,7 @@ abstract class EntityTurnSystem extends EntitySystem {
 }
 
 class TurnOverSystem extends System {
-  protected process(world: World): void {
+  run(world: World): void {
     const game = world.getGlobal(GameInfo);
     game.takeTurn = false;
   }
@@ -333,7 +333,7 @@ class DrawSystem extends System {
     this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
   }
 
-  protected process(world: World): void {
+  run(world: World): void {
     const buf = this._buf;
     const map = world.getGlobal(PosManager);
 

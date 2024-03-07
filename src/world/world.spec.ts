@@ -16,7 +16,7 @@ describe("World", function () {
       this.callback = callback;
     }
 
-    protected processEntity(entity: Entity): void {
+    processEntity(entity: Entity): void {
       this.callback(entity);
     }
   }
@@ -120,19 +120,19 @@ describe("World", function () {
 
   describe("entity lifecycle", () => {
     class CreateSystem extends System {
-      protected process(world: World): void {
+      run(world: World): void {
         world.create(new A(), new B());
       }
     }
 
     class DeleteSystem extends EntitySystem {
-      protected processEntity(entity: Entity, world: World): void {
+      processEntity(entity: Entity, world: World): void {
         world.queueDestroy(entity);
       }
     }
 
     class DeleteNowSystem extends EntitySystem {
-      protected processEntity(entity: Entity, world: World): void {
+      processEntity(entity: Entity, world: World): void {
         world.destroyNow(entity);
       }
     }

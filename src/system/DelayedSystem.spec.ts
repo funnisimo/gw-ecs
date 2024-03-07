@@ -11,7 +11,7 @@ describe("delayed system", () => {
       this.callback = callback;
     }
 
-    protected process(): void {
+    run(): void {
       this.callback();
     }
   }

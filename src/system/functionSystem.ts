@@ -25,7 +25,7 @@ export class FunctionSystem extends System {
     );
   }
 
-  protected process(world: World, time: number, delta: number): void {
+  run(world: World, time: number, delta: number): void {
     this._fn(world, time, delta);
   }
 }

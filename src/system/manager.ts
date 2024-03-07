@@ -18,8 +18,21 @@ export class SystemStep {
     this.systems.forEach((s) => s.start(world));
   }
 
-  run(world: World, time: number, delta: number) {
-    this.systems.forEach((s) => s.run(world, time, delta));
+  run(world: World, time: number, delta: number): boolean {
+    return this.systems.reduce((out, sys) => {
+      if (!sys.shouldRun(world, time, delta)) {
+        return out;
+      }
+      world._beforeSystemRun();
+      sys.run(world, time, delta);
+      sys.lastTick = world.currentTick();
+      world._afterSystemRun();
+      return true;
+    }, false);
+  }
+
+  rebase(zeroTime: number) {
+    this.systems.forEach((s) => s.rebase(zeroTime));
   }
 }
 
@@ -109,8 +122,15 @@ export class SystemSet {
     this.steps.forEach((s) => s.start(world));
   }
 
-  run(world: World, time: number, delta: number) {
-    this.steps.forEach((sys) => sys.run(world, time, delta));
+  run(world: World, time: number, delta: number): boolean {
+    return this.steps.reduce(
+      (out, step) => step.run(world, time, delta) || out,
+      false
+    );
+  }
+
+  rebase(zeroTime: number) {
+    this.steps.forEach((step) => step.rebase(zeroTime));
   }
 }
 
@@ -135,15 +155,17 @@ export class SystemManager {
 
   addStep(set: string, step: string, opts?: AddStepOpts): SystemManager;
   addStep(step: string, opts?: AddStepOpts): SystemManager;
-  addStep(...args: any[]): SystemManager {
+  addStep(
+    ...args: [string, AddStepOpts?] | [string, string, AddStepOpts?]
+  ): SystemManager {
     if (args.length == 1) {
       args = ["default", args[0], {}];
     }
     if (typeof args[1] !== "string") {
-      args = ["default", ...args];
+      args = ["default", args[0], args[1]];
     }
 
-    const [setName, stepName, opts] = args;
+    const [setName, stepName, opts] = args as [string, string, AddStepOpts?];
     const set = this._sets.get(setName);
     if (!set) throw new Error("Failed to find System Set: " + setName);
     set.addStep(stepName, opts);
@@ -176,14 +198,18 @@ export class SystemManager {
     }
   }
 
-  run(world: World, time: number, delta: number) {
-    this.runSet("default", world, time, delta);
+  run(world: World, time: number, delta: number): boolean {
+    return this.runSet("default", world, time, delta);
   }
 
-  runSet(set: string, world: World, time: number, delta: number) {
+  runSet(set: string, world: World, time: number, delta: number): boolean {
     const systems = this._sets.get(set);
     if (!systems) throw new Error("Missing System Set: " + set);
 
-    systems.run(world, time, delta);
+    return systems.run(world, time, delta);
+  }
+
+  rebase(zeroTime: number) {
+    this._sets.forEach((set) => set.rebase(zeroTime));
   }
 }
