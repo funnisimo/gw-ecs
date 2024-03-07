@@ -110,7 +110,7 @@ export class World implements ComponentSource {
 
     this._systems.forEach((system) => {
       this._beforeSystemProcess();
-      system.process();
+      system.run(this, this.time, this.delta);
       this._afterSystemProcess();
       this._currentTick += 1; // Tick after each system
     });
@@ -134,9 +134,9 @@ export class World implements ComponentSource {
       this._toDestroy.forEach((entity) => {
         this.notify.forEach((n) => n.destroyEntity(entity));
       });
-      this._systems.forEach((system) =>
-        system.destroyEntities(this._toDestroy)
-      );
+      // this._systems.forEach((system) =>
+      //   system.destroyEntities(this._toDestroy)
+      // );
       this._components.destroyEntities(this._toDestroy);
       this._entities.destroyEntities(this._toDestroy);
       this._toDestroy = [];
@@ -156,7 +156,7 @@ export class World implements ComponentSource {
 
   destroyNow(entity: Entity): void {
     this.notify.forEach((n) => n.destroyEntity(entity));
-    this._systems.forEach((system) => system.destroyEntity(entity));
+    // this._systems.forEach((system) => system.destroyEntity(entity));
     this._components.destroyEntity(entity);
     this._entities.destroy(entity);
     entity._destroy();

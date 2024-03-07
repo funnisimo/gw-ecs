@@ -11,7 +11,7 @@ describe("interval system", () => {
       this.callback = callback;
     }
 
-    protected doProcess(): void {
+    protected process(): void {
       this.callback();
     }
   }
@@ -106,7 +106,7 @@ describe("interval system", () => {
       let world = new World();
       let interval = 25;
       let myIntervalSystem = new MyIntervalSystem(interval, interval, callback);
-      myIntervalSystem.enableCatchUpDelay(false);
+      myIntervalSystem.setCatchUp(false);
 
       world.addSystem(myIntervalSystem).start();
 

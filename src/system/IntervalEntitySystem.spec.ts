@@ -160,7 +160,7 @@ describe("interval entity system", () => {
         interval,
         callback
       );
-      myIntervalSystem.enableCatchUpDelay(false);
+      myIntervalSystem.setCatchUp(false);
 
       world.addSystem(myIntervalSystem).start();
 

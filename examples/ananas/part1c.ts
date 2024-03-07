@@ -70,9 +70,9 @@ class DrawSystem extends System {
     this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
   }
 
-  protected doProcess(): void {
+  protected process(world: World): void {
     const buf = this._buf;
-    const map = this.world.getGlobal(PosManager);
+    const map = world.getGlobal(PosManager);
 
     map.everyXY((x, y, es) => {
       const entity = BOX_ASPECT.first(es) || TILE_ASPECT.first(es)!;

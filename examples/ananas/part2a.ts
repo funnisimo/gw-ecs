@@ -2,7 +2,7 @@ import terminal from "terminal-kit";
 import * as ROT from "rot-js";
 import { Aspect, World } from "gw-ecs/world";
 import { System } from "gw-ecs/system";
-import { PosManager } from "gw-ecs/utils";
+import { PosManager, Pos } from "gw-ecs/utils";
 
 function ifDo<T>(maybeVal: T, doFn: (t: NonNullable<T>) => any): boolean {
   if (!maybeVal) return false;
@@ -74,9 +74,9 @@ class DrawSystem extends System {
     this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
   }
 
-  protected doProcess(): void {
+  protected process(world: World): void {
     const buf = this._buf;
-    const map = this.world.getGlobal(PosManager);
+    const map = world.getGlobal(PosManager);
 
     map.everyXY((x, y, es) => {
       ifDo(HERO_ASPECT.first(es), (e) => {

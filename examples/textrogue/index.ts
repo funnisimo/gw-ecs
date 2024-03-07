@@ -69,7 +69,7 @@ class DrawSystem extends System {
     this._pos = entity.fetch(Pos)!;
   }
 
-  protected doProcess(): void {
+  protected process(): void {
     for (let y = this._pos.y - 2; y <= this._pos.y + 2; ++y) {
       let out = ["^K.", "^K.", "^K.", "^K.", "^K."];
       for (let dx = 0; dx <= 4; ++dx) {
@@ -92,8 +92,8 @@ class MoveSystem extends EntitySystem {
   constructor() {
     super(new Aspect(Move, Pos));
   }
-  protected processEntity(entity: Entity): void {
-    const posMgr = this.world.getGlobal(PosManager)!;
+  protected processEntity(entity: Entity, world: World): void {
+    const posMgr = world.getGlobal(PosManager)!;
     const pos = entity.update(Pos)!;
     const dir = entity.remove(Move)!.dir;
     const dxy = DIR[dir];
@@ -112,9 +112,7 @@ class MoveSystem extends EntitySystem {
 
 const world = new World()
   .registerComponents(Wall, Player, Move)
-  .setGlobal(new PosManager(21, 21), (w, r) => {
-    r.init(w);
-  })
+  .setGlobal(new PosManager(21, 21))
   .init((w: World) => {
     const player = w.create(new Player());
     w.setGlobal(player); // put player entity in as resource to make getting it easier in systems

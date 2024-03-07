@@ -28,14 +28,16 @@ class GameInfo {
 }
 
 abstract class EntityTurnSystem extends EntitySystem {
-  isEnabled(): boolean {
-    return super.isEnabled() && this.world.getGlobal(GameInfo).takeTurn;
+  shouldRun(world: World, time: number, delta: number): boolean {
+    return (
+      super.shouldRun(world, time, delta) && world.getGlobal(GameInfo).takeTurn
+    );
   }
 }
 
 class TurnOverSystem extends System {
-  protected doProcess(): void {
-    const game = this.world.getGlobal(GameInfo);
+  protected process(world: World): void {
+    const game = world.getGlobal(GameInfo);
     game.takeTurn = false;
   }
 }
@@ -49,9 +51,9 @@ class OpenSystem extends EntityTurnSystem {
     super(new Aspect(Open, Pos));
   }
 
-  protected processEntity(entity: Entity): void {
-    const term = this.world.getGlobal(Term).term;
-    const posMgr = this.world.getGlobal(PosManager);
+  protected processEntity(entity: Entity, world: World): void {
+    const term = world.getGlobal(Term).term;
+    const posMgr = world.getGlobal(PosManager);
     const pos = entity.fetch(Pos)!;
 
     entity.remove(Open);
@@ -96,9 +98,9 @@ class MoveSystem extends EntityTurnSystem {
     super(new Aspect(Move, Pos));
   }
 
-  protected processEntity(entity: Entity): void {
-    const term = this.world.getGlobal(Term).term;
-    const posMgr = this.world.getGlobal(PosManager);
+  protected processEntity(entity: Entity, world: World): void {
+    const term = world.getGlobal(Term).term;
+    const posMgr = world.getGlobal(PosManager);
     const pos = entity.fetch(Pos)!;
 
     const dxy = entity.remove(Move)!.dir;
@@ -140,18 +142,18 @@ class PedroSystem extends EntityTurnSystem {
     super(new Aspect(Pedro));
   }
 
-  protected processEntity(entity: Entity): void {
+  protected processEntity(entity: Entity, world: World): void {
     const pedro = entity.update(Pedro)!;
     const pedroPos = entity.fetch(Pos)!;
 
     if (!pedro.path || pedro.path.length == 0) {
       // Pick a random box...
-      const boxes = [...this.world.getStore(Box).entities()];
+      const boxes = [...world.getStore(Box).entities()];
       const box = ROT.RNG.getItem(boxes)!;
       // Find a path to that box...
       const boxPos = box.fetch(Pos)!;
 
-      const posMgr = this.world.getGlobal(PosManager);
+      const posMgr = world.getGlobal(PosManager);
       /* prepare path to given coords */
       var astar = new ROT.Path.AStar(
         boxPos.x,
@@ -245,9 +247,9 @@ class DrawSystem extends System {
     this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
   }
 
-  protected doProcess(): void {
+  protected process(world: World): void {
     const buf = this._buf;
-    const map = this.world.getGlobal(PosManager);
+    const map = world.getGlobal(PosManager);
 
     map.everyXY((x, y, es) => {
       const entity =

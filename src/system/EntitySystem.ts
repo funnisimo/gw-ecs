@@ -1,6 +1,7 @@
 import { Aspect } from "../world/aspect.js";
 import { System } from "./system.js";
 import { Entity } from "../entity/entity.js";
+import { World } from "../world/world.js";
 
 export abstract class EntitySystem extends System {
   // protected entities: Entity[];
@@ -42,13 +43,18 @@ export abstract class EntitySystem extends System {
   //   }
   // }
 
-  protected doProcess(): void {
-    for (let e of this._aspect.all(this.world, this.lastTick)) {
-      this.processEntity(e);
+  protected process(world: World, time: number, delta: number): void {
+    for (let e of this._aspect.all(world, this.lastTick)) {
+      this.processEntity(e, world, time, delta);
     }
   }
 
-  protected abstract processEntity(entity: Entity): void;
+  protected abstract processEntity(
+    entity: Entity,
+    world: World,
+    time: number,
+    delta: number
+  ): void;
 
   // /* tslint:disable:no-empty */
   // public doProcess(): void {}

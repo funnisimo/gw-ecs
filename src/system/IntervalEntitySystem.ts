@@ -1,6 +1,7 @@
 import { IntervalSystem } from "./intervalSystem.js";
 import { Aspect } from "../world/aspect.js";
 import { Entity } from "../entity/entity.js";
+import { World } from "../world/world.js";
 
 export abstract class IntervalEntitySystem extends IntervalSystem {
   private _aspect: Aspect;
@@ -14,11 +15,16 @@ export abstract class IntervalEntitySystem extends IntervalSystem {
     return this._aspect.match(entity, this.lastTick);
   }
 
-  protected doProcess(): void {
-    for (let e of this._aspect.all(this.world, this.lastTick)) {
-      this.processEntity(e);
+  protected process(world: World, time: number, delta: number): void {
+    for (let e of this._aspect.all(world, this.lastTick)) {
+      this.processEntity(e, world, time, delta);
     }
   }
 
-  protected abstract processEntity(entity: Entity): void;
+  protected abstract processEntity(
+    entity: Entity,
+    world: World,
+    time: number,
+    delta: number
+  ): void;
 }

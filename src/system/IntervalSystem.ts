@@ -1,3 +1,4 @@
+import { World } from "../world/world.js";
 import { System } from "./system.js";
 
 export abstract class IntervalSystem extends System {
@@ -11,31 +12,23 @@ export abstract class IntervalSystem extends System {
     this.delay = startIn === undefined ? runEvery : startIn;
   }
 
-  protected updateDelay() {
-    this.delay -= this.world.delta;
-  }
-
-  public enableCatchUpDelay(catchUp: boolean): void {
+  public setCatchUp(catchUp: boolean): void {
     this.catchUp = catchUp;
   }
 
-  public process(): void {
-    if (this.isEnabled()) {
-      this.updateDelay();
-      if (this.delay <= 0) {
-        this.beforeProcess();
-        this.doProcess();
-        this.afterProcess();
-        if (this.interval == 0) {
-          this.setEnabled(false);
-        } else {
-          this.delay += this.interval;
-          // TODO - there is a way to do this without the loop
-          while (this.delay < 0 && !this.catchUp) {
-            this.delay += this.interval;
-          }
-        }
+  shouldRun(world: World, time: number, delta: number): boolean {
+    if (!super.shouldRun(world, time, delta)) return false;
+    this.delay -= delta;
+    if (this.delay > 0) return false;
+    if (this.interval == 0) {
+      this.setEnabled(false);
+    } else {
+      this.delay += this.interval;
+      // TODO - there is a way to do this without the loop
+      while (this.delay < 0 && !this.catchUp) {
+        this.delay += this.interval;
       }
     }
+    return true;
   }
 }

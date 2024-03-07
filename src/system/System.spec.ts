@@ -11,16 +11,8 @@ describe("System", () => {
       this.callback = callback;
     }
 
-    beforeProcess(): void {
-      this.callback("beforeProcess");
-    }
-
-    protected doProcess(): void {
-      this.callback("processSystem");
-    }
-
-    afterProcess(): void {
-      this.callback("afterProcess");
+    protected process(): void {
+      this.callback();
     }
   }
 
@@ -33,9 +25,7 @@ describe("System", () => {
     world.start();
     world.process();
 
-    expect(callback).toHaveBeenCalledWith("beforeProcess");
-    expect(callback).toHaveBeenCalledWith("processSystem");
-    expect(callback).toHaveBeenCalledWith("afterProcess");
+    expect(callback).toHaveBeenCalled();
   });
 
   it("will call processSystem only if the system is not active", () => {
@@ -54,9 +44,6 @@ describe("System", () => {
     system.setEnabled(true);
     world.process();
 
-    expect(callback).toHaveBeenCalledTimes(3); // before, process, after
-    expect(callback).toHaveBeenCalledWith("beforeProcess");
-    expect(callback).toHaveBeenCalledWith("processSystem");
-    expect(callback).toHaveBeenCalledWith("afterProcess");
+    expect(callback).toHaveBeenCalledTimes(1);
   });
 });

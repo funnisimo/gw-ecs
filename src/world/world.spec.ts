@@ -120,20 +120,20 @@ describe("World", function () {
 
   describe("entity lifecycle", () => {
     class CreateSystem extends System {
-      protected doProcess(): void {
-        this.world.create(new A(), new B());
+      protected process(world: World): void {
+        world.create(new A(), new B());
       }
     }
 
     class DeleteSystem extends EntitySystem {
-      protected processEntity(entity: Entity): void {
-        this.world.queueDestroy(entity);
+      protected processEntity(entity: Entity, world: World): void {
+        world.queueDestroy(entity);
       }
     }
 
     class DeleteNowSystem extends EntitySystem {
-      protected processEntity(entity: Entity): void {
-        this.world.destroyNow(entity);
+      protected processEntity(entity: Entity, world: World): void {
+        world.destroyNow(entity);
       }
     }
 

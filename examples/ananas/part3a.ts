@@ -22,9 +22,9 @@ class OpenSystem extends EntitySystem {
     super(new Aspect(Open, Pos));
   }
 
-  protected processEntity(entity: Entity): void {
-    const term = this.world.getGlobal(Term).term;
-    const posMgr = this.world.getGlobal(PosManager);
+  protected processEntity(entity: Entity, world: World): void {
+    const term = world.getGlobal(Term).term;
+    const posMgr = world.getGlobal(PosManager);
     const pos = entity.fetch(Pos)!;
 
     entity.remove(Open);
@@ -39,7 +39,7 @@ class OpenSystem extends EntitySystem {
 
     if (!box.ananas) {
       term.moveTo(0, 26).eraseLine.blue("Empty");
-      this.world.queueDestroy(boxEntity);
+      world.queueDestroy(boxEntity);
     } else {
       term.moveTo(0, 26).eraseLine.green("You found the ^yananas^ !");
       term.processExit(0);
@@ -69,9 +69,9 @@ class MoveSystem extends EntitySystem {
     super(new Aspect(Move, Pos));
   }
 
-  protected processEntity(entity: Entity): void {
-    const term = this.world.getGlobal(Term).term;
-    const posMgr = this.world.getGlobal(PosManager);
+  protected processEntity(entity: Entity, world: World): void {
+    const term = world.getGlobal(Term).term;
+    const posMgr = world.getGlobal(PosManager);
     const pos = entity.fetch(Pos)!;
 
     const dirName = entity.remove(Move)!.dirName;
@@ -150,9 +150,9 @@ class DrawSystem extends System {
     this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
   }
 
-  protected doProcess(): void {
+  protected process(world: World): void {
     const buf = this._buf;
-    const map = this.world.getGlobal(PosManager);
+    const map = world.getGlobal(PosManager);
 
     map.everyXY((x, y, es) => {
       const entity =
