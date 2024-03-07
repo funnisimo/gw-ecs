@@ -1,8 +1,8 @@
 import terminal from "terminal-kit";
 import * as ROT from "rot-js";
-import { Aspect, World } from "gw-ecs/world";
-import { System } from "gw-ecs/system";
-import { PosManager, Pos } from "gw-ecs/utils";
+import { Aspect, World } from "gw-ecs/world/index";
+import { System } from "gw-ecs/system/system";
+import { PosManager } from "gw-ecs/utils/positions";
 
 function ifDo<T>(maybeVal: T, doFn: (t: NonNullable<T>) => any): boolean {
   if (!maybeVal) return false;

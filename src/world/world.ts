@@ -122,41 +122,33 @@ export class World implements ComponentSource {
     return entity;
   }
 
-  _beforeSystemRun() {
-    // this.toUpdate.forEach((entity) => {
-    //   const components = entity.allComponents(); // this.componentManager.getAllComponents(entity);
-    //   this.systems.forEach((system) => system.accept(entity, components));
-    // });
-    // this.toUpdate = [];
-  }
+  // _beforeSystemRun() {
+  //   // this.toUpdate.forEach((entity) => {
+  //   //   const components = entity.allComponents(); // this.componentManager.getAllComponents(entity);
+  //   //   this.systems.forEach((system) => system.accept(entity, components));
+  //   // });
+  //   // this.toUpdate = [];
+  // }
 
   process(delta: number = 0): void {
     this.delta = delta;
     this.time += delta;
-    this._currentTick += 1; // Tick for each system
 
     this._systems.run(this, this.time, this.delta);
 
-    // (system) => {
-    //   this._beforeSystemProcess();
-    //   system.run(this, this.time, this.delta);
-    //   this._afterSystemProcess();
-    //   this._currentTick += 1; // Tick after each system
-    // };
-
-    this._afterSystemRun(); // force a cleanup in case no systems run (mainly for testing)
+    // force a cleanup in case no systems run (mainly for testing)
+    // also forces a tick
+    this._afterSystemRun();
 
     if (this._currentTick > 100000) {
       this._currentTick -= 100000;
       this._entities.rebase(100000);
       this._systems.rebase(100000);
-      // this._systems.forEach((system) => system.rebase(100000));
     }
   }
 
   _afterSystemRun(): void {
-    this._currentTick += 1; // Tick for each system
-
+    this._currentTick += 1; // Tick for each system (must be after)
     if (this._toDestroy.length) {
       this._toDestroy.forEach((entity) => {
         this.notify.forEach((n) => n.destroyEntity(entity));

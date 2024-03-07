@@ -23,7 +23,7 @@ export class SystemStep {
       if (!sys.shouldRun(world, time, delta)) {
         return out;
       }
-      world._beforeSystemRun();
+      // world._beforeSystemRun();
       sys.run(world, time, delta);
       sys.lastTick = world.currentTick();
       world._afterSystemRun();
