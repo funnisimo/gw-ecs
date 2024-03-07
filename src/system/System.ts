@@ -2,7 +2,7 @@ import { World } from "../world/world.js";
 
 export abstract class System {
   private _enabled: boolean = true;
-  lastTick = 0;
+  lastTick = 0; // not protected so that SystemManager can update on run
 
   constructor() {
     this._enabled = true;
@@ -26,15 +26,6 @@ export abstract class System {
   shouldRun(_world: World, _time: number, _delta: number): boolean {
     return this._enabled;
   }
-
-  // run(world: World, time: number, delta: number): boolean {
-  //   if (!this.shouldRun(world, time, delta)) {
-  //     return false;
-  //   }
-  //   this.process(world, time, delta);
-  //   this.lastTick = world.currentTick();
-  //   return true;
-  // }
 
   abstract run(world: World, time: number, delta: number): void;
 }
