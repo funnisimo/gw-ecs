@@ -1,6 +1,5 @@
 import "jest-extended";
 import { Aspect, World } from "../world";
-import { Entity } from "../entity";
 import { EntitySystem } from "./index";
 
 class A {}
@@ -13,7 +12,7 @@ describe("entity system", () => {
       super(aspect);
     }
 
-    processEntity(_entity: Entity): void {}
+    processEntity(): void {}
   }
 
   it("use its aspect to check whether an entity match or not", () => {

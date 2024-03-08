@@ -12,15 +12,7 @@ describe("delayed entity system", () => {
       this.fakeCallback = callback;
     }
 
-    // public updateEntityDelay(entity: Entity): boolean {
-    //   let manager = this.world.getComponentManager(Timer);
-    //   let timer = manager.fetch(entity)!;
-    //   if (timer.timeBeforeProcess < 0) return false; // Hmmmm.....
-    //   timer.timeBeforeProcess -= this.world.delta;
-    //   return timer.timeBeforeProcess <= 0;
-    // }
-
-    public processEntity(entity: Entity): void {
+    public processEntity(_world: World, entity: Entity): void {
       this.fakeCallback(entity);
     }
   }

@@ -1,5 +1,13 @@
-import { World } from "../world";
-import { System } from "./system";
+import { Entity } from "../entity/entity.js";
+import { World } from "../world/world.js";
+import { EntitySystem } from "./entitySystem.js";
+import {
+  EntityFunctionSystem,
+  EntitySystemFn,
+  FunctionSystem,
+  SystemFn,
+} from "./functionSystem.js";
+import { System } from "./system.js";
 
 export class SystemStep {
   name: string;
@@ -8,6 +16,10 @@ export class SystemStep {
   constructor(name: string) {
     this.name = name;
     this.systems = [];
+  }
+
+  get length(): number {
+    return this.systems.length;
   }
 
   addSystem(sys: System) {
@@ -34,6 +46,40 @@ export class SystemStep {
   rebase(zeroTime: number) {
     this.systems.forEach((s) => s.rebase(zeroTime));
   }
+
+  forEach(fn: (sys: System) => void) {
+    this.systems.forEach(fn);
+  }
+}
+
+export class EntitySystemStep extends SystemStep {
+  declare systems: EntitySystem[];
+
+  addSystem(sys: EntitySystem) {
+    this.systems.push(sys);
+  }
+
+  runEntity(
+    world: World,
+    entity: Entity,
+    time: number,
+    delta: number
+  ): boolean {
+    return this.systems.reduce((out, sys) => {
+      if (!sys.shouldRun(world, time, delta)) {
+        return out;
+      }
+      if (!sys.accept(entity)) return out;
+      sys.processEntity(world, entity, time, delta);
+      sys.lastTick = world.currentTick();
+      world._afterSystemRun();
+      return true;
+    }, false);
+  }
+
+  forEach(fn: (sys: EntitySystem) => void) {
+    this.systems.forEach(fn);
+  }
 }
 
 export interface AddStepOpts {
@@ -47,23 +93,26 @@ export class SystemSet {
 
   constructor(name: string, steps: string[] = ["update"]) {
     this.name = name;
-    this.steps = steps.map((n) => new SystemStep(n));
+    this.steps = steps.map((n) => this._createStep(n));
   }
 
   setSteps(steps: string[]) {
-    if (
-      this.steps.length > 1 ||
-      this.steps[0].name !== "update" ||
-      this.steps[0].systems.length > 0
-    ) {
+    if (this.steps.some((step) => step.length > 0)) {
       throw new Error(
-        "Cannot set steps on a SystemSet that already has been configured."
+        "Cannot reset steps on a SystemSet that already has systems in it."
       );
     }
-    this.steps = steps.map((n) => new SystemStep(n));
+    this.steps = steps.map((n) => this._createStep(n));
   }
 
-  addSystem(system: System, stepName = "update"): SystemSet {
+  _createStep(name: string): SystemStep {
+    return new SystemStep(name);
+  }
+
+  addSystem(system: System | SystemFn, stepName = "update"): this {
+    if (typeof system === "function") {
+      system = new FunctionSystem(system);
+    }
     const step = this.steps.find((s) => s.name == stepName);
     if (!step) {
       throw new Error(
@@ -78,7 +127,7 @@ export class SystemSet {
     return this;
   }
 
-  addStep(name: string, opts: AddStepOpts = {}): SystemSet {
+  addStep(name: string, opts: AddStepOpts = {}): this {
     if (opts.before) {
       const index = this.steps.findIndex((step) => step.name == opts.before);
       if (index < 0) {
@@ -132,6 +181,40 @@ export class SystemSet {
   rebase(zeroTime: number) {
     this.steps.forEach((step) => step.rebase(zeroTime));
   }
+
+  forEach(fn: (system: System, step: string) => void) {
+    this.steps.forEach((step) => {
+      step.forEach((sys) => fn(sys, step.name));
+    });
+  }
+}
+
+export class EntitySystemSet extends SystemSet {
+  declare steps: EntitySystemStep[];
+
+  _createStep(name: string): EntitySystemStep {
+    return new EntitySystemStep(name);
+  }
+
+  // @ts-ignore
+  addSystem(system: EntitySystem | EntitySystemFn, stepName = "update"): this {
+    if (typeof system === "function") {
+      system = new EntityFunctionSystem(system);
+    }
+    return super.addSystem(system, stepName);
+  }
+
+  runEntity(
+    world: World,
+    entity: Entity,
+    time: number,
+    delta: number
+  ): boolean {
+    return this.steps.reduce(
+      (out, step) => step.runEntity(world, entity, time, delta) || out,
+      false
+    );
+  }
 }
 
 export class SystemManager {
@@ -173,9 +256,17 @@ export class SystemManager {
     return this;
   }
 
-  addSystem(system: System, inStep?: string): SystemManager;
-  addSystem(system: System, inSet: string, inStep?: string): SystemManager;
-  addSystem(system: System, ...args: string[]): SystemManager {
+  addSystem(system: System | SystemFn, inStep?: string): SystemManager;
+  addSystem(
+    system: System | SystemFn,
+    inSet: string,
+    inStep?: string
+  ): SystemManager;
+  addSystem(system: System | SystemFn, ...args: string[]): SystemManager {
+    if (typeof system === "function") {
+      system = new FunctionSystem(system);
+    }
+
     if (args.length == 0) {
       args = ["default", "update"];
     }

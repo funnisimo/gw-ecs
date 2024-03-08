@@ -10,9 +10,10 @@ export interface Store<T> {
   remove(entity: Entity): T | undefined; // This is immediate
 
   singleEntity(): Entity | undefined;
-  entities(): IterableIterator<Entity>;
-  values(): IterableIterator<T>;
-  entries(): IterableIterator<[Entity, T]>;
+  forEach(fn: (e: Entity, c: T) => void): void;
+  // entities(): IterableIterator<Entity>;
+  // values(): IterableIterator<T>;
+  // entries(): IterableIterator<[Entity, T]>;
 
   destroyEntity(entity: Entity): void;
   destroyEntities(entities: Entity[]): void;
@@ -67,6 +68,12 @@ export class SetStore<T> implements Store<T> {
 
   singleEntity(): Entity | undefined {
     return this._data.keys().next().value;
+  }
+
+  forEach(fn: (e: Entity, c: T) => void) {
+    for (let entity of this._data.keys()) {
+      fn(entity, entity.fetch(this._comp)!);
+    }
   }
 
   entities() {
