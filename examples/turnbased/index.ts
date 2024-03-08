@@ -6,6 +6,7 @@ import { System } from "gw-ecs/system/system";
 import { Entity } from "gw-ecs/entity/entity";
 import { Aspect } from "gw-ecs/world";
 import { Schedule } from "gw-ecs/utils/schedule";
+import { StoreWatcher } from "gw-ecs/component/store";
 
 class Messages {
   data: string[] = [];
@@ -76,13 +77,13 @@ class ScheduleEntitySystem extends EntitySystem {
 
 class DrawSystem extends System {
   run(world: World, time: number) {
-    const global = world.getGlobal(Messages);
-    const msgs = global.popAll();
+    const msgs = world.getGlobal(Messages).popAll();
+    const gameTurn = world.getGlobal(GameTurn);
     if (msgs.length) {
-      term.blue(`World: ${time}, Game: [game.time]\n`);
       msgs.forEach((msg) => {
         term(msg)("\n");
       });
+      term.blue(`World: ${time}, Game: ${gameTurn.schedule.time}\n`);
     }
   }
 }
@@ -141,17 +142,22 @@ class GameTurnSystem extends System {
       gameTurn.schedule.add(e, a.actTime); // - add to schedule
     });
 
-    // TODO - Register interest in Actor component
-    // - onAdd => add to schedule
-    // - onRemove => remove from schedule
-    //
+    actors.notify({
+      compAdded(entity, comp) {
+        gameTurn.schedule.add(entity, comp.actTime);
+      },
+      compRemoved(entity, _comp) {
+        gameTurn.schedule.remove(entity);
+      },
+    });
   }
 
   run(world: World, time: number, delta: number) {
     const gameTurn = world.getGlobal(GameTurn);
+    if (gameTurn.paused) return;
 
     let entity = gameTurn.schedule.pop() as Entity | null;
-    while (entity && !gameTurn.paused) {
+    while (entity) {
       // Check to see if we should break out because of FX or animation or something else that is going on
 
       // TODO - what to do with delta in gameTurn mode?
@@ -160,6 +166,7 @@ class GameTurnSystem extends System {
         return;
       }
 
+      if (gameTurn.paused) return;
       entity = gameTurn.schedule.pop() as Entity | null;
     }
   }
@@ -217,7 +224,7 @@ const world = new World()
   .addSystem(new GameTurnSystem())
   .addSystem(new DrawSystem())
   .init((w) => {
-    const eA = w.create(new Name("a"), new Actor());
+    const eA = w.create(new Name("a"), new Actor()); // This is our Hero (user controlled)
     w.setGlobal(eA); // Store our hero Entity
 
     w.create(new Name("b"), new Actor(mobAiFn));
@@ -236,7 +243,7 @@ term.on("key", function (name, matches, data) {
   } else if (name === " " || name === "ENTER") {
     const hero = world.getGlobal(Entity);
     const actor = hero.update(Actor)!;
-    actor.ready = true;
+    actor.ready = true; // Hero did something...
     term.green("User Input\n");
   } else {
     term("'key' event: %s\n", name);

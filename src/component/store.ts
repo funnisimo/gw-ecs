@@ -1,6 +1,11 @@
 import { Entity } from "../entity/entity.js";
 import { Component } from "./component.js";
 
+export interface StoreWatcher<T> {
+  compAdded?(entity: Entity, comp: T): void;
+  compRemoved?(entity: Entity, comp: T): void;
+}
+
 export interface Store<T> {
   has(entity: Entity): boolean;
 
@@ -10,11 +15,12 @@ export interface Store<T> {
   remove(entity: Entity): T | undefined; // This is immediate
 
   singleEntity(): Entity | undefined;
-  forEach(fn: (e: Entity, c: T) => void): void;
-  // entities(): IterableIterator<Entity>;
-  // values(): IterableIterator<T>;
-  // entries(): IterableIterator<[Entity, T]>;
+  forEach(fn: (entity: Entity, comp: T) => void): void;
 
+  notify(watcher: StoreWatcher<T>): void;
+  stopNotify(watcher: StoreWatcher<T>): void;
+
+  // TODO - Move these to different interface
   destroyEntity(entity: Entity): void;
   destroyEntities(entities: Entity[]): void;
 }
@@ -24,10 +30,28 @@ export type AnyStore = Store<any>;
 export class SetStore<T> implements Store<T> {
   _comp: Component<T>;
   _data: Set<Entity>;
+  _watchers: (StoreWatcher<T> | null)[];
 
   constructor(comp: Component<T>) {
     this._comp = comp;
     this._data = new Set();
+    this._watchers = [];
+  }
+
+  notify(watcher: StoreWatcher<T>) {
+    let index = this._watchers.indexOf(null);
+    if (index >= 0) {
+      this._watchers[index] = watcher;
+    } else {
+      this._watchers.push(watcher);
+    }
+  }
+
+  stopNotify(watcher: StoreWatcher<T>) {
+    const index = this._watchers.indexOf(watcher);
+    if (index >= 0) {
+      this._watchers[index] = null;
+    }
   }
 
   /**
@@ -40,6 +64,9 @@ export class SetStore<T> implements Store<T> {
     if (!entity.isAlive()) return undefined;
     entity._addComp(this._comp, comp);
     this._data.add(entity);
+    this._watchers.forEach(
+      (w) => w && w.compAdded && w.compAdded(entity, comp)
+    );
   }
 
   fetch(entity: Entity): T | undefined {
@@ -58,6 +85,11 @@ export class SetStore<T> implements Store<T> {
     const v = entity.fetch(this._comp);
     entity._removeComp(this._comp);
     this._data.delete(entity);
+    if (v) {
+      this._watchers.forEach(
+        (w) => w && w.compRemoved && w.compRemoved(entity, v)
+      );
+    }
     return v;
   }
 
