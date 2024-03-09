@@ -22,17 +22,17 @@ describe("Aspect", () => {
     it("should matchs entity if it has all the required components", () => {
       let aspect = new Aspect().with(A, B, C);
       const entity = world.create();
-      entity.add(new A());
-      entity.add(new B());
-      entity.add(new C());
+      entity.set(new A());
+      entity.set(new B());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeTrue();
     });
 
     it("should refuses entity if it has not all the required components", () => {
       let aspect = new Aspect().with(A, B, C);
       const entity = world.create();
-      entity.add(new A());
-      entity.add(new C());
+      entity.set(new A());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeFalse();
     });
   });
@@ -48,24 +48,24 @@ describe("Aspect", () => {
     it("should matchs entity if it has at least one of the required components", () => {
       let aspect = new Aspect().one(A, B, C);
       const entityA = world.create();
-      entityA.add(new A());
+      entityA.set(new A());
       expect(aspect.match(entityA)).toBeTrue();
       const entityB = world.create();
-      entityB.add(new B());
+      entityB.set(new B());
       expect(aspect.match(entityB)).toBeTrue();
       const entityC = world.create();
-      entityC.add(new C());
+      entityC.set(new C());
       expect(aspect.match(entityC)).toBeTrue();
-      entityA.add(new E());
+      entityA.set(new E());
       expect(aspect.match(entityA)).toBeTrue();
-      entityB.add(new A());
+      entityB.set(new A());
       expect(aspect.match(entityB)).toBeFalse(); // It has 2, but only 1 is the filter
     });
     it("should refuses entity if it has none of all the required components", () => {
       let aspect = new Aspect().one(A, B, C);
       const entity = world.create();
       expect(aspect.match(entity)).toBeFalse();
-      entity.add(new D());
+      entity.set(new D());
       expect(aspect.match(entity)).toBeFalse();
     });
   });
@@ -82,16 +82,16 @@ describe("Aspect", () => {
       let aspect = new Aspect().without(A, B, C);
       const entity = world.create();
       expect(aspect.match(entity)).toBeTrue();
-      entity.add(new E());
+      entity.set(new E());
       expect(aspect.match(entity)).toBeTrue();
     });
     it("should refuses entity if it has any of the excluded components", () => {
       let aspect = new Aspect().without(A, B, C);
       const entity = world.create();
       expect(aspect.match(entity)).toBeTrue();
-      entity.add(new A());
+      entity.set(new A());
       expect(aspect.match(entity)).toBeFalse();
-      entity.add(new D());
+      entity.set(new D());
       expect(aspect.match(entity)).toBeFalse();
     });
   });
@@ -107,42 +107,42 @@ describe("Aspect", () => {
     it("all and one", () => {
       let aspect = new Aspect().with(A, B).one(C, D);
       const entity = world.create();
-      entity.add(new A());
-      entity.add(new B());
+      entity.set(new A());
+      entity.set(new B());
       expect(aspect.match(entity)).toBeFalse();
-      entity.add(new C());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeTrue();
       entity.remove(C);
-      entity.add(new D());
+      entity.set(new D());
       expect(aspect.match(entity)).toBeTrue();
       entity.remove(B);
-      entity.add(new C());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeFalse();
-      entity.add(new B());
+      entity.set(new B());
       expect(aspect.match(entity)).toBeFalse(); // We want only 1
       entity.remove(D);
-      entity.add(new E());
+      entity.set(new E());
       expect(aspect.match(entity)).toBeTrue();
     });
 
     it("all and none", () => {
       let aspect = new Aspect().with(A, B).without(C, D);
       const entity = world.create();
-      entity.add(new A());
-      entity.add(new B());
+      entity.set(new A());
+      entity.set(new B());
       expect(aspect.match(entity)).toBeTrue(); // A, B
-      entity.add(new C());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeFalse(); // [A, B, C]
       entity.remove(C);
-      entity.add(new D());
+      entity.set(new D());
       expect(aspect.match(entity)).toBeFalse(); // [A, B, D]
-      entity.add(new C());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeFalse(); // [A, B, C, D]
       entity.remove(B);
       entity.remove(D);
       expect(aspect.match(entity)).toBeFalse(); // [A, C]
       entity.remove(C);
-      entity.add(new D());
+      entity.set(new D());
       expect(aspect.match(entity)).toBeFalse(); // [A, D]
     });
 
@@ -150,68 +150,68 @@ describe("Aspect", () => {
       let aspect = new Aspect().one(A, B).without(C, D);
       let entity = world.create();
       expect(aspect.match(entity)).toBeFalse(); // []
-      entity.add(new A());
+      entity.set(new A());
       expect(aspect.match(entity)).toBeTrue(); // [A]
       entity.remove(A);
-      entity.add(new B());
+      entity.set(new B());
       expect(aspect.match(entity)).toBeTrue(); // [A]
-      entity.add(new C());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeFalse(); // [A, C]
       entity = world.create();
-      entity.add(new E());
-      entity.add(new D());
+      entity.set(new E());
+      entity.set(new D());
       expect(aspect.match(entity)).toBeFalse(); // [E, D]
       entity.remove(E);
-      entity.add(new C());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeFalse(); // [C, D]
     });
 
     it("all, one and none", () => {
       let aspect = new Aspect().with(A, B).one(C, D).without(E);
       let entity = world.create();
-      entity.add(new A());
-      entity.add(new B());
+      entity.set(new A());
+      entity.set(new B());
       expect(aspect.match(entity)).toBeFalse(); // [A, B]
-      entity.add(new C());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeTrue(); // [A, B, C]
       entity.remove(C);
-      entity.add(new D());
+      entity.set(new D());
       expect(aspect.match(entity)).toBeTrue(); // [A, B, D]
-      entity.add(new C());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeFalse(); // [A, B, C, D] - It has 2, but we want only 1
       entity.remove(D);
-      entity.add(new E());
+      entity.set(new E());
       expect(aspect.match(entity)).toBeFalse(); // [A, B, C, E]
       entity = world.create();
-      entity.add(new A());
-      entity.add(new C());
-      entity.add(new D());
+      entity.set(new A());
+      entity.set(new C());
+      entity.set(new D());
       expect(aspect.match(entity)).toBeFalse(); // [A, C, D]
-      entity.add(new B());
-      entity.add(new F());
+      entity.set(new B());
+      entity.set(new F());
       expect(aspect.match(entity)).toBeFalse(); // [A, B, C, D, F] - It has 2, but we want only 1
     });
 
     it("all, one, some, and none", () => {
       let aspect = new Aspect().with(A, B).one(C, D).some(E, F).without(G);
       let entity = world.create();
-      entity.add(new A());
-      entity.add(new B());
+      entity.set(new A());
+      entity.set(new B());
       expect(aspect.match(entity)).toBeFalse(); // [A, B]
-      entity.add(new C());
+      entity.set(new C());
       expect(aspect.match(entity)).toBeFalse(); // [A, B, C]
       entity.remove(C);
-      entity.add(new D());
+      entity.set(new D());
       expect(aspect.match(entity)).toBeFalse(); // [A, B, D]
-      entity.add(new C());
-      entity.add(new E());
+      entity.set(new C());
+      entity.set(new E());
       expect(aspect.match(entity)).toBeFalse(); // [A, B, C, D, E]
       entity.remove(D);
       expect(aspect.match(entity)).toBeTrue(); // [A, B, C, E]
-      entity.add(new F());
+      entity.set(new F());
       expect(aspect.match(entity)).toBeTrue(); // [A, B, C, E, F]
       entity.remove(F);
-      entity.add(new G());
+      entity.set(new G());
       expect(aspect.match(entity)).toBeFalse(); // [A, B, C, E, G]
     });
   });
@@ -234,12 +234,12 @@ describe("Aspect", () => {
       const e3 = world.create();
 
       const a = new A();
-      e1.add(a);
-      e2.add(new A());
+      e1.set(a);
+      e2.set(new A());
 
       const b = new B();
-      e1.add(b);
-      e3.add(new B());
+      e1.set(b);
+      e3.set(new B());
 
       // 1 = A + B
       // 2 = A

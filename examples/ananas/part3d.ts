@@ -73,7 +73,7 @@ class OpenSystem extends EntityTurnSystem {
 
     if (!box.ananas) {
       term.moveTo(0, 26).eraseLine.green("Empty");
-      boxEntity.add(EMPTY_BOX_SPRITE);
+      boxEntity.set(EMPTY_BOX_SPRITE);
     } else {
       term.moveTo(0, 26).eraseLine.green("You found the ^yananas^ !");
       term.processExit(0);
@@ -209,7 +209,7 @@ class PedroSystem extends EntityTurnSystem {
     // Pick the next step in the path
     const dest = pedro.path.splice(0, 1)[0];
     const dir = dest.minus(pedroPos);
-    entity.add(new Move(dir));
+    entity.set(new Move(dir));
   }
 }
 
@@ -361,7 +361,7 @@ function digMap(world: World) {
     const sprite = blocks ? WALL_SPRITE : FLOOR_SPRITE;
     const tile = world.create(new Tile(), sprite);
     if (blocks) {
-      tile.add(new Collider("tile"));
+      tile.set(new Collider("tile"));
     } else {
       floors.push({ x, y });
     }
@@ -444,11 +444,11 @@ term.on("key", function (name, matches, data) {
     term.processExit(0);
   } else if (["LEFT", "RIGHT", "UP", "DOWN"].includes(name)) {
     const game = world.getGlobal(GameInfo);
-    game.hero.add(new Move(DIRS[name]));
+    game.hero.set(new Move(DIRS[name]));
     game.takeTurn = true;
   } else if ([" ", "ENTER"].includes(name)) {
     const game = world.getGlobal(GameInfo);
-    game.hero.add(new Open());
+    game.hero.set(new Open());
     game.takeTurn = true;
   } else {
     term.moveTo(0, 26).eraseLine.red("Unknown key: ", name);

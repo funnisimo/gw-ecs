@@ -66,7 +66,7 @@ export class SetStore<T> implements Store<T> {
    */
   set(entity: Entity, comp: T): void {
     if (!entity.isAlive()) return undefined;
-    entity._addComp(this._comp, comp);
+    entity._setComp(this._comp, comp);
     this._data.add(entity);
     this._watchers.forEach((w) => w && w.compSet && w.compSet(entity, comp));
   }

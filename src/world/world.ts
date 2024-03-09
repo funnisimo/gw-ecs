@@ -117,7 +117,7 @@ export class World implements ComponentSource {
   create(...withComps: any[]): Entity {
     const entity = this._entities.create();
     withComps.forEach((c) => {
-      entity.add(c);
+      entity.set(c);
     });
     return entity;
   }
@@ -219,7 +219,7 @@ export class World implements ComponentSource {
     return mgr.update(entity);
   }
 
-  addComponent<T>(entity: Entity, val: T, comp?: Component<T>): void {
+  setComponent<T>(entity: Entity, val: T, comp?: Component<T>): void {
     // @ts-ignore
     comp = comp || val.constructor;
     if (!comp) throw new Error("Missing constructor!");

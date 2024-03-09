@@ -10,7 +10,7 @@ class CompA {
 }
 
 describe("Entity", () => {
-  let addComponent: jest.Mock;
+  let setComponent: jest.Mock;
   let removeComponent: jest.Mock;
   let currentTick: jest.Mock;
   let entities: Entities;
@@ -18,12 +18,12 @@ describe("Entity", () => {
 
   beforeEach(() => {
     currentTick = jest.fn().mockReturnValue(1);
-    addComponent = jest.fn().mockImplementation((e, v, c) => e._addComp(c, v));
+    setComponent = jest.fn().mockImplementation((e, v, c) => e._setComp(c, v));
     removeComponent = jest.fn().mockImplementation((e, c) => e._removeComp(c));
 
     source = {
       currentTick,
-      addComponent,
+      setComponent,
       removeComponent,
     };
 
@@ -42,15 +42,15 @@ describe("Entity", () => {
     expect(e.fetch(CompA)).toBeUndefined();
 
     const a = new CompA();
-    expect(e.add(a)).toBeUndefined();
-    expect(addComponent).toHaveBeenCalledWith(e, a, CompA);
-    addComponent.mockClear();
+    expect(e.set(a)).toBeUndefined();
+    expect(setComponent).toHaveBeenCalledWith(e, a, CompA);
+    setComponent.mockClear();
 
     expect(e.has(CompA)).toBeTrue();
     expect(e.fetch(CompA)).toBe(a);
 
     const a2 = new CompA(2);
-    expect(e.add(a2)).toBeUndefined();
+    expect(e.set(a2)).toBeUndefined();
     expect(e.has(CompA)).toBeTrue();
     expect(e.fetch(CompA)).toEqual(a2);
 
@@ -72,7 +72,7 @@ describe("Entity", () => {
 
     expect(e.isAlive()).toBeTrue();
     expect(e.gen).toEqual(1);
-    e.add(new CompA());
+    e.set(new CompA());
 
     entities.destroy(e); // Done by world, managers
     expect(e.isAlive()).toBeFalse();
@@ -86,7 +86,7 @@ describe("Entity", () => {
     expect(e2.gen).toEqual(2);
     expect(e2.isAlive()).toBeTrue();
     expect(e2.has(CompA)).toBeFalse();
-    e2.add(new CompA());
+    e2.set(new CompA());
     expect(e2.has(CompA)).toBeTrue();
 
     entities.destroy(e2); // Done by world

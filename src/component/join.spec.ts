@@ -16,12 +16,12 @@ describe("join", () => {
     const e3 = world.create();
 
     const a = new A();
-    e1.add(a);
-    e2.add(new A());
+    e1.set(a);
+    e2.set(new A());
 
     const b = new B();
-    e1.add(b);
-    e3.add(new B());
+    e1.set(b);
+    e3.set(new B());
 
     // 1 = A + B
     // 2 = A

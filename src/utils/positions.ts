@@ -133,7 +133,7 @@ export class PosManager implements WorldEventHandler, WorldInit {
     if (pos) {
       pos.set(x, y);
     } else {
-      entity._addComp(Pos, new Pos(/* this, */ x, y));
+      entity._setComp(Pos, new Pos(/* this, */ x, y));
       this._entities.set(entity.index, entity);
     }
   }

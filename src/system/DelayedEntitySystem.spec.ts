@@ -31,13 +31,13 @@ describe("delayed entity system", () => {
     world.registerComponent(A).addSystem(myDelayedEntitySystem).start();
 
     let entity = world.create();
-    entity.add(new A());
+    entity.set(new A());
 
     world.process(5);
     expect(fakeCallback).not.toHaveBeenCalled();
 
     let entity2 = world.create();
-    entity2.add(new A());
+    entity2.set(new A());
 
     myDelayedEntitySystem.setEnabled(false);
     world.process(10);

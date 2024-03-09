@@ -153,13 +153,13 @@ async function play(world: World) {
       term(" - ^ghelp\n");
       term(" - ^gquit\n");
     } else if (cmd[0] == "l") {
-      player.add(new Move("left"));
+      player.set(new Move("left"));
     } else if (cmd[0] == "r") {
-      player.add(new Move("right"));
+      player.set(new Move("right"));
     } else if (cmd[0] == "u") {
-      player.add(new Move("up"));
+      player.set(new Move("up"));
     } else if (cmd[0] == "d") {
-      player.add(new Move("down"));
+      player.set(new Move("down"));
     } else {
       term("Unknown command: ^r%s\n", cmd);
     }

@@ -32,23 +32,23 @@ describe("entity system", () => {
 
     let entity = world.create();
 
-    entity.add(new A());
+    entity.set(new A());
     expect(systemA.accept(entity)).toBeFalse();
-    entity.add(new B());
+    entity.set(new B());
     expect(systemA.accept(entity)).toBeTrue();
     entity.remove(A);
     expect(systemA.accept(entity)).toBeFalse();
-    entity.add(new C());
+    entity.set(new C());
     expect(systemA.accept(entity)).toBeFalse();
 
     entity.remove(C);
     expect(systemB.accept(entity)).toBeTrue();
-    entity.add(new B());
+    entity.set(new B());
     expect(systemB.accept(entity)).toBeTrue();
 
     entity.remove(A);
     expect(systemB.accept(entity)).toBeTrue();
-    entity.add(new C());
+    entity.set(new C());
     expect(systemB.accept(entity)).toBeFalse();
   });
 
@@ -73,7 +73,7 @@ describe("entity system", () => {
     expect(systemA.accept(entity)).toBeFalse();
     expect(systemB.accept(entity)).toBeFalse();
 
-    entity.add(new A());
+    entity.set(new A());
     expect(systemA.accept(entity)).toBeTrue();
     expect(systemB.accept(entity)).toBeTrue();
 

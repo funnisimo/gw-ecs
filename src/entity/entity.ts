@@ -3,8 +3,8 @@ import type { Component, AnyComponent } from "../component/component.js";
 export interface ComponentSource {
   currentTick(): number;
 
-  addComponent<T>(entity: Entity, val: T, comp?: Component<T>): void; // TODO - Return replaced value?
-  removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined; // TODO - Return deleted value?
+  setComponent<T>(entity: Entity, val: T, comp?: Component<T>): void; // TODO - Return replaced value?
+  removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined;
 }
 
 export type Index = number;
@@ -73,13 +73,13 @@ export class Entity {
     return data.data;
   }
 
-  add<T>(val: T, comp?: Component<T>): void {
+  set<T>(val: T, comp?: Component<T>): void {
     // @ts-ignore
     comp = comp || val.constructor;
-    this._source.addComponent(this, val, comp);
+    this._source.setComponent(this, val, comp);
   }
 
-  _addComp(comp: AnyComponent, val: any): void {
+  _setComp(comp: AnyComponent, val: any): void {
     const data = this._comps.get(comp);
     if (!data) {
       this._comps.set(comp, new CompData(val, this._source.currentTick()));

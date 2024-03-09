@@ -63,7 +63,7 @@ describe("World", function () {
       world.start();
 
       let entity = world.create();
-      entity.add(new A());
+      entity.set(new A());
 
       world.process(0);
       expect(callback).toHaveBeenCalledTimes(1);

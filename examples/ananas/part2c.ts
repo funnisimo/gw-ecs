@@ -235,10 +235,10 @@ term.on("key", function (name, matches, data) {
     term.processExit(0);
   } else if (["LEFT", "RIGHT", "UP", "DOWN"].includes(name)) {
     const hero = world.getGlobal(Entity);
-    hero.add(new Move(name));
+    hero.set(new Move(name));
   } else if ([" ", "ENTER"].includes(name)) {
     const hero = world.getGlobal(Entity);
-    hero.add(new Open());
+    hero.set(new Open());
   } else {
     term.moveTo(0, 26).eraseLine.red("Unknown key: ", name);
   }
