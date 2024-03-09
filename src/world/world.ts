@@ -130,11 +130,15 @@ export class World implements ComponentSource {
   //   // this.toUpdate = [];
   // }
 
-  process(delta: number = 0): void {
+  runSystems(delta: number = 0) {
+    this.runSystemSet("default", delta);
+  }
+
+  runSystemSet(set: string, delta: number = 0): void {
     this.delta = delta;
     this.time += delta;
 
-    this._systems.run(this, this.time, this.delta);
+    this._systems.runSet(set, this, this.time, this.delta);
 
     // force a cleanup in case no systems run (mainly for testing)
     // also forces a tick

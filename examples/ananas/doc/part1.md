@@ -81,7 +81,7 @@ We are going to add a "global" variable that holds a reference to the terminal o
 
     // ...
     function run() {
-        world.process(16);
+        world.runSystems(16);
         setTimeout(run, 16);
     }
 

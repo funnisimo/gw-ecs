@@ -132,7 +132,7 @@ async function play(world: World) {
   const player = world.getGlobal(Entity); // getStore(Player).singleEntity()!;
 
   while (running) {
-    world.process();
+    world.runSystems();
 
     term("Command> ");
     let cmd = await term.inputField({

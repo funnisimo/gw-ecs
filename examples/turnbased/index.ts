@@ -252,7 +252,7 @@ term.on("key", function (name, matches, data) {
 });
 
 function run() {
-  world.process(16);
+  world.runSystems(16);
   setTimeout(run, 16);
 }
 
