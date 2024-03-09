@@ -22,7 +22,7 @@ describe("Store", () => {
       store.remove(entity);
 
       const a = new A();
-      store.add(entity, a);
+      store.set(entity, a);
       expect(store.has(entity)).toBeTrue();
       expect(store.fetch(entity)).toBe(a);
       expect(store.update(entity)).toBe(a);
@@ -32,14 +32,14 @@ describe("Store", () => {
       expect(store.fetch(entity)).toBeUndefined();
       expect(store.update(entity)).toBeUndefined();
 
-      store.add(entity, a);
+      store.set(entity, a);
       // These are done by world...
       store.destroyEntity(entity); // TODO - take this out of interface
       entity._destroy();
       //
 
       // working on dead entities...
-      store.add(entity, a);
+      store.set(entity, a);
       expect(store.has(entity)).toBeFalse();
       expect(store.fetch(entity)).toBeUndefined();
       expect(store.update(entity)).toBeUndefined();

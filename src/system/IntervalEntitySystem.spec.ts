@@ -52,8 +52,8 @@ describe("interval entity system", () => {
 
     let entityA = world.create();
     let entityB = world.create();
-    world.getStore(A).add(entityA, new A());
-    world.getStore(A).add(entityB, new A());
+    world.getStore(A).set(entityA, new A());
+    world.getStore(A).set(entityB, new A());
 
     world.process(5);
     expect(callback).not.toHaveBeenCalled();
@@ -63,7 +63,7 @@ describe("interval entity system", () => {
     expect(callback).toHaveBeenCalledWith(entityB);
 
     callback.mockClear();
-    world.getStore(B).add(entityB, new B());
+    world.getStore(B).set(entityB, new B());
     world.process(10);
     expect(callback).toHaveBeenCalledWith(entityA);
     expect(callback).not.toHaveBeenCalledWith(entityB);

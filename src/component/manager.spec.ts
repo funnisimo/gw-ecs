@@ -14,8 +14,8 @@ describe("component manager", () => {
 
     let entity = world.create();
 
-    storeA.add(entity, new A());
-    storeB.add(entity, new B());
+    storeA.set(entity, new A());
+    storeB.set(entity, new B());
 
     expect(entity.has(A)).toBeTrue();
     expect(entity.has(B)).toBeTrue();

@@ -41,7 +41,7 @@ class MoveSystem extends EntitySystem {
     super(new Aspect(Move, Pos));
   }
 
-  protected processEntity(entity: Entity, world: World): void {
+  processEntity(world: World, entity: Entity): void {
     const term = world.getGlobal(Term).term;
     const posMgr = world.getGlobal(PosManager);
     const pos = entity.fetch(Pos)!;

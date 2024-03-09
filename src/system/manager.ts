@@ -88,7 +88,9 @@ export class SystemStep {
 }
 
 export class EntitySystemStep extends SystemStep {
+  declare preSystems: EntitySystem[];
   declare systems: EntitySystem[];
+  declare postSystems: EntitySystem[];
 
   // @ts-ignore
   addSystem(sys: EntitySystem | EntitySystemFn, order?: SystemOrder) {
@@ -105,13 +107,13 @@ export class EntitySystemStep extends SystemStep {
     delta: number
   ): boolean {
     let out = false;
-    out = this.systems.reduce((out, sys) => {
+    out = this.preSystems.reduce((out, sys) => {
       return this._runEntitySystem(world, sys, entity, time, delta) || out;
     }, out);
     out = this.systems.reduce((out, sys) => {
       return this._runEntitySystem(world, sys, entity, time, delta) || out;
     }, out);
-    out = this.systems.reduce((out, sys) => {
+    out = this.postSystems.reduce((out, sys) => {
       return this._runEntitySystem(world, sys, entity, time, delta) || out;
     }, out);
     return out;

@@ -143,7 +143,7 @@ class GameTurnSystem extends System {
     });
 
     actors.notify({
-      compAdded(entity, comp) {
+      compSet(entity, comp) {
         gameTurn.schedule.add(entity, comp.actTime);
       },
       compRemoved(entity, _comp) {

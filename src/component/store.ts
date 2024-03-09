@@ -2,14 +2,14 @@ import { Entity } from "../entity/entity.js";
 import { Component } from "./component.js";
 
 export interface StoreWatcher<T> {
-  compAdded?(entity: Entity, comp: T): void;
+  compSet?(entity: Entity, comp: T): void;
   compRemoved?(entity: Entity, comp: T): void;
 }
 
 export interface Store<T> {
   has(entity: Entity): boolean;
 
-  add(entity: Entity, comp: T): void;
+  set(entity: Entity, comp: T): void;
   fetch(entity: Entity): T | undefined;
   update(entity: Entity): T | undefined;
   remove(entity: Entity): T | undefined; // This is immediate
@@ -64,13 +64,11 @@ export class SetStore<T> implements Store<T> {
    * @param comp
    * @returns Prior value - if any
    */
-  add(entity: Entity, comp: T): void {
+  set(entity: Entity, comp: T): void {
     if (!entity.isAlive()) return undefined;
     entity._addComp(this._comp, comp);
     this._data.add(entity);
-    this._watchers.forEach(
-      (w) => w && w.compAdded && w.compAdded(entity, comp)
-    );
+    this._watchers.forEach((w) => w && w.compSet && w.compSet(entity, comp));
   }
 
   fetch(entity: Entity): T | undefined {

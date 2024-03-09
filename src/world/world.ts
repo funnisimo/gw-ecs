@@ -225,7 +225,7 @@ export class World implements ComponentSource {
     if (!comp) throw new Error("Missing constructor!");
     const mgr = this._components.getStore(comp);
     if (!mgr) throw new Error("Using unregistered component: " + comp.name);
-    mgr.add(entity, val);
+    mgr.set(entity, val);
   }
 
   removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined {

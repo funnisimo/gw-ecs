@@ -88,7 +88,7 @@ describe("World", function () {
       world.registerComponents(A).addSystem(system, false);
 
       let entity = world.create();
-      world.getStore(A).add(entity, new A());
+      world.getStore(A).set(entity, new A());
       world.start();
 
       callback.mockClear();

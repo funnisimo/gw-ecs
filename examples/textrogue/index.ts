@@ -92,7 +92,7 @@ class MoveSystem extends EntitySystem {
   constructor() {
     super(new Aspect(Move, Pos));
   }
-  protected processEntity(entity: Entity, world: World): void {
+  processEntity(world: World, entity: Entity): void {
     const posMgr = world.getGlobal(PosManager)!;
     const pos = entity.update(Pos)!;
     const dir = entity.remove(Move)!.dir;
@@ -144,11 +144,12 @@ async function play(world: World) {
     term("\n");
 
     if (cmd[0] == "q") {
-      term("^gok\n");
+      term("^gquit\n");
       term.processExit(0);
+      running = false;
     } else if (cmd[0] == "h") {
       term("^bCommands:\n");
-      term(" - move: ^gleft^, ^gright^, ^gup^, ^gdown\n");
+      term(" - move: ^gl[eft]^, ^gr[ight]^, ^gu[p]^, ^gd[own]\n");
       term(" - ^ghelp\n");
       term(" - ^gquit\n");
     } else if (cmd[0] == "l") {
