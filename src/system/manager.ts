@@ -9,54 +9,93 @@ import {
 } from "./functionSystem.js";
 import { System } from "./system.js";
 
+export type SystemOrder = "pre" | "post" | "normal";
+
 export class SystemStep {
   name: string;
+  preSystems: System[];
   systems: System[];
+  postSystems: System[];
 
   constructor(name: string) {
     this.name = name;
     this.systems = [];
+    this.preSystems = [];
+    this.postSystems = [];
   }
 
   get length(): number {
-    return this.systems.length;
+    return (
+      this.preSystems.length + this.systems.length + this.postSystems.length
+    );
   }
 
-  addSystem(sys: System) {
-    this.systems.push(sys);
+  addSystem(sys: System | SystemFn, order?: SystemOrder) {
+    if (typeof sys === "function") {
+      sys = new FunctionSystem(sys);
+    }
+    if (order === "pre") {
+      this.preSystems.push(sys);
+    } else if (order === "post") {
+      this.postSystems.push(sys);
+    } else {
+      this.systems.push(sys);
+    }
   }
 
   start(world: World) {
+    this.preSystems.forEach((s) => s.start(world));
     this.systems.forEach((s) => s.start(world));
+    this.postSystems.forEach((s) => s.start(world));
   }
 
   run(world: World, time: number, delta: number): boolean {
-    return this.systems.reduce((out, sys) => {
-      if (!sys.shouldRun(world, time, delta)) {
-        return out;
-      }
-      // world._beforeSystemRun();
-      sys.run(world, time, delta);
-      sys.lastTick = world.currentTick();
-      world._afterSystemRun();
-      return true;
-    }, false);
+    let out = false;
+    out = this.preSystems.reduce((out, sys) => {
+      return this._runSystem(world, sys, time, delta) || out;
+    }, out);
+    out = this.systems.reduce((out, sys) => {
+      return this._runSystem(world, sys, time, delta) || out;
+    }, out);
+    out = this.postSystems.reduce((out, sys) => {
+      return this._runSystem(world, sys, time, delta) || out;
+    }, out);
+    return out;
+  }
+
+  _runSystem(world: World, sys: System, time: number, delta: number): boolean {
+    if (!sys.shouldRun(world, time, delta)) {
+      return false;
+    }
+    // world._beforeSystemRun();
+    sys.run(world, time, delta);
+    sys.lastTick = world.currentTick();
+    world._afterSystemRun();
+    return true;
   }
 
   rebase(zeroTime: number) {
+    this.preSystems.forEach((s) => s.rebase(zeroTime));
     this.systems.forEach((s) => s.rebase(zeroTime));
+    this.postSystems.forEach((s) => s.rebase(zeroTime));
   }
 
-  forEach(fn: (sys: System) => void) {
-    this.systems.forEach(fn);
+  forEach(fn: (sys: System, stepName: string) => void) {
+    this.preSystems.forEach((s) => fn(s, "pre-" + this.name));
+    this.systems.forEach((s) => fn(s, this.name));
+    this.postSystems.forEach((s) => fn(s, "post-" + this.name));
   }
 }
 
 export class EntitySystemStep extends SystemStep {
   declare systems: EntitySystem[];
 
-  addSystem(sys: EntitySystem) {
-    this.systems.push(sys);
+  // @ts-ignore
+  addSystem(sys: EntitySystem | EntitySystemFn, order?: SystemOrder) {
+    if (typeof sys === "function") {
+      sys = new EntityFunctionSystem(sys);
+    }
+    super.addSystem(sys, order);
   }
 
   runEntity(
@@ -65,20 +104,39 @@ export class EntitySystemStep extends SystemStep {
     time: number,
     delta: number
   ): boolean {
-    return this.systems.reduce((out, sys) => {
-      if (!sys.shouldRun(world, time, delta)) {
-        return out;
-      }
-      if (!sys.accept(entity)) return out;
-      sys.processEntity(world, entity, time, delta);
-      sys.lastTick = world.currentTick();
-      world._afterSystemRun();
-      return true;
-    }, false);
+    let out = false;
+    out = this.systems.reduce((out, sys) => {
+      return this._runEntitySystem(world, sys, entity, time, delta) || out;
+    }, out);
+    out = this.systems.reduce((out, sys) => {
+      return this._runEntitySystem(world, sys, entity, time, delta) || out;
+    }, out);
+    out = this.systems.reduce((out, sys) => {
+      return this._runEntitySystem(world, sys, entity, time, delta) || out;
+    }, out);
+    return out;
   }
 
-  forEach(fn: (sys: EntitySystem) => void) {
-    this.systems.forEach(fn);
+  _runEntitySystem(
+    world: World,
+    sys: EntitySystem,
+    entity: Entity,
+    time: number,
+    delta: number
+  ): boolean {
+    if (!sys.shouldRun(world, time, delta)) {
+      return false;
+    }
+    if (!sys.accept(entity)) return false;
+    sys.processEntity(world, entity, time, delta);
+    sys.lastTick = world.currentTick();
+    world._afterSystemRun();
+    return true;
+  }
+
+  forEach(fn: (sys: EntitySystem, order: SystemOrder) => void) {
+    // @ts-ignore
+    super.forEach(fn);
   }
 }
 
@@ -102,6 +160,9 @@ export class SystemSet {
         "Cannot reset steps on a SystemSet that already has systems in it."
       );
     }
+    if (steps.some((name) => name.includes("-"))) {
+      throw new Error("SystemSets cannot have names that include a '-'.");
+    }
     this.steps = steps.map((n) => this._createStep(n));
   }
 
@@ -113,6 +174,10 @@ export class SystemSet {
     if (typeof system === "function") {
       system = new FunctionSystem(system);
     }
+    let order: SystemOrder = "normal";
+    if (stepName.includes("-")) {
+      [order, stepName] = stepName.split("-") as [SystemOrder, string];
+    }
     const step = this.steps.find((s) => s.name == stepName);
     if (!step) {
       throw new Error(
@@ -123,11 +188,12 @@ export class SystemSet {
           "]"
       );
     }
-    step.addSystem(system);
+    step.addSystem(system, order);
     return this;
   }
 
   addStep(name: string, opts: AddStepOpts = {}): this {
+    if (name.includes("-")) throw new Error('step names cannot include "-".');
     if (opts.before) {
       const index = this.steps.findIndex((step) => step.name == opts.before);
       if (index < 0) {
@@ -184,14 +250,16 @@ export class SystemSet {
 
   forEach(fn: (system: System, step: string) => void) {
     this.steps.forEach((step) => {
-      step.forEach((sys) => fn(sys, step.name));
+      step.forEach(fn);
     });
   }
 }
 
 export class EntitySystemSet extends SystemSet {
+  // @ts-ignore
   declare steps: EntitySystemStep[];
 
+  // @ts-ignore
   _createStep(name: string): EntitySystemStep {
     return new EntitySystemStep(name);
   }
