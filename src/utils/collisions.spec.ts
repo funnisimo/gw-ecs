@@ -1,46 +1,53 @@
 import "jest-extended";
-import { CollisionManager } from "./collisions";
-import { Aspect, World } from "../world";
+import { Collider, CollisionManager } from "./collisions";
+import { World } from "../world";
 
-class A {}
-class B {}
-
-describe("CollisionManager", () => {
-  test("basic collision", () => {
-    const collideFn = jest.fn();
-
-    const world = new World();
-    const manager = new CollisionManager();
-    const init = jest.spyOn(manager, "worldInit");
-    world.setGlobal(manager);
-    expect(init).toHaveBeenCalled();
-
-    manager.register(new Aspect(), new Aspect(), collideFn);
-
-    const actor = world.create();
-    const target = world.create();
-
-    manager.collide(actor, target);
-    expect(collideFn).toHaveBeenCalledWith(actor, target, world);
+describe("collisions", () => {
+  describe("Collider", () => {
+    test("basics", () => {
+      const c = new Collider("a");
+      expect(c.tags).toEqual(["a"]);
+      expect(c.match([])).toBeFalse();
+      expect(c.match(["a"])).toBeTrue();
+    });
   });
 
-  test("basic match collision", () => {
-    const collideFn = jest.fn();
+  describe("CollisionManager", () => {
+    test("basic collision", () => {
+      const collideFn = jest.fn();
 
-    const world = new World().registerComponents(A, B);
-    const manager = new CollisionManager();
-    world.setGlobal(manager);
+      const world = new World();
+      const manager = new CollisionManager();
+      const init = jest.spyOn(manager, "worldInit");
+      world.setGlobal(manager);
+      expect(init).toHaveBeenCalled();
 
-    manager.register(new Aspect(A), new Aspect(B), collideFn);
+      manager.register("a", "a", collideFn);
 
-    const actor = world.create(new A());
-    const target = world.create();
+      const actor = world.create(new Collider("a"));
+      const target = world.create(new Collider("a"));
 
-    manager.collide(actor, target);
-    expect(collideFn).not.toHaveBeenCalled();
+      manager.collide(actor, target);
+      expect(collideFn).toHaveBeenCalledWith(actor, target, world);
+    });
 
-    target.add(new B());
-    manager.collide(actor, target);
-    expect(collideFn).toHaveBeenCalledWith(actor, target, world);
+    test("basic match collision", () => {
+      const collideFn = jest.fn();
+
+      const world = new World();
+      const manager = new CollisionManager();
+      world.setGlobal(manager);
+
+      manager.register("a", "b", collideFn);
+
+      const actorA = world.create(new Collider("a"));
+      const actorB = world.create(new Collider("b"));
+
+      manager.collide(actorB, actorA);
+      expect(collideFn).not.toHaveBeenCalled();
+
+      manager.collide(actorA, actorB);
+      expect(collideFn).toHaveBeenCalledWith(actorA, actorB, world);
+    });
   });
 });

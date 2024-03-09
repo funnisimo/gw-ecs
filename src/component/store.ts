@@ -20,6 +20,10 @@ export interface Store<T> {
   notify(watcher: StoreWatcher<T>): void;
   stopNotify(watcher: StoreWatcher<T>): void;
 
+  entities(): Entity[];
+  values(): T[];
+  entries(): [Entity, T][];
+
   // TODO - Move these to different interface
   destroyEntity(entity: Entity): void;
   destroyEntities(entities: Entity[]): void;
@@ -108,8 +112,8 @@ export class SetStore<T> implements Store<T> {
     }
   }
 
-  entities() {
-    return this._data.keys();
+  entities(): Entity[] {
+    return [...this._data.keys()];
   }
 
   singleValue(): T | undefined {
@@ -117,10 +121,12 @@ export class SetStore<T> implements Store<T> {
     return entity && (entity.fetch(this._comp) as T);
   }
 
-  *values() {
+  values(): T[] {
+    let out: T[] = [];
     for (let entity of this._data.keys()) {
-      yield entity.fetch(this._comp) as T;
+      out.push(entity.fetch(this._comp)!);
     }
+    return out;
   }
 
   singleEntry(): [Entity, T] | undefined {
@@ -128,10 +134,8 @@ export class SetStore<T> implements Store<T> {
     return entity && [entity, entity.fetch(this._comp) as T];
   }
 
-  *entries() {
-    for (let entity of this._data.keys()) {
-      yield [entity, entity.fetch(this._comp)] as [Entity, T];
-    }
+  entries(): [Entity, T][] {
+    return this.entities().map((e) => [e, e.fetch(this._comp)!]);
   }
 
   // *added(sinceTick): Iterable<[Entity,T]> {}

@@ -56,7 +56,7 @@ class OpenSystem extends EntityTurnSystem {
     super(new Aspect(Open, Pos));
   }
 
-  protected processEntity(entity: Entity, world: World): void {
+  processEntity(world: World, entity: Entity): void {
     const term = world.getGlobal(Term).term;
     const posMgr = world.getGlobal(PosManager);
     const pos = entity.fetch(Pos)!;
@@ -103,7 +103,7 @@ class MoveSystem extends EntityTurnSystem {
     super(new Aspect(Move, Pos));
   }
 
-  protected processEntity(entity: Entity, world: World): void {
+  processEntity(world: World, entity: Entity): void {
     const term = world.getGlobal(Term).term;
     const posMgr = world.getGlobal(PosManager);
     const pos = entity.fetch(Pos)!;
@@ -145,7 +145,7 @@ class PedroSystem extends EntityTurnSystem {
     super(new Aspect(Pedro));
   }
 
-  protected processEntity(entity: Entity, world: World): void {
+  processEntity(world: World, entity: Entity): void {
     const pedro = entity.update(Pedro)!;
     const pedroPos = entity.fetch(Pos)!;
 
@@ -161,7 +161,7 @@ class PedroSystem extends EntityTurnSystem {
 
     if (!goal && pedro.path.length == 0) {
       // Pick a random box...
-      const boxes = [...world.getStore(Box).entities()];
+      const boxes = world.getStore(Box).entities();
       const box = ROT.RNG.getItem(boxes)!;
       // Find a path to that box...
       goal = box.fetch(Pos)!;
@@ -261,7 +261,7 @@ class FovSystem extends EntitySystem {
     super(new Aspect(FOV).updated(Pos));
   }
 
-  protected processEntity(entity: Entity, world: World): void {
+  processEntity(world: World, entity: Entity): void {
     const fov = entity.update(FOV)!;
     const pos = entity.fetch(Pos)!;
 
@@ -361,7 +361,7 @@ function digMap(world: World) {
     const sprite = blocks ? WALL_SPRITE : FLOOR_SPRITE;
     const tile = world.create(new Tile(), sprite);
     if (blocks) {
-      tile.add(new Collider());
+      tile.add(new Collider("tile"));
     } else {
       floors.push({ x, y });
     }
@@ -392,7 +392,12 @@ function placeHero(world: World, locs: XY[]): XY {
   const posMgr = world.getGlobal(PosManager);
   var index = Math.floor(ROT.RNG.getUniform() * locs.length);
   var loc = locs.splice(index, 1)[0];
-  const hero = world.create(new Hero(), HERO_SPRITE, new FOV(), new Collider());
+  const hero = world.create(
+    new Hero(),
+    HERO_SPRITE,
+    new FOV(),
+    new Collider("actor")
+  );
   posMgr.set(hero, loc.x, loc.y);
   world.setGlobal(new GameInfo(hero));
   return loc;
@@ -410,7 +415,7 @@ function placePedro(world: World, avoidLoc: XY, locs: XY[]) {
   const index = dist.indexOf(maxDist);
   var loc = locs.splice(index, 1)[0];
 
-  const pedro = world.create(new Pedro(), PEDRO_SPRITE, new Collider());
+  const pedro = world.create(new Pedro(), PEDRO_SPRITE, new Collider("actor"));
   posMgr.set(pedro, loc.x, loc.y);
 }
 
@@ -463,10 +468,8 @@ const world = new World()
   .setGlobal(new Term(term))
   .setGlobal(new CollisionManager(), (col) => {
     col
-      .register(HERO_ASPECT, PEDRO_ASPECT, gameOver)
-      .register(PEDRO_ASPECT, HERO_ASPECT, gameOver)
-      .register(HERO_ASPECT, TILE_ASPECT, blockedMove)
-      .register(PEDRO_ASPECT, TILE_ASPECT, blockedMove);
+      .register(["actor"], ["actor"], gameOver)
+      .register(["actor"], "tile", blockedMove);
   })
   .addSystem(new PedroSystem())
   .addSystem(new MoveSystem())
