@@ -3,6 +3,7 @@ import { World } from "../world";
 
 class A {}
 class B {}
+class C extends A {}
 
 describe("component manager", () => {
   it("should delete all components when an entity is removed", () => {
@@ -34,5 +35,24 @@ describe("component manager", () => {
 
     expect(storeA.fetch(entity)).toBeUndefined();
     expect(storeB.fetch(entity)).toBeUndefined();
+  });
+
+  test("subclass", () => {
+    let world = new World();
+    world.registerComponents(A, B);
+
+    const c = new C();
+    const entity = world.create(c);
+    expect(entity.fetch(A)).toBe(c);
+  });
+
+  test("subclass also registered", () => {
+    let world = new World();
+    world.registerComponents(A, B, C);
+
+    const c = new C();
+    const entity = world.create(c);
+    expect(entity.fetch(A)).toBeUndefined();
+    expect(entity.fetch(C)).toBe(c);
   });
 });

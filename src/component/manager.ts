@@ -15,8 +15,12 @@ export class ComponentManager {
     this.stores.set(comp, store);
   }
 
-  getStore<T>(comp: Component<T>): CompStore<T> {
-    return this.stores.get(comp) as CompStore<T>;
+  getStore<T>(comp: Component<T>): CompStore<T> | undefined {
+    do {
+      const store = this.stores.get(comp);
+      if (store) return store;
+      comp = Object.getPrototypeOf(comp);
+    } while (comp && !comp.isPrototypeOf(Object));
   }
 
   destroyEntity(entity: Entity): void {
