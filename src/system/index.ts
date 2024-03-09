@@ -7,3 +7,4 @@ export * from "./entitySystem.js";
 export * from "./delayedEntitySystem.js";
 export * from "./intervalEntitySystem.js";
 export * from "./functionSystem.js";
+export * from "./manager.js";

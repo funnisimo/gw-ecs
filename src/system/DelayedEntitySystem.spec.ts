@@ -33,18 +33,18 @@ describe("delayed entity system", () => {
     let entity = world.create();
     entity.set(new A());
 
-    world.process(5);
+    world.runSystems(5);
     expect(fakeCallback).not.toHaveBeenCalled();
 
     let entity2 = world.create();
     entity2.set(new A());
 
     myDelayedEntitySystem.setEnabled(false);
-    world.process(10);
+    world.runSystems(10);
     expect(fakeCallback).not.toHaveBeenCalled();
 
     myDelayedEntitySystem.setEnabled(true);
-    world.process(5);
+    world.runSystems(5);
     expect(fakeCallback).toHaveBeenCalledTimes(2); // Delay is for system, not per entity
     expect(fakeCallback).toHaveBeenCalledWith(entity);
     expect(fakeCallback).toHaveBeenCalledWith(entity2);

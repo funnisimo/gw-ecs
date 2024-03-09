@@ -1,10 +1,16 @@
 import { System } from "../system/system.js";
 import { ComponentManager } from "../component/manager.js";
-import { Store } from "../component/store.js";
+import { CompStore } from "../component/store.js";
 import { ComponentSource, Entities, Entity } from "../entity/entity.js";
 import { AnyComponent, Component } from "../component/component.js";
 import { Resources } from "./resources.js";
 import { AddStepOpts, SystemManager } from "../system/manager.js";
+import {
+  Queue,
+  QueueManager,
+  QueueReader,
+  QueueStore,
+} from "../utils/queue.js";
 
 export interface WorldInit {
   worldInit?(world: World): void;
@@ -17,6 +23,7 @@ export interface WorldEventHandler {
 export class World implements ComponentSource {
   _systems: SystemManager;
   _components: ComponentManager;
+  _queues: QueueManager;
   _entities: Entities;
   _toDestroy: Entity[];
   delta: number;
@@ -32,6 +39,7 @@ export class World implements ComponentSource {
     this._currentTick = 1;
     this._components = new ComponentManager();
     this._systems = new SystemManager();
+    this._queues = new QueueManager();
     this._toDestroy = [];
     this._globals = new Resources();
     this.notify = [];
@@ -41,22 +49,27 @@ export class World implements ComponentSource {
     return this._currentTick;
   }
 
-  registerComponent<T>(comp: Component<T>, store?: Store<T>): World {
+  registerComponent<T>(comp: Component<T>, store?: CompStore<T>): this {
     this._components.register(comp, store);
     return this;
   }
 
-  registerComponents(...comp: AnyComponent[]): World {
+  registerComponents(...comp: AnyComponent[]): this {
     comp.forEach((c) => {
       this._components.register(c);
     });
     return this;
   }
 
+  registerQueue<T>(comp: Queue<T>): this {
+    this._queues.register(comp);
+    return this;
+  }
+
   setGlobal<T>(
     val: T & WorldInit,
     initFn?: (global: T, world: World) => void
-  ): World {
+  ): this {
     this._globals.set(val);
     const worldInit = val["worldInit"];
     if (worldInit) {
@@ -68,7 +81,7 @@ export class World implements ComponentSource {
     return this;
   }
 
-  addSystemSet(name: string, steps?: string[]): World {
+  addSystemSet(name: string, steps?: string[]): this {
     this._systems.addSet(name, steps);
     return this;
   }
@@ -77,7 +90,7 @@ export class World implements ComponentSource {
   addSystemStep(step: string, opts?: AddStepOpts): World;
   addSystemStep(
     ...args: [string, AddStepOpts?] | [string, string, AddStepOpts?]
-  ): World {
+  ): this {
     // @ts-ignore
     this._systems.addStep(...args);
     return this;
@@ -91,7 +104,7 @@ export class World implements ComponentSource {
     inStep: string,
     enable?: boolean
   ): World;
-  addSystem(system: System, ...args: any[]): World {
+  addSystem(system: System, ...args: any[]): this {
     if (typeof args.at(-1) === "boolean") {
       system.setEnabled(args.at(-1));
       args.pop();
@@ -100,18 +113,32 @@ export class World implements ComponentSource {
     return this;
   }
 
-  init(fn: (world: World) => void): World {
+  init(fn: (world: World) => void): this {
     fn(this);
     return this;
   }
 
-  start(): World {
+  start(): this {
     this._systems.start(this);
     return this;
   }
 
-  getStore<T>(comp: Component<T>): Store<T> {
-    return this._components.getStore(comp);
+  getStore<T>(comp: Component<T>): CompStore<T> {
+    const store = this._components.getStore(comp);
+    if (!store) throw new Error("Failed to find component store: " + comp.name);
+    return store;
+  }
+
+  getQueue<T>(queue: Queue<T>): QueueStore<T> {
+    const store = this._queues.getStore(queue);
+    if (!store) throw new Error("Failed to find queue store: " + queue.name);
+    return store;
+  }
+
+  getReader<T>(queue: Queue<T>, onlyNew = false): QueueReader<T> {
+    const store = this._queues.getStore(queue);
+    if (!store) throw new Error("Failed to find queue: " + queue.name);
+    return store.reader(onlyNew);
   }
 
   create(...withComps: any[]): Entity {

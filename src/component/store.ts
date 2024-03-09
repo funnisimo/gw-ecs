@@ -6,7 +6,7 @@ export interface StoreWatcher<T> {
   compRemoved?(entity: Entity, comp: T): void;
 }
 
-export interface Store<T> {
+export interface CompStore<T> {
   has(entity: Entity): boolean;
 
   set(entity: Entity, comp: T): void;
@@ -29,9 +29,9 @@ export interface Store<T> {
   destroyEntities(entities: Entity[]): void;
 }
 
-export type AnyStore = Store<any>;
+export type AnyStore = CompStore<any>;
 
-export class SetStore<T> implements Store<T> {
+export class SetStore<T> implements CompStore<T> {
   _comp: Component<T>;
   _data: Set<Entity>;
   _watchers: (StoreWatcher<T> | null)[];
@@ -147,3 +147,35 @@ export class SetStore<T> implements Store<T> {
     entities.forEach((e) => this.destroyEntity(e));
   }
 }
+
+/*
+class Person {
+    name = 'John';
+    age = 23;
+}
+
+class Actor extends Person {
+    troup = 'Cats';
+}
+
+const actor = new Actor();
+const person = new Person();
+
+const mgr = new Map();
+mgr.set(Person, 'person');
+
+function getEntry(mgr, proto) {
+    do {
+        // console.log(proto);
+        // console.log(mgr.get(proto));
+        if (mgr.has(proto)) return mgr.get(proto);
+        proto = Object.getPrototypeOf(proto);
+    } while (proto && !proto.isPrototypeOf(Object));
+}
+
+console.log('person entry = ' + getEntry(mgr, person.constructor));
+console.log('actor entry = ' + getEntry(mgr, actor.constructor));
+
+const obj = { a: 1 };
+console.log('obj entry = ' + getEntry(mgr, obj.constructor));
+*/

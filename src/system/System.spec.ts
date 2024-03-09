@@ -23,7 +23,7 @@ describe("System", () => {
 
     world.addSystem(system);
     world.start();
-    world.process();
+    world.runSystems();
 
     expect(callback).toHaveBeenCalled();
   });
@@ -36,13 +36,13 @@ describe("System", () => {
     world.addSystem(system);
     system.setEnabled(false);
     world.start();
-    world.process();
+    world.runSystems();
 
     expect(callback).toHaveBeenCalledTimes(0);
 
     callback.mockClear();
     system.setEnabled(true);
-    world.process();
+    world.runSystems();
 
     expect(callback).toHaveBeenCalledTimes(1);
   });

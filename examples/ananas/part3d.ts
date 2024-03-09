@@ -161,7 +161,7 @@ class PedroSystem extends EntityTurnSystem {
 
     if (!goal && pedro.path.length == 0) {
       // Pick a random box...
-      const boxes = world.getStore(Box).entities();
+      const boxes = world.getStore(Box)!.entities();
       const box = ROT.RNG.getItem(boxes)!;
       // Find a path to that box...
       goal = box.fetch(Pos)!;

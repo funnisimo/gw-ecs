@@ -46,7 +46,7 @@ describe("World", function () {
       let idA = world.create();
       let idB = world.create();
       world.queueDestroy(idA);
-      world.process();
+      world.runSystems();
       let idC = world.create();
       let idD = world.create();
       expect(idA.index).toEqual(0);
@@ -65,19 +65,19 @@ describe("World", function () {
       let entity = world.create();
       entity.set(new A());
 
-      world.process(0);
+      world.runSystems(0);
       expect(callback).toHaveBeenCalledTimes(1);
 
       // entity is not deleted until sytem 'process' completes...
       callback.mockClear();
       world.queueDestroy(entity);
       world.queueDestroy(entity); // Can remove multiple times
-      world.process(0);
+      world.runSystems(0);
 
       expect(callback).toHaveBeenCalledTimes(1);
 
       callback.mockClear();
-      world.process(0);
+      world.runSystems(0);
       expect(callback).not.toHaveBeenCalled();
     });
 
@@ -88,16 +88,16 @@ describe("World", function () {
       world.registerComponents(A).addSystem(system, false);
 
       let entity = world.create();
-      world.getStore(A).set(entity, new A());
+      world.getStore(A)!.set(entity, new A());
       world.start();
 
       callback.mockClear();
-      world.process(1);
+      world.runSystems(1);
       expect(callback).not.toHaveBeenCalled();
       system.setEnabled(true);
 
       callback.mockClear();
-      world.process(1);
+      world.runSystems(1);
       expect(callback).toHaveBeenCalledWith(entity);
     });
   });
@@ -148,13 +148,13 @@ describe("World", function () {
         .start();
 
       expect(world.entities().count()).toEqual(0);
-      world.process();
-      world.process();
-      world.process();
+      world.runSystems();
+      world.runSystems();
+      world.runSystems();
       expect(world.entities().count()).toEqual(3);
       sysCreate.setEnabled(false);
       sysDelete.setEnabled(true);
-      world.process();
+      world.runSystems();
       expect(world.entities().count()).toEqual(0);
     });
 
@@ -169,13 +169,13 @@ describe("World", function () {
         .start();
 
       expect(world.entities().count()).toEqual(0);
-      world.process();
-      world.process();
-      world.process();
+      world.runSystems();
+      world.runSystems();
+      world.runSystems();
       expect(world.entities().count()).toEqual(3);
       sysCreate.setEnabled(false);
       sysDelete.setEnabled(true);
-      world.process();
+      world.runSystems();
       expect(world.entities().count()).toEqual(0);
     });
   });

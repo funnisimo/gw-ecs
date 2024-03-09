@@ -64,7 +64,7 @@ class DrawSystem extends System {
   start(world: World) {
     super.start(world);
     this._mgr = world.getGlobal(PosManager);
-    const store = world.getStore(Player);
+    const store = world.getStore(Player)!;
     const entity = store.singleEntity()!;
     this._pos = entity.fetch(Pos)!;
   }

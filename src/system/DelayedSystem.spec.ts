@@ -16,19 +16,19 @@ describe("delayed system", () => {
     }
   }
 
-  it("should call process after the given delay", () => {
+  it("should call our system after the given delay", () => {
     let world = new World();
     let callback = jest.fn();
     world.addSystem(new MyDelayedSystem(10, callback)).start();
 
-    world.process(5);
+    world.runSystems(5);
     expect(callback).not.toHaveBeenCalled();
 
-    world.process(5);
+    world.runSystems(5);
     expect(callback).toHaveBeenCalled();
 
     callback.mockClear();
-    world.process(10);
+    world.runSystems(10);
     expect(callback).not.toHaveBeenCalled();
   });
 
@@ -37,7 +37,7 @@ describe("delayed system", () => {
     let callback = jest.fn();
     world.addSystem(new MyDelayedSystem(10, callback), false).start();
 
-    world.process(20);
+    world.runSystems(20);
     expect(callback).not.toHaveBeenCalled();
   });
 
@@ -48,16 +48,16 @@ describe("delayed system", () => {
       let system = new MyDelayedSystem(10, callback);
       world.addSystem(system).start();
 
-      world.process(5);
+      world.runSystems(5);
       expect(callback).not.toHaveBeenCalled();
 
       callback.mockClear();
       system.runIn(10);
-      world.process(5);
+      world.runSystems(5);
       expect(callback).not.toHaveBeenCalled();
 
       callback.mockClear();
-      world.process(10);
+      world.runSystems(10);
       expect(callback).toHaveBeenCalled();
     });
 
@@ -67,14 +67,14 @@ describe("delayed system", () => {
       let system = new MyDelayedSystem(10, callback);
       world.addSystem(system).start();
 
-      world.process(5);
+      world.runSystems(5);
       expect(callback).not.toHaveBeenCalled();
 
       callback.mockClear();
       system.runIn(10);
       expect(system.isEnabled()).toBeTrue();
 
-      world.process(15);
+      world.runSystems(15);
       expect(callback).toHaveBeenCalled();
       expect(system.isEnabled()).toBeFalse();
     });

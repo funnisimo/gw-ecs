@@ -24,23 +24,23 @@ describe("interval system", () => {
 
     world.addSystem(myIntervalSystem).start();
 
-    world.process(5);
+    world.runSystems(5);
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
-    world.process(10);
+    world.runSystems(10);
     expect(callback).toHaveBeenCalled();
 
     callback.mockClear();
-    world.process(5);
+    world.runSystems(5);
     expect(callback).toHaveBeenCalled();
 
     callback.mockClear();
-    world.process(9);
+    world.runSystems(9);
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
-    world.process(1);
+    world.runSystems(1);
     expect(callback).toHaveBeenCalled();
   });
 
@@ -53,21 +53,21 @@ describe("interval system", () => {
     world.addSystem(myIntervalSystem).start();
 
     callback.mockClear();
-    world.process(10);
+    world.runSystems(10);
     expect(callback).toHaveBeenCalled();
 
     callback.mockClear();
-    world.process(9);
+    world.runSystems(9);
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
     myIntervalSystem.setEnabled(false);
-    world.process(1);
+    world.runSystems(1);
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
     myIntervalSystem.setEnabled(true);
-    world.process(1);
+    world.runSystems(1);
     expect(callback).toHaveBeenCalled();
   });
 
@@ -81,23 +81,23 @@ describe("interval system", () => {
       world.addSystem(myIntervalSystem).start();
 
       callback.mockClear();
-      world.process(30);
+      world.runSystems(30);
       expect(callback).toHaveBeenCalled();
 
       callback.mockClear();
-      world.process(0);
+      world.runSystems(0);
       expect(callback).toHaveBeenCalled();
 
       callback.mockClear();
-      world.process(0);
+      world.runSystems(0);
       expect(callback).toHaveBeenCalled();
 
       callback.mockClear();
-      world.process(0);
+      world.runSystems(0);
       expect(callback).not.toHaveBeenCalled();
 
       callback.mockClear();
-      world.process(10);
+      world.runSystems(10);
       expect(callback).toHaveBeenCalled();
     });
 
@@ -111,23 +111,23 @@ describe("interval system", () => {
       world.addSystem(myIntervalSystem).start();
 
       callback.mockClear();
-      world.process(30);
+      world.runSystems(30);
       expect(callback).toHaveBeenCalled();
 
       callback.mockClear();
-      world.process(0);
+      world.runSystems(0);
       expect(callback).not.toHaveBeenCalled();
 
       callback.mockClear();
-      world.process(19);
+      world.runSystems(19);
       expect(callback).not.toHaveBeenCalled();
 
       callback.mockClear();
-      world.process(0);
+      world.runSystems(0);
       expect(callback).not.toHaveBeenCalled();
 
       callback.mockClear();
-      world.process(1);
+      world.runSystems(1);
       expect(callback).toHaveBeenCalled();
     });
   });

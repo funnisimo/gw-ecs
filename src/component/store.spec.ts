@@ -11,7 +11,7 @@ describe("Store", () => {
       world.start();
 
       let entity = world.create();
-      let store = world.getStore(A);
+      let store = world.getStore(A)!;
 
       let component = store.fetch(entity);
       expect(component).toBeUndefined();
@@ -51,7 +51,7 @@ describe("Store", () => {
       world.registerComponent(A);
       world.start();
 
-      const store = world.getStore(A);
+      const store = world.getStore(A)!;
       const a1 = new A();
       const e1 = world.create(a1);
       const a2 = new A();

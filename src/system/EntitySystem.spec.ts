@@ -69,7 +69,7 @@ describe("entity system", () => {
 
     let entity = world.create();
 
-    world.process(1);
+    world.runSystems(1);
     expect(systemA.accept(entity)).toBeFalse();
     expect(systemB.accept(entity)).toBeFalse();
 
@@ -77,7 +77,7 @@ describe("entity system", () => {
     expect(systemA.accept(entity)).toBeTrue();
     expect(systemB.accept(entity)).toBeTrue();
 
-    world.process(1);
+    world.runSystems(1);
     expect(systemA.accept(entity)).toBeFalse();
     expect(systemB.accept(entity)).toBeFalse();
 
@@ -85,7 +85,7 @@ describe("entity system", () => {
     expect(systemA.accept(entity)).toBeFalse();
     expect(systemB.accept(entity)).toBeTrue();
 
-    world.process(1);
+    world.runSystems(1);
     expect(systemA.accept(entity)).toBeFalse();
     expect(systemB.accept(entity)).toBeFalse();
   });

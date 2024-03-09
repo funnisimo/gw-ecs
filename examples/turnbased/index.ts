@@ -137,7 +137,7 @@ class GameTurnSystem extends System {
   start(world: World) {
     const gameTurn = world.getGlobal(GameTurn);
 
-    const actors = world.getStore(Actor);
+    const actors = world.getStore(Actor)!;
     actors.forEach((e, a) => {
       gameTurn.schedule.add(e, a.actTime); // - add to schedule
     });

@@ -9,8 +9,8 @@ describe("component manager", () => {
     let world = new World();
     world.registerComponents(A).registerComponents(B);
 
-    let storeA = world.getStore(A);
-    let storeB = world.getStore(B);
+    let storeA = world.getStore(A)!;
+    let storeB = world.getStore(B)!;
 
     let entity = world.create();
 
@@ -27,7 +27,7 @@ describe("component manager", () => {
     expect(storeA.fetch(entity)).toBeInstanceOf(A);
     expect(storeB.fetch(entity)).toBeInstanceOf(B);
 
-    world.process();
+    world.runSystems();
     expect(entity.isAlive()).toBeFalse();
     expect(entity.has(A)).toBeFalse();
     expect(entity.has(B)).toBeFalse();
