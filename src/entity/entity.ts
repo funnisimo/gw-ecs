@@ -10,13 +10,13 @@ export interface ComponentSource {
 export type Index = number;
 export type Gen = number;
 
-class CompData {
-  data: any;
+class CompData<T> {
+  data: T;
   added: number;
   updated: number;
   removed: number;
 
-  constructor(data: any, added: number) {
+  constructor(data: T, added: number) {
     this.data = data;
     this.added = this.updated = added;
     this.removed = -1;
@@ -29,17 +29,19 @@ class CompData {
   }
 }
 
+type AnyCompData = CompData<any>;
+
 export class Entity {
   index: Index;
   gen: Gen;
 
-  _source: ComponentSource;
-  _comps: Map<AnyComponent, CompData>;
+  _source: ComponentSource | null;
+  _comps: Map<AnyComponent, AnyCompData>;
 
-  constructor(source: ComponentSource, index: Index, gen: Gen = 1) {
+  constructor(index: Index, gen: Gen = 1, source?: ComponentSource) {
     this.index = index;
     this.gen = gen;
-    this._source = source;
+    this._source = source || null;
     this._comps = new Map();
   }
 
@@ -76,15 +78,20 @@ export class Entity {
   set<T>(val: T, comp?: Component<T>): void {
     // @ts-ignore
     comp = comp || val.constructor;
-    this._source.setComponent(this, val, comp);
+    this._source
+      ? this._source.setComponent(this, val, comp)
+      : this._setComp(comp!, val);
   }
 
   _setComp(comp: AnyComponent, val: any): void {
     const data = this._comps.get(comp);
     if (!data) {
-      this._comps.set(comp, new CompData(val, this._source.currentTick()));
+      this._comps.set(
+        comp,
+        new CompData(val, this._source ? this._source.currentTick() : 0)
+      );
     } else {
-      data.added = data.updated = this._source.currentTick();
+      data.added = data.updated = this._source ? this._source.currentTick() : 0;
       data.removed = -1;
       data.data = val;
     }
@@ -96,13 +103,15 @@ export class Entity {
   }
 
   remove<T>(comp: Component<T>): T | undefined {
-    return this._source.removeComponent(this, comp);
+    return this._source
+      ? this._source.removeComponent(this, comp)
+      : this._removeComp(comp);
   }
 
   _removeComp<T>(comp: AnyComponent): T | undefined {
     const data = this._comps.get(comp);
     if (data && data.removed < 0) {
-      data.removed = this._source.currentTick();
+      data.removed = this._source ? this._source.currentTick() : 0;
       return data.data;
     }
     return undefined;
@@ -123,7 +132,7 @@ export class Entity {
   _updateComp(comp: AnyComponent): void {
     const data = this._comps.get(comp);
     if (data) {
-      data.updated = this._source.currentTick();
+      data.updated = this._source ? this._source.currentTick() : 0;
     }
   }
 
@@ -166,11 +175,11 @@ export class Entities {
     const index = this._all.findIndex((e) => typeof e === "number");
     if (index >= 0) {
       const oldGen = this._all[index] as number;
-      const entity = new Entity(this._source, index, oldGen + 1);
+      const entity = new Entity(index, oldGen + 1, this._source);
       this._all[index] = entity;
       return entity;
     }
-    const newE = new Entity(this._source, this._all.length);
+    const newE = new Entity(this._all.length, 1, this._source);
     this._all.push(newE);
     return newE;
   }

@@ -34,13 +34,13 @@ class GameInfo {
 
 abstract class EntityTurnSystem extends EntitySystem {
   isEnabled(): boolean {
-    return super.isEnabled() && this.world.getGlobal(GameInfo).takeTurn;
+    return super.isEnabled() && this.world.getUnique(GameInfo).takeTurn;
   }
 }
 
 class TurnOverSystem extends System {
   protected doProcess(): void {
-    const game = this.world.getGlobal(GameInfo);
+    const game = this.world.getUnique(GameInfo);
     game.takeTurn = false;
   }
 }
@@ -55,8 +55,8 @@ class OpenSystem extends EntityTurnSystem {
   }
 
   protected processEntity(entity: Entity): void {
-    const term = this.world.getGlobal(Term).term;
-    const posMgr = this.world.getGlobal(PosManager);
+    const term = this.world.getUnique(Term).term;
+    const posMgr = this.world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
 
     entity.remove(Open);
@@ -102,8 +102,8 @@ class MoveSystem extends EntityTurnSystem {
   }
 
   protected processEntity(entity: Entity): void {
-    const term = this.world.getGlobal(Term).term;
-    const posMgr = this.world.getGlobal(PosManager);
+    const term = this.world.getUnique(Term).term;
+    const posMgr = this.world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
 
     const dxy = entity.remove(Move)!.dir;
@@ -112,7 +112,7 @@ class MoveSystem extends EntityTurnSystem {
 
     const others = posMgr.getAt(newX, newY, COLLIDER_ASPECT);
     if (others.length > 0) {
-      if (this.world.getGlobal(CollisionManager).collide(entity, others)) {
+      if (this.world.getUnique(CollisionManager).collide(entity, others)) {
         return;
       }
     }
@@ -148,7 +148,7 @@ class PedroSystem extends EntityTurnSystem {
     const pedroPos = entity.fetch(Pos)!;
 
     let goal: XY | null = null;
-    const heroEntity = this.world.getGlobal(GameInfo).hero;
+    const heroEntity = this.world.getUnique(GameInfo).hero;
     const heroFov = heroEntity.fetch(FOV);
     if (heroFov) {
       if (heroFov.isVisible(pedroPos.x, pedroPos.y)) {
@@ -166,7 +166,7 @@ class PedroSystem extends EntityTurnSystem {
     }
 
     if (goal) {
-      const posMgr = this.world.getGlobal(PosManager);
+      const posMgr = this.world.getUnique(PosManager);
       /* prepare path to given coords */
       var astar = new ROT.Path.AStar(
         goal.x,
@@ -263,7 +263,7 @@ class FovSystem extends EntitySystem {
     const fov = entity.update(FOV)!;
     const pos = entity.fetch(Pos)!;
 
-    const posMgr = this.world.getGlobal(PosManager);
+    const posMgr = this.world.getUnique(PosManager);
 
     /* input callback */
     function lightPasses(x, y) {
@@ -327,13 +327,13 @@ class DrawSystem extends System {
 
   start(world: World) {
     super.start(world);
-    const term = world.getGlobal(Term).term;
+    const term = world.getUnique(Term).term;
     this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
   }
 
   protected doProcess(): void {
     const buf = this._buf;
-    const map = this.world.getGlobal(PosManager);
+    const map = this.world.getUnique(PosManager);
 
     map.everyXY((x, y, es) => {
       const entity =
@@ -352,7 +352,7 @@ class DrawSystem extends System {
 
 function digMap(world: World) {
   const digger = new ROT.Map.Digger(80, 25);
-  const posMgr = world.getGlobal(PosManager);
+  const posMgr = world.getUnique(PosManager);
   const floors: XY[] = [];
 
   function digCallback(x: number, y: number, blocks: number) {
@@ -376,7 +376,7 @@ function digMap(world: World) {
 
 function placeBoxes(world: World, count: number, locs: XY[]) {
   count = Math.min(count, locs.length);
-  const posMgr = world.getGlobal(PosManager);
+  const posMgr = world.getUnique(PosManager);
 
   while (count) {
     var index = Math.floor(ROT.RNG.getUniform() * locs.length);
@@ -387,17 +387,17 @@ function placeBoxes(world: World, count: number, locs: XY[]) {
 }
 
 function placeHero(world: World, locs: XY[]): XY {
-  const posMgr = world.getGlobal(PosManager);
+  const posMgr = world.getUnique(PosManager);
   var index = Math.floor(ROT.RNG.getUniform() * locs.length);
   var loc = locs.splice(index, 1)[0];
   const hero = world.create(new Hero(), HERO_SPRITE, new FOV(), new Collider());
   posMgr.set(hero, loc.x, loc.y);
-  world.setGlobal(new GameInfo(hero));
+  world.setUnique(new GameInfo(hero));
   return loc;
 }
 
 function placePedro(world: World, avoidLoc: XY, locs: XY[]) {
-  const posMgr = world.getGlobal(PosManager);
+  const posMgr = world.getUnique(PosManager);
 
   // We need to find a place far from our hero so that they have a chance to get going before Pedro
   // bears down on them.
@@ -413,14 +413,14 @@ function placePedro(world: World, avoidLoc: XY, locs: XY[]) {
 }
 
 function gameOver(_a: Entity, _b: Entity, world: World) {
-  const term = world.getGlobal(Term).term;
+  const term = world.getUnique(Term).term;
   term.moveTo(0, 27).eraseLine.red("Got you!");
   term.processExit(0);
 }
 
 function blockedMove(actor: Entity, _b: Entity, world: World) {
   if (actor.has(Hero)) {
-    const term = world.getGlobal(Term).term;
+    const term = world.getUnique(Term).term;
     term.moveTo(0, 26).eraseLine.red("Blocked");
   }
 }
@@ -436,11 +436,11 @@ term.on("key", function (name, matches, data) {
     term.grabInput(false);
     term.processExit(0);
   } else if (["LEFT", "RIGHT", "UP", "DOWN"].includes(name)) {
-    const game = world.getGlobal(GameInfo);
+    const game = world.getUnique(GameInfo);
     game.hero.add(new Move(DIRS[name]));
     game.takeTurn = true;
   } else if ([" ", "ENTER"].includes(name)) {
-    const game = world.getGlobal(GameInfo);
+    const game = world.getUnique(GameInfo);
     game.hero.add(new Open());
     game.takeTurn = true;
   } else {
@@ -457,9 +457,9 @@ const world = new World()
   .registerComponent(Open)
   .registerComponent(Sprite)
   .registerComponent(FOV)
-  .setGlobal(new PosManager(80, 25))
-  .setGlobal(new Term(term))
-  .setGlobal(new CollisionManager(), (col) => {
+  .setUnique(new PosManager(80, 25))
+  .setUnique(new Term(term))
+  .setUnique(new CollisionManager(), (col) => {
     col
       .register(HERO_ASPECT, PEDRO_ASPECT, gameOver)
       .register(PEDRO_ASPECT, HERO_ASPECT, gameOver)

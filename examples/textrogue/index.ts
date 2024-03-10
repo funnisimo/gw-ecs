@@ -28,7 +28,7 @@ const term = terminal.terminal;
 // HELPERS
 
 function buildMaze(world: World) {
-  const mgr = world.getGlobal(PosManager);
+  const mgr = world.getUnique(PosManager);
   const [width, height] = mgr.size;
 
   // surround with walls
@@ -63,7 +63,7 @@ class DrawSystem extends System {
 
   start(world: World) {
     super.start(world);
-    this._mgr = world.getGlobal(PosManager);
+    this._mgr = world.getUnique(PosManager);
     const store = world.getStore(Player)!;
     const entity = store.singleEntity()!;
     this._pos = entity.fetch(Pos)!;
@@ -93,7 +93,7 @@ class MoveSystem extends EntitySystem {
     super(new Aspect(Move, Pos));
   }
   processEntity(world: World, entity: Entity): void {
-    const posMgr = world.getGlobal(PosManager)!;
+    const posMgr = world.getUnique(PosManager)!;
     const pos = entity.update(Pos)!;
     const dir = entity.remove(Move)!.dir;
     const dxy = DIR[dir];
@@ -112,11 +112,11 @@ class MoveSystem extends EntitySystem {
 
 const world = new World()
   .registerComponents(Wall, Player, Move)
-  .setGlobal(new PosManager(21, 21))
+  .setUnique(new PosManager(21, 21))
   .init((w: World) => {
     const player = w.create(new Player());
-    w.setGlobal(player); // put player entity in as resource to make getting it easier in systems
-    w.getGlobal(PosManager).set(player, 11, 11);
+    w.setUnique(player); // put player entity in as resource to make getting it easier in systems
+    w.getUnique(PosManager).set(player, 11, 11);
   })
   .addSystem(new MoveSystem())
   .addSystem(new DrawSystem())
@@ -129,7 +129,7 @@ const wallAspect = new Aspect(Wall);
 
 async function play(world: World) {
   let running = true;
-  const player = world.getGlobal(Entity); // getStore(Player).singleEntity()!;
+  const player = world.getUnique(Entity); // getStore(Player).singleEntity()!;
 
   while (running) {
     world.runSystems();

@@ -66,13 +66,13 @@ class DrawSystem extends System {
 
   start(world: World) {
     super.start(world);
-    const term = world.getGlobal(Term).term;
+    const term = world.getUnique(Term).term;
     this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
   }
 
   run(world: World): void {
     const buf = this._buf;
-    const map = world.getGlobal(PosManager);
+    const map = world.getUnique(PosManager);
 
     map.everyXY((x, y, es) => {
       const entity = BOX_ASPECT.first(es) || TILE_ASPECT.first(es)!;
@@ -87,7 +87,7 @@ class DrawSystem extends System {
 
 function digMap(world: World) {
   const digger = new ROT.Map.Digger(80, 25);
-  const posMgr = world.getGlobal(PosManager);
+  const posMgr = world.getUnique(PosManager);
   const floors: XY[] = [];
 
   function digCallback(x: number, y: number, blocks: number) {
@@ -105,7 +105,7 @@ function digMap(world: World) {
 
 function placeBoxes(world: World, count: number, locs: XY[]) {
   count = Math.min(count, locs.length);
-  const posMgr = world.getGlobal(PosManager);
+  const posMgr = world.getUnique(PosManager);
 
   while (count) {
     var index = Math.floor(ROT.RNG.getUniform() * locs.length);
@@ -135,8 +135,8 @@ const world = new World()
   .registerComponent(Sprite)
   .registerComponent(Tile)
   .registerComponent(Box)
-  .setGlobal(new PosManager(80, 25))
-  .setGlobal(new Term(term))
+  .setUnique(new PosManager(80, 25))
+  .setUnique(new Term(term))
   .addSystem(new DrawSystem())
   .init(digMap)
   .start();

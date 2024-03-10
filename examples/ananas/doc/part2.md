@@ -23,7 +23,7 @@ We start by adding a component for our Hero, registering it, and adding it to ou
     // ... DrawSystem ...
     protected doProcess(): void {
         const buf = this._buf;
-        const map = this.world.getGlobal(PosManager);
+        const map = this.world.getUnique(PosManager);
 
         map.everyXY((x, y, es) => {
             ifDo(HERO_ASPECT.first(es), (e) => {
@@ -51,12 +51,12 @@ We start by adding a component for our Hero, registering it, and adding it to ou
 And we need a function to place our Hero. While we are at it, because the Hero is so special we are going to store the Hero Entity as a global. That way we can more easily get it from our systems...
 
     function placeHero(world: World, locs: { x: number; y: number }[]) {
-        const posMgr = world.getGlobal(PosManager);
+        const posMgr = world.getUnique(PosManager);
         var index = Math.floor(ROT.RNG.getUniform() * locs.length);
         var loc = locs.splice(index, 1)[0];
         const hero = world.create(new Hero());
         posMgr.set(hero, loc.x, loc.y);
-        world.setGlobal(hero);
+        world.setUnique(hero);
     }
 
 Now we add to the `digMap` function a call to place our Hero...
@@ -109,8 +109,8 @@ Our `doProcess` removes the `Move` component and uses it's `dirName` along with 
         }
 
         protected processEntity(entity: Entity): void {
-            const term = this.world.getGlobal(Term).term;
-            const posMgr = this.world.getGlobal(PosManager);
+            const term = this.world.getUnique(Term).term;
+            const posMgr = this.world.getUnique(PosManager);
             const pos = entity.fetch(Pos)!;
 
             const dirName = entity.remove(Move)!.dirName;
@@ -144,7 +144,7 @@ And finally, we put a `Move` component onto our `Hero` whenever an arrow key is 
             term.grabInput(false);
             term.processExit(0);
         } else if (["LEFT", "RIGHT", "UP", "DOWN"].includes(name)) {
-            const hero = world.getGlobal(Entity);
+            const hero = world.getUnique(Entity);
             hero.add(new Move(name));
         } else {
             term.moveTo(0, 26).eraseLine.red("Unknown key: ", name);
@@ -180,7 +180,7 @@ We will also slightly chnage our Boxes so that one of them will have the ananas 
         locs: { x: number; y: number }[]
     ) {
         count = Math.min(count, locs.length);
-        const posMgr = world.getGlobal(PosManager);
+        const posMgr = world.getUnique(PosManager);
 
         while (count) {
             var index = Math.floor(ROT.RNG.getUniform() * locs.length);
@@ -204,8 +204,8 @@ And we can add the new component and system. The system removes the `Open` compo
         }
 
         protected processEntity(entity: Entity): void {
-            const term = this.world.getGlobal(Term).term;
-            const posMgr = this.world.getGlobal(PosManager);
+            const term = this.world.getUnique(Term).term;
+            const posMgr = this.world.getUnique(PosManager);
             const pos = entity.fetch(Pos)!;
 
             entity.remove(Open);
@@ -238,7 +238,7 @@ Lastly, we add a handler for putting the `Open` component onto the Hero if we pr
 
     // ... term.on('key', ...
     } else if ([" ", "ENTER"].includes(name)) {
-        const hero = world.getGlobal(Entity);
+        const hero = world.getUnique(Entity);
         hero.add(new Open());
     } else {
     // ...

@@ -77,7 +77,7 @@ We are going to add a "global" variable that holds a reference to the terminal o
     }
 
     // ...
-    const world = new World().setGlobal(new Term(term)).start();
+    const world = new World().setUnique(new Term(term)).start();
 
     // ...
     function run() {
@@ -119,13 +119,13 @@ Any entity with a `Sprite` and a `Pos` will be eligible to be drawn. The drawing
 
         start(world: World) {
             super.start(world);
-            const term = world.getGlobal(Term).term;
+            const term = world.getUnique(Term).term;
             this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
         }
 
         protected doProcess(): void {
             const buf = this._buf;
-            const map = this.world.getGlobal(PosManager);
+            const map = this.world.getUnique(PosManager);
 
             map.everyXY((x, y, es) => {
                 const entity = SPRITE_ASPECT.first(es)!;
@@ -141,8 +141,8 @@ Any entity with a `Sprite` and a `Pos` will be eligible to be drawn. The drawing
     // ...
     const world = new World()
         .registerComponent(Sprite)
-        .setGlobal(new Term(term))
-        .setGlobal(new PosManager(80, 25), (w, r) => r.init(w))
+        .setUnique(new Term(term))
+        .setUnique(new PosManager(80, 25), (w, r) => r.init(w))
         .addSystem(new DrawSystem())
         .start();
 
@@ -170,7 +170,7 @@ Now lets dig the map using `rot.js` and its `Digger`. We are going to add a func
 
     function digMap(world: World) {
         const digger = new ROT.Map.Digger(80, 25);
-        const posMgr = world.getGlobal(PosManager);
+        const posMgr = world.getUnique(PosManager);
 
         function digCallback(x: number, y: number, blocks: number) {
             const comps = blocks > 0 ? [WALL_TILE, WALL_SPRITE] : [FLOOR_TILE, FLOOR_SPRITE];
@@ -184,8 +184,8 @@ Now lets dig the map using `rot.js` and its `Digger`. We are going to add a func
     const world = new World()
         .registerComponent(Sprite)
         .registerComponent(Tile)
-        .setGlobal(new PosManager(80, 25), (w, r) => r.init(w))
-        .setGlobal(new Term(term))
+        .setUnique(new PosManager(80, 25), (w, r) => r.init(w))
+        .setUnique(new Term(term))
         .addSystem(new DrawSystem())
         .init(digMap)
         .start();
@@ -255,7 +255,7 @@ Next, we will update `digMap` to track the floor locations and use them to place
 
     function digMap(world: World) {
         const digger = new ROT.Map.Digger(80, 25);
-        const posMgr = world.getGlobal(PosManager);
+        const posMgr = world.getUnique(PosManager);
         const floors: XY[] = [];
 
         function digCallback(x: number, y: number, blocks: number) {
@@ -273,7 +273,7 @@ Next, we will update `digMap` to track the floor locations and use them to place
 
     function placeBoxes(world: World, count: number, locs: XY[]) {
         count = Math.min(count, locs.length);
-        const posMgr = world.getGlobal(PosManager);
+        const posMgr = world.getUnique(PosManager);
 
         while (count) {
             var index = Math.floor(ROT.RNG.getUniform() * locs.length);

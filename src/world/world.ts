@@ -29,7 +29,7 @@ export class World implements ComponentSource {
   delta: number;
   time: number;
   _currentTick: number;
-  _globals: Resources;
+  _uniques: Resources;
   notify: WorldEventHandler[];
 
   constructor() {
@@ -41,7 +41,7 @@ export class World implements ComponentSource {
     this._systems = new SystemManager();
     this._queues = new QueueManager();
     this._toDestroy = [];
-    this._globals = new Resources();
+    this._uniques = new Resources();
     this.notify = [];
   }
 
@@ -66,11 +66,11 @@ export class World implements ComponentSource {
     return this;
   }
 
-  setGlobal<T>(
+  setUnique<T>(
     val: T & WorldInit,
     initFn?: (global: T, world: World) => void
   ): this {
-    this._globals.set(val);
+    this._uniques.set(val);
     const worldInit = val["worldInit"];
     if (worldInit) {
       worldInit.call(val, this);
@@ -220,20 +220,20 @@ export class World implements ComponentSource {
 
   /// Resources
 
-  globals(): Resources {
-    return this._globals;
+  uniques(): Resources {
+    return this._uniques;
   }
 
   // set<T>(val: T) {
   //   this._resources.set(val);
   // }
 
-  getGlobal<T>(comp: Component<T>): T {
-    return this._globals.get(comp);
+  getUnique<T>(comp: Component<T>): T {
+    return this._uniques.get(comp);
   }
 
-  deleteGlobal<T>(comp: Component<T>) {
-    this._globals.delete(comp);
+  removeUnique<T>(comp: Component<T>) {
+    this._uniques.delete(comp);
   }
 
   /// ComponentSource

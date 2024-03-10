@@ -1,5 +1,5 @@
 import "jest-extended";
-import { Entities, ComponentSource } from "./entity";
+import { Entities, ComponentSource, Entity } from "./entity";
 
 class CompA {
   data: number;
@@ -28,6 +28,16 @@ describe("Entity", () => {
     };
 
     entities = new Entities(source);
+  });
+
+  test("stand alone", () => {
+    const entity = new Entity(1);
+    entity.set(new CompA());
+    expect(entity.has(CompA)).toBeTrue();
+    expect(entity.fetch(CompA)!.data).toEqual(1);
+    entity.remove(CompA);
+    expect(entity.has(CompA)).toBeFalse();
+    expect(entity.fetch(CompA)).toBeUndefined();
   });
 
   test("basics", () => {

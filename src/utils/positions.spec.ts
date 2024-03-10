@@ -7,7 +7,7 @@ describe("Positions", () => {
     const world = new World();
 
     const mgr = new PosManager(10, 10); // dims
-    world.setGlobal(mgr); // You would normally store this in your world...
+    world.setUnique(mgr); // You would normally store this in your world...
 
     const e1 = world.create();
 

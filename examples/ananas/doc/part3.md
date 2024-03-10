@@ -125,7 +125,7 @@ Now we can add Pedro. We are going to add Pedro the same way we add a Hero. He i
         avoidLoc: { x: number; y: number },
         locs: { x: number; y: number }[]
     ) {
-        const posMgr = world.getGlobal(PosManager);
+        const posMgr = world.getUnique(PosManager);
 
         // We need to find a place far from our hero so that they have a chance to get going before Pedro
         // bears down on them.
@@ -165,16 +165,16 @@ The way we are going to do this is to keep a global flag that tells the systems 
     }
 
     // ... placeHero ...
-    world.setGlobal(new GameInfo(hero));
+    world.setUnique(new GameInfo(hero));
 
     // ... and in our key handler, term.on('key', ... )
-    const hero = world.getGlobal(GameInfo).hero;
+    const hero = world.getUnique(GameInfo).hero;
 
 So we want our turn based systems to respect the `takeTurn` flag. So lets create a base class for a `EntityTurnSystem` that does this check for us. And we will use it for our `OpenSystem` and `MoveSystem` systems.
 
     abstract class EntityTurnSystem extends EntitySystem {
         isEnabled(): boolean {
-            return super.isEnabled() && this.world.getGlobal(GameInfo).takeTurn;
+            return super.isEnabled() && this.world.getUnique(GameInfo).takeTurn;
         }
     }
 
@@ -186,7 +186,7 @@ This new base class only enables our system whenever the `takeTurn` flag is set.
 
     class TurnOverSystem extends System {
         protected doProcess(): void {
-            const game = this.world.getGlobal(GameInfo);
+            const game = this.world.getUnique(GameInfo);
             game.takeTurn = false;
         }
     }
@@ -204,11 +204,11 @@ This new base class only enables our system whenever the `takeTurn` flag is set.
     if (name === "CTRL_C" || name === "q") {
         // ...
     } else if (["LEFT", "RIGHT", "UP", "DOWN"].includes(name)) {
-        const game = world.getGlobal(GameInfo);
+        const game = world.getUnique(GameInfo);
         game.hero.add(new Move(name));
         game.takeTurn = true;
     } else if ([" ", "ENTER"].includes(name)) {
-        const game = world.getGlobal(GameInfo);
+        const game = world.getUnique(GameInfo);
         game.hero.add(new Open());
         game.takeTurn = true;
     } else {

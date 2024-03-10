@@ -207,7 +207,7 @@ describe("manager", () => {
       }
 
       run(world: World): void {
-        world.getGlobal(RunOrder).push(this.name);
+        world.getUnique(RunOrder).push(this.name);
       }
     }
 
@@ -218,11 +218,11 @@ describe("manager", () => {
       manager.addSystem(new TestSystem("b"));
       manager.addSystem(new TestSystem("c"));
 
-      const world = new World().setGlobal(new RunOrder());
+      const world = new World().setUnique(new RunOrder());
       manager.start(world);
       manager.run(world, 0, 0);
 
-      expect(world.getGlobal(RunOrder).get()).toEqual(["a", "b", "c"]);
+      expect(world.getUnique(RunOrder).get()).toEqual(["a", "b", "c"]);
     });
 
     test("add steps", () => {
@@ -238,11 +238,11 @@ describe("manager", () => {
       const defaultSet = manager.getSet()!;
       expect(defaultSet.steps).toHaveLength(3);
 
-      const world = new World().setGlobal(new RunOrder());
+      const world = new World().setUnique(new RunOrder());
       manager.start(world);
       manager.run(world, 0, 0);
 
-      expect(world.getGlobal(RunOrder).get()).toEqual(["c", "b", "a"]);
+      expect(world.getUnique(RunOrder).get()).toEqual(["c", "b", "a"]);
     });
 
     test("add set", () => {
@@ -256,11 +256,11 @@ describe("manager", () => {
       manager.addSystem(new TestSystem("b"), "panic", "pre-update");
       manager.addSystem(new TestSystem("c"), "panic", "start");
 
-      const world = new World().setGlobal(new RunOrder());
+      const world = new World().setUnique(new RunOrder());
       manager.start(world);
       manager.runSet("panic", world, 0, 0);
 
-      expect(world.getGlobal(RunOrder).get()).toEqual(["c", "b", "a"]);
+      expect(world.getUnique(RunOrder).get()).toEqual(["c", "b", "a"]);
     });
 
     test("add set with steps", () => {
@@ -272,11 +272,11 @@ describe("manager", () => {
       manager.addSystem(new TestSystem("b"), "panic", "update");
       manager.addSystem(new TestSystem("c"), "panic", "pre-start");
 
-      const world = new World().setGlobal(new RunOrder());
+      const world = new World().setUnique(new RunOrder());
       manager.start(world);
       manager.runSet("panic", world, 0, 0);
 
-      expect(world.getGlobal(RunOrder).get()).toEqual(["c", "b", "a"]);
+      expect(world.getUnique(RunOrder).get()).toEqual(["c", "b", "a"]);
     });
   });
 });

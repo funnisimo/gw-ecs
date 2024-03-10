@@ -106,15 +106,15 @@ describe("World", function () {
     test("basics", () => {
       const world = new World();
       const a = new A();
-      world.setGlobal(a);
-      expect(world.getGlobal(A)).toBe(a);
+      world.setUnique(a);
+      expect(world.getUnique(A)).toBe(a);
 
       const a2 = new A();
-      world.setGlobal(a2);
-      expect(world.getGlobal(A)).toBe(a2);
+      world.setUnique(a2);
+      expect(world.getUnique(A)).toBe(a2);
 
-      world.deleteGlobal(A);
-      expect(world.getGlobal(A)).toBeUndefined();
+      world.removeUnique(A);
+      expect(world.getUnique(A)).toBeUndefined();
     });
   });
 

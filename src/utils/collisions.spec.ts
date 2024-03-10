@@ -19,7 +19,7 @@ describe("collisions", () => {
       const world = new World();
       const manager = new CollisionManager();
       const init = jest.spyOn(manager, "worldInit");
-      world.setGlobal(manager);
+      world.setUnique(manager);
       expect(init).toHaveBeenCalled();
 
       manager.register("a", "a", collideFn);
@@ -36,7 +36,7 @@ describe("collisions", () => {
 
       const world = new World();
       const manager = new CollisionManager();
-      world.setGlobal(manager);
+      world.setUnique(manager);
 
       manager.register("a", "b", collideFn);
 

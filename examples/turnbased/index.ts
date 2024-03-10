@@ -50,7 +50,7 @@ class LogSystem extends EntitySystem {
     const nameText = name ? name.name : "unknown";
     const msg = `${this.name} - ${nameText}`;
 
-    world.getGlobal(Messages).add(msg);
+    world.getUnique(Messages).add(msg);
   }
 }
 
@@ -65,20 +65,20 @@ class ScheduleEntitySystem extends EntitySystem {
     time: number,
     delta: number
   ): void {
-    const gameTurn = world.getGlobal(GameTurn);
+    const gameTurn = world.getUnique(GameTurn);
     const actor = entity.fetch(Actor)!;
     gameTurn.schedule.add(entity, actor.actTime);
 
     const name = entity.fetch(Name);
     const nameText = name ? name.name : "unknown";
-    world.getGlobal(Messages).add("Rescheduled - " + nameText);
+    world.getUnique(Messages).add("Rescheduled - " + nameText);
   }
 }
 
 class DrawSystem extends System {
   run(world: World, time: number) {
-    const msgs = world.getGlobal(Messages).popAll();
-    const gameTurn = world.getGlobal(GameTurn);
+    const msgs = world.getUnique(Messages).popAll();
+    const gameTurn = world.getUnique(GameTurn);
     if (msgs.length) {
       msgs.forEach((msg) => {
         term(msg)("\n");
@@ -135,7 +135,7 @@ class GameTurn {
 
 class GameTurnSystem extends System {
   start(world: World) {
-    const gameTurn = world.getGlobal(GameTurn);
+    const gameTurn = world.getUnique(GameTurn);
 
     const actors = world.getStore(Actor)!;
     actors.forEach((e, a) => {
@@ -153,7 +153,7 @@ class GameTurnSystem extends System {
   }
 
   run(world: World, time: number, delta: number) {
-    const gameTurn = world.getGlobal(GameTurn);
+    const gameTurn = world.getUnique(GameTurn);
     if (gameTurn.paused) return;
 
     let entity = gameTurn.schedule.pop() as Entity | null;
@@ -192,7 +192,7 @@ class GameTurnSystem extends System {
       return false;
     }
     world
-      .getGlobal(Messages)
+      .getUnique(Messages)
       .add(`^gRun entity^ - ${entity.index} @ ${gameTurn.schedule.time}`);
     actor.ready = false;
     gameTurn.systems.runEntity(world, entity, time, delta);
@@ -211,8 +211,8 @@ term("Hello\n");
 const world = new World()
   .registerComponent(Name)
   .registerComponent(Actor)
-  .setGlobal(new Messages())
-  .setGlobal(new GameTurn(), (gt) => {
+  .setUnique(new Messages())
+  .setUnique(new GameTurn(), (gt) => {
     const systems = gt.systems;
     systems
       .addSystem(new LogSystem("start"), "start")
@@ -225,7 +225,7 @@ const world = new World()
   .addSystem(new DrawSystem())
   .init((w) => {
     const eA = w.create(new Name("a"), new Actor()); // This is our Hero (user controlled)
-    w.setGlobal(eA); // Store our hero Entity
+    w.setUnique(eA); // Store our hero Entity
 
     w.create(new Name("b"), new Actor(mobAiFn));
     w.create(new Name("c"), new Actor(80, mobAiFn));
@@ -241,7 +241,7 @@ term.on("key", function (name, matches, data) {
     term.grabInput(false);
     term.processExit(0);
   } else if (name === " " || name === "ENTER") {
-    const hero = world.getGlobal(Entity);
+    const hero = world.getUnique(Entity);
     const actor = hero.update(Actor)!;
     actor.ready = true; // Hero did something...
     term.green("User Input\n");

@@ -30,14 +30,14 @@ class GameInfo {
 abstract class EntityTurnSystem extends EntitySystem {
   shouldRun(world: World, time: number, delta: number): boolean {
     return (
-      super.shouldRun(world, time, delta) && world.getGlobal(GameInfo).takeTurn
+      super.shouldRun(world, time, delta) && world.getUnique(GameInfo).takeTurn
     );
   }
 }
 
 class TurnOverSystem extends System {
   run(world: World): void {
-    const game = world.getGlobal(GameInfo);
+    const game = world.getUnique(GameInfo);
     game.takeTurn = false;
   }
 }
@@ -52,8 +52,8 @@ class OpenSystem extends EntityTurnSystem {
   }
 
   processEntity(world: World, entity: Entity): void {
-    const term = world.getGlobal(Term).term;
-    const posMgr = world.getGlobal(PosManager);
+    const term = world.getUnique(Term).term;
+    const posMgr = world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
 
     entity.remove(Open);
@@ -99,8 +99,8 @@ class MoveSystem extends EntityTurnSystem {
   }
 
   processEntity(world: World, entity: Entity): void {
-    const term = world.getGlobal(Term).term;
-    const posMgr = world.getGlobal(PosManager);
+    const term = world.getUnique(Term).term;
+    const posMgr = world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
 
     const dxy = entity.remove(Move)!.dir;
@@ -153,7 +153,7 @@ class PedroSystem extends EntityTurnSystem {
       // Find a path to that box...
       const boxPos = box.fetch(Pos)!;
 
-      const posMgr = world.getGlobal(PosManager);
+      const posMgr = world.getUnique(PosManager);
       /* prepare path to given coords */
       var astar = new ROT.Path.AStar(
         boxPos.x,
@@ -243,13 +243,13 @@ class DrawSystem extends System {
 
   start(world: World) {
     super.start(world);
-    const term = world.getGlobal(Term).term;
+    const term = world.getUnique(Term).term;
     this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
   }
 
   run(world: World): void {
     const buf = this._buf;
-    const map = world.getGlobal(PosManager);
+    const map = world.getUnique(PosManager);
 
     map.everyXY((x, y, es) => {
       const entity =
@@ -268,7 +268,7 @@ class DrawSystem extends System {
 
 function digMap(world: World) {
   const digger = new ROT.Map.Digger(80, 25);
-  const posMgr = world.getGlobal(PosManager);
+  const posMgr = world.getUnique(PosManager);
   const floors: XY[] = [];
 
   function digCallback(x: number, y: number, blocks: number) {
@@ -289,7 +289,7 @@ function digMap(world: World) {
 
 function placeBoxes(world: World, count: number, locs: XY[]) {
   count = Math.min(count, locs.length);
-  const posMgr = world.getGlobal(PosManager);
+  const posMgr = world.getUnique(PosManager);
 
   while (count) {
     var index = Math.floor(ROT.RNG.getUniform() * locs.length);
@@ -300,17 +300,17 @@ function placeBoxes(world: World, count: number, locs: XY[]) {
 }
 
 function placeHero(world: World, locs: XY[]): XY {
-  const posMgr = world.getGlobal(PosManager);
+  const posMgr = world.getUnique(PosManager);
   var index = Math.floor(ROT.RNG.getUniform() * locs.length);
   var loc = locs.splice(index, 1)[0];
   const hero = world.create(new Hero(), HERO_SPRITE);
   posMgr.set(hero, loc.x, loc.y);
-  world.setGlobal(new GameInfo(hero));
+  world.setUnique(new GameInfo(hero));
   return loc;
 }
 
 function placePedro(world: World, avoidLoc: XY, locs: XY[]) {
-  const posMgr = world.getGlobal(PosManager);
+  const posMgr = world.getUnique(PosManager);
 
   // We need to find a place far from our hero so that they have a chance to get going before Pedro
   // bears down on them.
@@ -336,11 +336,11 @@ term.on("key", function (name, matches, data) {
     term.grabInput(false);
     term.processExit(0);
   } else if (["LEFT", "RIGHT", "UP", "DOWN"].includes(name)) {
-    const game = world.getGlobal(GameInfo);
+    const game = world.getUnique(GameInfo);
     game.hero.set(new Move(DIRS[name]));
     game.takeTurn = true;
   } else if ([" ", "ENTER"].includes(name)) {
-    const game = world.getGlobal(GameInfo);
+    const game = world.getUnique(GameInfo);
     game.hero.set(new Open());
     game.takeTurn = true;
   } else {
@@ -356,8 +356,8 @@ const world = new World()
   .registerComponent(Move)
   .registerComponent(Open)
   .registerComponent(Sprite)
-  .setGlobal(new PosManager(80, 25))
-  .setGlobal(new Term(term))
+  .setUnique(new PosManager(80, 25))
+  .setUnique(new Term(term))
   .addSystem(new PedroSystem())
   .addSystem(new MoveSystem())
   .addSystem(new OpenSystem())
