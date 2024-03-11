@@ -1,5 +1,5 @@
 import { Entity } from "../entity/entity.js";
-import { World } from "../world/world.js";
+import { Level } from "../world/level.js";
 import { EntitySystem } from "./entitySystem.js";
 import {
   EntityFunctionSystem,
@@ -30,10 +30,11 @@ export class SystemStep {
     );
   }
 
-  addSystem(sys: System | SystemFn, order?: SystemOrder) {
+  addSystem(sys: System | SystemFn, order?: SystemOrder, enabled = true) {
     if (typeof sys === "function") {
       sys = new FunctionSystem(sys);
     }
+    sys.setEnabled(enabled);
     if (order === "pre") {
       this.preSystems.push(sys);
     } else if (order === "post") {
@@ -43,34 +44,33 @@ export class SystemStep {
     }
   }
 
-  start(world: World) {
-    this.preSystems.forEach((s) => s.start(world));
-    this.systems.forEach((s) => s.start(world));
-    this.postSystems.forEach((s) => s.start(world));
+  start(level: Level) {
+    this.preSystems.forEach((s) => s.start(level));
+    this.systems.forEach((s) => s.start(level));
+    this.postSystems.forEach((s) => s.start(level));
   }
 
-  run(world: World, time: number, delta: number): boolean {
+  run(level: Level, time: number, delta: number): boolean {
     let out = false;
     out = this.preSystems.reduce((out, sys) => {
-      return this._runSystem(world, sys, time, delta) || out;
+      return this._runSystem(level, sys, time, delta) || out;
     }, out);
     out = this.systems.reduce((out, sys) => {
-      return this._runSystem(world, sys, time, delta) || out;
+      return this._runSystem(level, sys, time, delta) || out;
     }, out);
     out = this.postSystems.reduce((out, sys) => {
-      return this._runSystem(world, sys, time, delta) || out;
+      return this._runSystem(level, sys, time, delta) || out;
     }, out);
     return out;
   }
 
-  _runSystem(world: World, sys: System, time: number, delta: number): boolean {
-    if (!sys.shouldRun(world, time, delta)) {
+  _runSystem(level: Level, sys: System, time: number, delta: number): boolean {
+    if (!sys.shouldRun(level, time, delta)) {
       return false;
     }
-    // world._beforeSystemRun();
-    sys.run(world, time, delta);
-    sys.lastTick = world.currentTick();
-    world._afterSystemRun();
+    sys.run(level, time, delta);
+    sys.lastTick = level.currentTick();
+    level.maintain();
     return true;
   }
 
@@ -101,38 +101,38 @@ export class EntitySystemStep extends SystemStep {
   }
 
   runEntity(
-    world: World,
+    level: Level,
     entity: Entity,
     time: number,
     delta: number
   ): boolean {
     let out = false;
     out = this.preSystems.reduce((out, sys) => {
-      return this._runEntitySystem(world, sys, entity, time, delta) || out;
+      return this._runEntitySystem(level, sys, entity, time, delta) || out;
     }, out);
     out = this.systems.reduce((out, sys) => {
-      return this._runEntitySystem(world, sys, entity, time, delta) || out;
+      return this._runEntitySystem(level, sys, entity, time, delta) || out;
     }, out);
     out = this.postSystems.reduce((out, sys) => {
-      return this._runEntitySystem(world, sys, entity, time, delta) || out;
+      return this._runEntitySystem(level, sys, entity, time, delta) || out;
     }, out);
     return out;
   }
 
   _runEntitySystem(
-    world: World,
+    level: Level,
     sys: EntitySystem,
     entity: Entity,
     time: number,
     delta: number
   ): boolean {
-    if (!sys.shouldRun(world, time, delta)) {
+    if (!sys.shouldRun(level, time, delta)) {
       return false;
     }
     if (!sys.accept(entity)) return false;
-    sys.processEntity(world, entity, time, delta);
-    sys.lastTick = world.currentTick();
-    world._afterSystemRun();
+    sys.processEntity(level, entity, time, delta);
+    sys.lastTick = level.currentTick();
+    level.maintain();
     return true;
   }
 
@@ -172,7 +172,11 @@ export class SystemSet {
     return new SystemStep(name);
   }
 
-  addSystem(system: System | SystemFn, stepName = "update"): this {
+  addSystem(
+    system: System | SystemFn,
+    stepName = "update",
+    enabled = true
+  ): this {
     if (typeof system === "function") {
       system = new FunctionSystem(system);
     }
@@ -190,7 +194,7 @@ export class SystemSet {
           "]"
       );
     }
-    step.addSystem(system, order);
+    step.addSystem(system, order, enabled);
     return this;
   }
 
@@ -235,13 +239,13 @@ export class SystemSet {
     return this.steps.find((s) => s.name == name);
   }
 
-  start(world: World) {
-    this.steps.forEach((s) => s.start(world));
+  start(level: Level) {
+    this.steps.forEach((s) => s.start(level));
   }
 
-  run(world: World, time: number, delta: number): boolean {
+  run(level: Level, time: number, delta: number): boolean {
     return this.steps.reduce(
-      (out, step) => step.run(world, time, delta) || out,
+      (out, step) => step.run(level, time, delta) || out,
       false
     );
   }
@@ -275,13 +279,13 @@ export class EntitySystemSet extends SystemSet {
   }
 
   runEntity(
-    world: World,
+    level: Level,
     entity: Entity,
     time: number,
     delta: number
   ): boolean {
     return this.steps.reduce(
-      (out, step) => step.runEntity(world, entity, time, delta) || out,
+      (out, step) => step.runEntity(level, entity, time, delta) || out,
       false
     );
   }
@@ -326,48 +330,60 @@ export class SystemManager {
     return this;
   }
 
-  addSystem(system: System | SystemFn, inStep?: string): SystemManager;
+  addSystem(system: System | SystemFn, enabled?: boolean): this;
+  addSystem(system: System | SystemFn, inStep: string, enabled?: boolean): this;
   addSystem(
     system: System | SystemFn,
     inSet: string,
-    inStep?: string
-  ): SystemManager;
-  addSystem(system: System | SystemFn, ...args: string[]): SystemManager {
+    inStep: string,
+    enabled?: boolean
+  ): this;
+  addSystem(system: System | SystemFn, ...args: any[]): this {
     if (typeof system === "function") {
       system = new FunctionSystem(system);
     }
 
-    if (args.length == 0) {
-      args = ["default", "update"];
+    const defaultArgs = ["default", "update", true];
+    if (typeof args[0] === "string" && typeof args[1] !== "string") {
+      args.unshift("default");
     }
-    if (args.length == 1) {
-      args = ["default", args[0]];
+    while (args.length < defaultArgs.length) {
+      args.push(defaultArgs[args.length]);
     }
-    const [setName, stepName] = args;
+    let [setName, stepName, enabled] = args as [string, string, boolean];
+
+    if (typeof setName === "boolean") {
+      enabled = setName;
+      setName = "default";
+    }
+    if (typeof stepName === "boolean") {
+      enabled = stepName;
+      stepName = "update";
+    }
 
     const set = this._sets.get(setName);
     if (!set) {
       throw new Error("Missing System Set: " + setName);
     }
-    set.addSystem(system, stepName);
+    set.addSystem(system, stepName, enabled);
     return this;
   }
 
-  start(world: World) {
+  start(level: Level) {
     for (let set of this._sets.values()) {
-      set.start(world);
+      set.start(level);
     }
   }
 
-  run(world: World, time: number, delta: number): boolean {
-    return this.runSet("default", world, time, delta);
+  run(level: Level, time: number, delta: number): boolean {
+    return this.runSet("default", level, time, delta);
   }
 
-  runSet(set: string, world: World, time: number, delta: number): boolean {
+  runSet(set: string, level: Level, time: number, delta: number): boolean {
     const systems = this._sets.get(set);
     if (!systems) throw new Error("Missing System Set: " + set);
 
-    return systems.run(world, time, delta);
+    return systems.run(level, time, delta);
   }
 
   rebase(zeroTime: number) {

@@ -28,7 +28,7 @@ describe("component manager", () => {
     expect(storeA.fetch(entity)).toBeInstanceOf(A);
     expect(storeB.fetch(entity)).toBeInstanceOf(B);
 
-    world.runSystems();
+    world.maintain();
     expect(entity.isAlive()).toBeFalse();
     expect(entity.has(A)).toBeFalse();
     expect(entity.has(B)).toBeFalse();

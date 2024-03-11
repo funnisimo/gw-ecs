@@ -55,26 +55,26 @@ describe("interval entity system", () => {
     world.getStore(A)!.set(entityA, new A());
     world.getStore(A)!.set(entityB, new A());
 
-    world.runSystems(5);
+    world.addTime(5).runSystems();
     expect(callback).not.toHaveBeenCalled();
 
-    world.runSystems(5);
+    world.addTime(5).runSystems();
     expect(callback).toHaveBeenCalledWith(entityA);
     expect(callback).toHaveBeenCalledWith(entityB);
 
     callback.mockClear();
     world.getStore(B)!.set(entityB, new B());
-    world.runSystems(10);
+    world.addTime(10).runSystems();
     expect(callback).toHaveBeenCalledWith(entityA);
     expect(callback).not.toHaveBeenCalledWith(entityB);
 
     callback.mockClear();
-    world.runSystems(9);
+    world.addTime(9).runSystems();
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
     world.getStore(B)!.remove(entityB);
-    world.runSystems(1);
+    world.addTime(1).runSystems();
     expect(callback).toHaveBeenCalledWith(entityA);
     expect(callback).toHaveBeenCalledWith(entityB);
   });
@@ -95,25 +95,25 @@ describe("interval entity system", () => {
     let entity = world.create();
 
     callback.mockClear();
-    world.runSystems(10); // 15 - 10 = 5
+    world.addTime(10).runSystems(); // 15 - 10 = 5
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
     system.setEnabled(false);
-    world.runSystems(10); // no change
+    world.addTime(10).runSystems(); // no change
     expect(callback).not.toHaveBeenCalled();
 
     callback.mockClear();
     system.setEnabled(true);
-    world.runSystems(10); // 5 - 10 = -5, -5 + 10 = 5
+    world.addTime(10).runSystems(); // 5 - 10 = -5, -5 + 10 = 5
     expect(callback).toHaveBeenCalled();
 
     callback.mockClear();
-    world.runSystems(5); // 5 - 5 = 0, 0 + 10 = 10
+    world.addTime(5).runSystems(); // 5 - 5 = 0, 0 + 10 = 10
     expect(callback).toHaveBeenCalledWith(entity);
 
     callback.mockClear();
-    world.runSystems(5); // 10 - 5 = 5
+    world.addTime(5).runSystems(); // 10 - 5 = 5
     expect(callback).not.toHaveBeenCalledWith(entity);
   });
 
@@ -134,19 +134,19 @@ describe("interval entity system", () => {
       let entity = world.create();
 
       callback.mockClear();
-      world.runSystems(30);
+      world.addTime(30).runSystems();
       expect(callback).toHaveBeenCalledWith(entity);
 
       callback.mockClear();
-      world.runSystems(0);
+      world.addTime(0).runSystems();
       expect(callback).toHaveBeenCalledWith(entity);
 
       callback.mockClear();
-      world.runSystems(0);
+      world.addTime(0).runSystems();
       expect(callback).toHaveBeenCalledWith(entity);
 
       callback.mockClear();
-      world.runSystems(0);
+      world.addTime(0).runSystems();
       expect(callback).not.toHaveBeenCalled();
     });
 
@@ -167,16 +167,16 @@ describe("interval entity system", () => {
       let entity = world.create();
 
       callback.mockClear();
-      world.runSystems(259);
+      world.addTime(259).runSystems();
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledWith(entity);
 
       callback.mockClear();
-      world.runSystems(0);
+      world.addTime(0).runSystems();
       expect(callback).not.toHaveBeenCalled();
 
       callback.mockClear();
-      world.runSystems(1);
+      world.addTime(1).runSystems();
       expect(callback).toHaveBeenCalledWith(entity);
     });
   });

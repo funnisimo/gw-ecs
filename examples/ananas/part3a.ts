@@ -248,7 +248,7 @@ const world = new World()
   .start();
 
 function run() {
-  world.runSystems(16);
+  world.addTime(16).runSystems();
   setTimeout(run, 16);
 }
 

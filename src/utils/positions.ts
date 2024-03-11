@@ -1,5 +1,5 @@
-import { Entity, Index } from "../entity/entity.js";
-import { Aspect, World, WorldEventHandler, WorldInit } from "../world/index.js";
+import { Entity, EntityWatcher, Index } from "../entity/entity.js";
+import { Aspect, World, WorldInit } from "../world/index.js";
 
 export class Pos {
   x: number;
@@ -74,7 +74,7 @@ export class Pos {
 // ??? world.notify.push(this);
 // interface WorldEvent { destroyEntity(entity: Entity): void; }
 
-export class PosManager implements WorldEventHandler, WorldInit {
+export class PosManager implements EntityWatcher, WorldInit {
   _size: [number, number];
   _entities: Map<Index, Entity>;
 
@@ -98,7 +98,7 @@ export class PosManager implements WorldEventHandler, WorldInit {
   }
 
   worldInit(world: World): void {
-    world.notify.push(this); // Register interest in destroy events
+    world.entities().notify(this); // Register interest in destroy events
   }
 
   hasAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): boolean {
@@ -174,7 +174,7 @@ export class PosManager implements WorldEventHandler, WorldInit {
     }
   }
 
-  destroyEntity(entity: Entity): void {
+  entityDestroyed(entity: Entity): void {
     this.remove(entity);
   }
 }

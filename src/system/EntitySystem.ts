@@ -1,7 +1,7 @@
 import { Aspect } from "../world/aspect.js";
 import { System } from "./system.js";
 import { Entity } from "../entity/entity.js";
-import { World } from "../world/world.js";
+import { Level } from "../world/level.js";
 
 export abstract class EntitySystem extends System {
   // protected entities: Entity[];
@@ -43,14 +43,14 @@ export abstract class EntitySystem extends System {
   //   }
   // }
 
-  run(world: World, time: number, delta: number): void {
-    for (let e of this._aspect.all(world, this.lastTick)) {
-      this.processEntity(world, e, time, delta);
+  run(level: Level, time: number, delta: number): void {
+    for (let e of this._aspect.all(level, this.lastTick)) {
+      this.processEntity(level, e, time, delta);
     }
   }
 
   abstract processEntity(
-    world: World,
+    level: Level,
     entity: Entity,
     time: number,
     delta: number

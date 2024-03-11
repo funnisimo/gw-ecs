@@ -46,7 +46,7 @@ describe("World", function () {
       let idA = world.create();
       let idB = world.create();
       world.queueDestroy(idA);
-      world.runSystems();
+      world.maintain();
       let idC = world.create();
       let idD = world.create();
       expect(idA.index).toEqual(0);
@@ -65,19 +65,19 @@ describe("World", function () {
       let entity = world.create();
       entity.set(new A());
 
-      world.runSystems(0);
+      world.addTime(0).runSystems();
       expect(callback).toHaveBeenCalledTimes(1);
 
       // entity is not deleted until sytem 'process' completes...
       callback.mockClear();
       world.queueDestroy(entity);
       world.queueDestroy(entity); // Can remove multiple times
-      world.runSystems(0);
+      world.addTime(0).runSystems();
 
       expect(callback).toHaveBeenCalledTimes(1);
 
       callback.mockClear();
-      world.runSystems(0);
+      world.addTime(0).runSystems();
       expect(callback).not.toHaveBeenCalled();
     });
 
@@ -92,12 +92,12 @@ describe("World", function () {
       world.start();
 
       callback.mockClear();
-      world.runSystems(1);
+      world.addTime(1).runSystems();
       expect(callback).not.toHaveBeenCalled();
       system.setEnabled(true);
 
       callback.mockClear();
-      world.runSystems(1);
+      world.addTime(1).runSystems();
       expect(callback).toHaveBeenCalledWith(entity);
     });
   });

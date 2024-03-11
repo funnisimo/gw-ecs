@@ -34,7 +34,7 @@ describe("Store", () => {
 
       store.set(entity, a);
       // These are done by world...
-      store.destroyEntity(entity); // TODO - take this out of interface
+      store.entityDestroyed!(entity); // TODO - take this out of interface
       entity._destroy();
       //
 

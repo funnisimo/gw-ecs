@@ -6,7 +6,7 @@ export abstract class DelayedSystem extends IntervalSystem {
   }
 
   public runIn(delay: number) {
-    this.delay = delay;
+    this._runIn = delay;
     this.setEnabled(true);
   }
 }

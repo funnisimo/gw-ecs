@@ -1,6 +1,6 @@
 import type { AnyComponent } from "../component/component.js";
 import { Entity } from "../entity/entity.js";
-import { World } from "./world.js";
+import { Level } from "./level.js";
 
 export class Aspect {
   protected _allComponents: AnyComponent[];
@@ -80,8 +80,8 @@ export class Aspect {
     return entities.filter((e) => this.match(e, sinceTick));
   }
 
-  *all(world: World, sinceTick: number = 0): Iterable<Entity> {
-    for (let entity of world.entities()) {
+  *all(level: Level, sinceTick: number = 0): Iterable<Entity> {
+    for (let entity of level.entities()) {
       if (this.match(entity, sinceTick)) {
         yield entity;
       }
@@ -89,10 +89,10 @@ export class Aspect {
   }
 
   *allEntries(
-    world: World,
+    level: Level,
     sinceTick: number = 0
   ): Iterable<[Entity, AnyComponent[]]> {
-    for (let entity of this.all(world, sinceTick)) {
+    for (let entity of this.all(level, sinceTick)) {
       yield [entity, this._allComponents.map((c) => entity.fetch(c))];
     }
   }

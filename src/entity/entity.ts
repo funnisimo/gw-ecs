@@ -156,14 +156,21 @@ export class Entity {
   }
 }
 
+export interface EntityWatcher {
+  entityCreated?(entity: Entity): void;
+  entityDestroyed?(entity: Entity): void;
+}
+
 export class Entities {
   _all: (Entity | number)[];
   _source: ComponentSource;
+  _notify: EntityWatcher[];
   // _toDelete: Entity[];
 
   constructor(source: ComponentSource) {
     this._source = source;
     this._all = [];
+    this._notify = [];
     // this._toDelete = [];
   }
 
@@ -171,22 +178,31 @@ export class Entities {
     return JSON.stringify({ _all: this._all });
   }
 
+  notify(handler: EntityWatcher): void {
+    this._notify.push(handler);
+  }
+
+  // TODO - stopNotify??
+
   create(): Entity {
     const index = this._all.findIndex((e) => typeof e === "number");
     if (index >= 0) {
       const oldGen = this._all[index] as number;
       const entity = new Entity(index, oldGen + 1, this._source);
       this._all[index] = entity;
+      this._notify.forEach((h) => h.entityCreated && h.entityCreated(entity));
       return entity;
     }
     const newE = new Entity(this._all.length, 1, this._source);
     this._all.push(newE);
+    this._notify.forEach((h) => h.entityCreated && h.entityCreated(newE));
     return newE;
   }
 
   destroy(entity: Entity) {
     const oldGen = entity.gen;
     this._all[entity.index] = oldGen;
+    this._notify.forEach((h) => h.entityDestroyed && h.entityDestroyed(entity));
     entity._destroy();
   }
 

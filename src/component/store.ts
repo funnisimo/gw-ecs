@@ -1,4 +1,4 @@
-import { Entity } from "../entity/entity.js";
+import { Entity, EntityWatcher } from "../entity/entity.js";
 import { Component } from "./component.js";
 
 export interface StoreWatcher<T> {
@@ -6,7 +6,7 @@ export interface StoreWatcher<T> {
   compRemoved?(entity: Entity, comp: T): void;
 }
 
-export interface CompStore<T> {
+export interface CompStore<T> extends EntityWatcher {
   has(entity: Entity): boolean;
 
   set(entity: Entity, comp: T): void;
@@ -23,13 +23,15 @@ export interface CompStore<T> {
   entities(): Entity[];
   values(): T[];
   entries(): [Entity, T][];
-
-  // TODO - Move these to different interface
-  destroyEntity(entity: Entity): void;
-  destroyEntities(entities: Entity[]): void;
 }
 
 export type AnyStore = CompStore<any>;
+
+export interface CompStoreCtr<T> extends Function {
+  new (comp: Component<T>): CompStore<T>;
+}
+
+export type AnyCompStoreCtr = CompStoreCtr<any>;
 
 export class SetStore<T> implements CompStore<T> {
   _comp: Component<T>;
@@ -139,12 +141,8 @@ export class SetStore<T> implements CompStore<T> {
   // *added(sinceTick): Iterable<[Entity,T]> {}
   // *updated(sinceTick): Iterable<[Entity,T]> {}
 
-  destroyEntity(entity: Entity): void {
+  entityDestroyed(entity: Entity): void {
     this._data.delete(entity);
-  }
-
-  destroyEntities(entities: Entity[]): void {
-    entities.forEach((e) => this.destroyEntity(e));
   }
 }
 
