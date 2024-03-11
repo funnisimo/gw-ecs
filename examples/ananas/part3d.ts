@@ -193,11 +193,7 @@ class PedroSystem extends EntityTurnSystem {
       // pop the first step in the path off b/c it is Pedro's location
       pedro.path.splice(0, 1);
 
-      term
-        .moveTo(0, 27)
-        .eraseLine.blue(
-          "PATH - " + pedro.path.map((o) => `${o.x},${o.y}`).join(", ")
-        );
+      term.moveTo(0, 27).eraseLine.blue("PATH - " + pedro.path.length);
     }
 
     if (pedro.path.length == 0) {
