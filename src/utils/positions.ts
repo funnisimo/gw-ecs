@@ -2,45 +2,52 @@ import { Entity, EntityWatcher, Index } from "../entity/entity.js";
 import { Aspect, World, WorldInit } from "../world/index.js";
 
 export class Pos {
-  x: number;
-  y: number;
+  _x: number;
+  _y: number;
   //   _mgr: PosManager;
 
   constructor(/* mgr: PosManager, */ x = 0, y = 0) {
-    this.x = x;
-    this.y = y;
+    this._x = x;
+    this._y = y;
     // this._mgr = mgr;
   }
 
-  set(x: number, y: number) {
-    this.x = x;
-    this.y = y;
+  _set(x: number, y: number) {
+    this._x = x;
+    this._y = y;
   }
 
-  copy(pos: { x: number; y: number }): void {
-    this.x = pos.x;
-    this.y = pos.y;
+  get x(): number {
+    return this._x;
+  }
+  get y(): number {
+    return this._y;
   }
 
-  add(pos: { x: number; y: number }): void;
-  add(x: number, y: number): void;
-  add(x: number | { x: number; y: number }, y?: number): void {
-    if (typeof x === "object") {
-      return this.add(x.x, x.y);
-    }
-    this.x += x || 0;
-    this.y += y || 0;
-  }
+  // copy(pos: { x: number; y: number }): void {
+  //   this._x = pos.x;
+  //   this._y = pos.y;
+  // }
 
-  sub(pos: { x: number; y: number }): void;
-  sub(x: number, y: number): void;
-  sub(x: number | { x: number; y: number }, y?: number): void {
-    if (typeof x === "object") {
-      return this.sub(x.x, x.y);
-    }
-    this.x -= x || 0;
-    this.y -= y || 0;
-  }
+  // add(pos: { x: number; y: number }): void;
+  // add(x: number, y: number): void;
+  // add(x: number | { x: number; y: number }, y?: number): void {
+  //   if (typeof x === "object") {
+  //     return this.add(x.x, x.y);
+  //   }
+  //   this._x += x || 0;
+  //   this._y += y || 0;
+  // }
+
+  // sub(pos: { x: number; y: number }): void;
+  // sub(x: number, y: number): void;
+  // sub(x: number | { x: number; y: number }, y?: number): void {
+  //   if (typeof x === "object") {
+  //     return this.sub(x.x, x.y);
+  //   }
+  //   this._x -= x || 0;
+  //   this._y -= y || 0;
+  // }
 
   plus(pos: { x: number; y: number }): Pos;
   plus(x: number, y: number): Pos;
@@ -48,7 +55,7 @@ export class Pos {
     if (typeof x === "object") {
       return this.plus(x.x, x.y);
     }
-    return new Pos((x || 0) + this.x, (y || 0) + this.y);
+    return new Pos((x || 0) + this._x, (y || 0) + this._y);
   }
 
   minus(pos: { x: number; y: number }): Pos;
@@ -57,7 +64,7 @@ export class Pos {
     if (typeof x === "object") {
       return this.minus(x.x, x.y);
     }
-    return new Pos(this.x - (x || 0), this.y - (y || 0));
+    return new Pos(this._x - (x || 0), this._y - (y || 0));
   }
 
   equals(pos: { x: number; y: number }): boolean;
@@ -66,7 +73,7 @@ export class Pos {
     if (typeof x === "object") {
       return this.equals(x.x, x.y);
     }
-    return this.x == (x || 0) && this.y == (y || 0);
+    return this._x == (x || 0) && this._y == (y || 0);
   }
 }
 
@@ -76,7 +83,7 @@ export class Pos {
 
 export class PosManager implements EntityWatcher, WorldInit {
   _size: [number, number];
-  _entities: Map<Index, Entity>;
+  _entities: Map<Index, Entity[]>;
 
   constructor(width: number, height: number) {
     this._size = [width, height];
@@ -101,6 +108,10 @@ export class PosManager implements EntityWatcher, WorldInit {
     world.entities().notify(this); // Register interest in destroy events
   }
 
+  _getIndex(x: number, y: number): number {
+    return x + y * this.width;
+  }
+
   fill(createFn: (x: number, y: number) => Entity) {
     for (let x = 0; x < this.width; ++x) {
       for (let y = 0; y < this.height; ++y) {
@@ -111,26 +122,21 @@ export class PosManager implements EntityWatcher, WorldInit {
   }
 
   hasAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): boolean {
-    for (let entity of this._entities.values()) {
-      if (entity.fetch(Pos)!.equals(x, y)) {
-        if (!aspect || aspect.match(entity, sinceTick)) {
-          return true;
-        }
-      }
-    }
-    return false;
+    const index = this._getIndex(x, y);
+    const entities = this._entities.get(index);
+    if (!entities) return false;
+    return aspect
+      ? entities.some((e) => aspect.match(e, sinceTick))
+      : entities.length > 0;
   }
 
   getAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): Entity[] {
-    const out: Entity[] = [];
-    for (let entity of this._entities.values()) {
-      if (entity.fetch(Pos)!.equals(x, y)) {
-        if (!aspect || aspect.match(entity, sinceTick)) {
-          out.push(entity);
-        }
-      }
-    }
-    return out;
+    const index = this._getIndex(x, y);
+    const entities = this._entities.get(index);
+    if (!entities) return [];
+    return aspect
+      ? entities.filter((e) => aspect.match(e, sinceTick))
+      : entities;
   }
 
   firstAt(
@@ -139,13 +145,7 @@ export class PosManager implements EntityWatcher, WorldInit {
     aspect?: Aspect,
     sinceTick = 0
   ): Entity | undefined {
-    for (let entity of this._entities.values()) {
-      if (entity.fetch(Pos)!.equals(x, y)) {
-        if (!aspect || aspect.match(entity, sinceTick)) {
-          return entity;
-        }
-      }
-    }
+    return this.getAt(x, y, aspect, sinceTick)[0];
   }
 
   getFor(entity: Entity): Pos | undefined {
@@ -155,17 +155,38 @@ export class PosManager implements EntityWatcher, WorldInit {
   set(entity: Entity, x: number, y: number) {
     const pos = entity.update(Pos);
     if (pos) {
-      pos.set(x, y);
+      const oldIndex = this._getIndex(pos.x, pos.y);
+      const oldEntities = this._entities.get(oldIndex);
+      if (oldEntities) {
+        const entityIndex = oldEntities.indexOf(entity);
+        if (entityIndex >= 0) {
+          oldEntities.splice(entityIndex, 1);
+        }
+      }
+      pos._set(x, y);
     } else {
       entity._setComp(Pos, new Pos(/* this, */ x, y));
-      this._entities.set(entity.index, entity);
     }
+    const index = this._getIndex(x, y);
+    let entities = this._entities.get(index);
+    if (!entities) {
+      entities = [];
+      this._entities.set(index, entities);
+    }
+    entities.push(entity);
   }
 
   remove(entity: Entity) {
-    if (this._entities.delete(entity.index)) {
-      entity._removeComp(Pos);
+    const pos = entity.fetch(Pos);
+    if (!pos) return;
+    const index = this._getIndex(pos.x, pos.y);
+    let entities = this._entities.get(index);
+    if (!entities) return;
+    const entityIndex = entities.indexOf(entity);
+    if (entityIndex >= 0) {
+      entities.splice(entityIndex, 1);
     }
+    entity._removeComp(Pos);
   }
 
   eachXY(
@@ -200,5 +221,16 @@ export class PosManager implements EntityWatcher, WorldInit {
 
   entityDestroyed(entity: Entity): void {
     this.remove(entity);
+  }
+
+  toJSON(): string {
+    return JSON.stringify({
+      size: this._size,
+      // entities: [...this._entities.entries()].map(([index, entities]) => {
+      //   const x = index % this._size[0];
+      //   const y = Math.floor(index / this._size[0]);
+      //   return [x, y, entities.length];
+      // }),
+    });
   }
 }

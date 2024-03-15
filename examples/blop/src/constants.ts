@@ -59,47 +59,66 @@ export const REINFORCE_AMOUNT = 1; /////////////////////////////////////////////
 // DISPLAY DIMENSIONS
 //////////////////////////////////////////////////////
 
-export const TEXT_WIDTH_COEF = 2;
-export const LOG_WIDTH = 25;
-export const LOG_TEXT_WIDTH = LOG_WIDTH * TEXT_WIDTH_COEF;
-export const INFO_WIDTH = 20;
-export const INFO_TEXT_WIDTH = INFO_WIDTH * TEXT_WIDTH_COEF;
+export const SCREEN_WIDTH = 50;
+export const SCREEN_HEIGHT = 40;
+
+export const HELP_TOP = 0;
+export const HELP_LEFT = 0;
+export const HELP_WIDTH = SCREEN_WIDTH;
+export const HELP_HEIGHT = 4;
+
 export const MAP_WIDTH = WORLD_WIDTH;
 export const MAP_HEIGHT = WORLD_HEIGHT;
-export const MAP_HEADER_OFFSET = GWU.xy.xy(1 + LOG_WIDTH + 1, 1);
+export const MAP_TOP = HELP_HEIGHT + 4;
+export const MAP_LEFT = 0;
+
+export const MAP_HEADER_TOP = HELP_HEIGHT + 1;
 export const MAP_HEADER_WIDTH = MAP_WIDTH;
-export const MAP_HEADER_TEXT_WIDTH = MAP_HEADER_WIDTH * TEXT_WIDTH_COEF;
-export const MAP_HEADER_HEIGHT = 1;
-export const MAP_OFFSET = GWU.xy.plus(
-  MAP_HEADER_OFFSET,
-  GWU.xy.xy(0, MAP_HEADER_HEIGHT + 1)
-);
-export const HELP_OFFSET = GWU.xy.xy(
-  MAP_HEADER_OFFSET.x,
-  MAP_OFFSET.y + MAP_HEIGHT + 1
-);
-export const HELP_WIDTH = MAP_HEADER_WIDTH;
-export const HELP_TEXT_WIDTH = HELP_WIDTH * TEXT_WIDTH_COEF;
-export const HELP_HEIGHT = 5;
-export const DISPLAY_HEIGHT =
-  1 + MAP_HEADER_HEIGHT + 1 + MAP_HEIGHT + 1 + HELP_HEIGHT + 1;
-export const LOG_OFFSET = GWU.xy.xy(1, 1);
-export const LOG_HEIGHT = DISPLAY_HEIGHT - 2;
-export const INFO_HEIGHT = DISPLAY_HEIGHT - 2;
-export const INFO_OFFSET = GWU.xy.xy(MAP_OFFSET.x + MAP_WIDTH + 1, 1);
-export const DISPLAY_WIDTH = 1 + LOG_WIDTH + 1 + MAP_WIDTH + 1 + INFO_WIDTH + 1;
-export const HEALTH_GAUGE_LENGTH = 20;
-export const MODAL_OFFSET = GWU.xy.xy(15, 8);
-export const MODAL_WIDTH = DISPLAY_WIDTH - 2 * MODAL_OFFSET.x;
-export const MODAL_TEXT_WIDTH = MODAL_WIDTH * TEXT_WIDTH_COEF;
-export const DETAILS_WIDTH = 20;
-export const DETAILS_OFFSET = GWU.xy.xy(
-  DISPLAY_WIDTH - 1 - INFO_WIDTH - 2 - DETAILS_WIDTH,
-  2
-);
-export const DETAILS_TEXT_WIDTH = DETAILS_WIDTH * TEXT_WIDTH_COEF;
-export const LINES_BETWEEN_DETAILS_SECTIONS = 3;
-export const LINE_WIDTH_RATIO = 0.2;
+
+export const SIDEBAR_LEFT = MAP_WIDTH + 2;
+export const SIDEBAR_TOP = MAP_TOP;
+export const SIDEBAR_WIDTH = SCREEN_WIDTH - MAP_WIDTH - 1;
+export const SIDEBAR_HEIGHT = MAP_HEIGHT + 2; // including header
+
+export const LOG_TOP = MAP_TOP + MAP_HEIGHT + 2;
+export const LOG_LEFT = 0;
+export const LOG_WIDTH = SCREEN_WIDTH;
+export const LOG_HEIGHT = SCREEN_HEIGHT - LOG_TOP - 1;
+
+// export const TEXT_WIDTH_COEF = 2;
+// export const LOG_TEXT_WIDTH = LOG_WIDTH * TEXT_WIDTH_COEF;
+// export const INFO_WIDTH = 20;
+// export const INFO_TEXT_WIDTH = INFO_WIDTH * TEXT_WIDTH_COEF;
+// export const MAP_HEADER_OFFSET = GWU.xy.xy(1 + LOG_WIDTH + 1, 1);
+// export const MAP_HEADER_TEXT_WIDTH = MAP_HEADER_WIDTH * TEXT_WIDTH_COEF;
+// export const MAP_HEADER_HEIGHT = 1;
+// export const MAP_OFFSET = GWU.xy.plus(
+//   MAP_HEADER_OFFSET,
+//   GWU.xy.xy(0, MAP_HEADER_HEIGHT + 1)
+// );
+// export const HELP_OFFSET = GWU.xy.xy(
+//   MAP_HEADER_OFFSET.x,
+//   MAP_OFFSET.y + MAP_HEIGHT + 1
+// );
+// export const HELP_TEXT_WIDTH = HELP_WIDTH * TEXT_WIDTH_COEF;
+// export const DISPLAY_HEIGHT =
+//   1 + MAP_HEADER_HEIGHT + 1 + MAP_HEIGHT + 1 + HELP_HEIGHT + 1;
+// export const LOG_OFFSET = GWU.xy.xy(1, 1);
+// export const INFO_HEIGHT = DISPLAY_HEIGHT - 2;
+// export const INFO_OFFSET = GWU.xy.xy(MAP_OFFSET.x + MAP_WIDTH + 1, 1);
+// export const DISPLAY_WIDTH = 1 + LOG_WIDTH + 1 + MAP_WIDTH + 1 + INFO_WIDTH + 1;
+// export const HEALTH_GAUGE_LENGTH = 20;
+// export const MODAL_OFFSET = GWU.xy.xy(15, 8);
+// export const MODAL_WIDTH = DISPLAY_WIDTH - 2 * MODAL_OFFSET.x;
+// export const MODAL_TEXT_WIDTH = MODAL_WIDTH * TEXT_WIDTH_COEF;
+// export const DETAILS_WIDTH = 20;
+// export const DETAILS_OFFSET = GWU.xy.xy(
+//   DISPLAY_WIDTH - 1 - INFO_WIDTH - 2 - DETAILS_WIDTH,
+//   2
+// );
+// export const DETAILS_TEXT_WIDTH = DETAILS_WIDTH * TEXT_WIDTH_COEF;
+// export const LINES_BETWEEN_DETAILS_SECTIONS = 3;
+// export const LINE_WIDTH_RATIO = 0.2;
 
 //////////////////////////////////////////////////////
 // COLORS

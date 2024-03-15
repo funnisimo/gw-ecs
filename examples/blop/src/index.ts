@@ -5,6 +5,7 @@ import { Aspect, World } from "gw-ecs/world";
 import { Hero, Sprite, Tile } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { Pos, PosManager } from "gw-ecs/utils/positions";
+import { logs } from "./ui/log";
 
 console.log("Hello, search for the " + Constants.BLOPULET_NAME);
 
@@ -23,6 +24,17 @@ const gw = GWU.app.start({
       nextLevel(world);
     },
     click(ev: GWU.app.Event) {
+      if (ev.x < Constants.MAP_WIDTH) {
+        if (ev.y >= Constants.MAP_TOP && ev.y < Constants.LOG_TOP - 2) {
+          const x = ev.x;
+          const y = ev.y - Constants.MAP_TOP;
+
+          const mgr = world.getUnique(PosManager);
+          const entities = mgr.getAt(x, y);
+          console.log("map click", x, y, entities);
+          return;
+        }
+      }
       console.log("click", ev.x, ev.y);
     },
     keypress(this: GWU.app.Scene, ev: GWU.app.Event) {
@@ -40,6 +52,7 @@ const gw = GWU.app.start({
       drawLineH(buffer, 0, 28, 50, "-", "white", "black");
 
       drawMap(buffer, world, 0, 8);
+      drawLog(buffer, 0, 29);
       // GWU.xy.forRect(buffer.width, buffer.height, (x, y) => {
       //   const ch = String.fromCharCode(65 + GWU.rng.random.number(26));
       //   const fg = GWU.rng.random.number(0x1000);
@@ -75,6 +88,13 @@ function drawMap(
       buffer.draw(x + x0, y + y0, sprite.ch, sprite.fg, sprite.bg);
     }
   }, new Aspect(Pos, Sprite));
+}
+
+function drawLog(buffer: GWU.buffer.Buffer, x0: number, y0: number) {
+  for (let i = 0; i < Constants.LOG_HEIGHT; ++i) {
+    let y = Constants.LOG_TOP + Constants.LOG_HEIGHT - i - 1;
+    buffer.drawText(Constants.LOG_LEFT, y, logs[i]);
+  }
 }
 
 function drawLineH(

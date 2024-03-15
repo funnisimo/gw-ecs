@@ -1,7 +1,7 @@
 import * as Constants from "../constants";
 
 let oldLogsIndex = Infinity;
-var logs: string[] = [];
+export var logs: string[] = [];
 
 // export function drawLogs(logDisplay) {
 //   var yLine = _constants__WEBPACK_IMPORTED_MODULE_0__.LOG_HEIGHT - 1;
@@ -51,7 +51,7 @@ var logs: string[] = [];
 // }
 
 export function addLog(message: string) {
-  //   var _logs;
+  // TODO - split at log display width...
 
   logs.unshift(message);
   if (logs.length > Constants.LOG_HEIGHT + 2) {

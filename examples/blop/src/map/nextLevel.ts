@@ -77,9 +77,11 @@ function makeNormalLevel(world: World, depth: number) {
     startingHeroXY = { x: pos.x, y: pos.y };
   }
 
+  console.log("hero xy - before", startingHeroXY);
   const heroXY = findClosestSpawnTile(world, startingHeroXY);
   const mgr = world.getUnique(PosManager);
   mgr.set(hero, heroXY.x, heroXY.y);
+  console.log("hero starting xy", heroXY);
 
   //
   var stairsXY = findSpawnTileFarFrom(
