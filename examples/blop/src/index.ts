@@ -1,4 +1,4 @@
-import * as GWU from "gw-utils/index";
+import * as GWU from "gw-utils";
 import * as Constants from "./constants";
 import type { ColorBase } from "gw-utils/color";
 import { Aspect, World } from "gw-ecs/world";
@@ -25,7 +25,7 @@ const gw = GWU.app.start({
     click(ev: GWU.app.Event) {
       console.log("click", ev.x, ev.y);
     },
-    keypress(ev: GWU.app.Event) {
+    keypress(this: GWU.app.Scene, ev: GWU.app.Event) {
       if (ev.key == " ") {
         nextLevel(world);
         this.needsDraw = true;
@@ -33,7 +33,7 @@ const gw = GWU.app.start({
         console.log("key", ev.key);
       }
     },
-    draw(buffer) {
+    draw(buffer: GWU.buffer.Buffer) {
       drawLineH(buffer, 0, 5, 50, "-", "white", "black");
       drawLineV(buffer, 20, 6, 22, "|", "white", "black");
       drawLineH(buffer, 0, 7, 20, "-", "white", "black");
@@ -50,6 +50,9 @@ const gw = GWU.app.start({
   },
 });
 
+const HERO_ASPECT = new Aspect(Hero);
+const TILE_ASPECT = new Aspect(Tile);
+
 function drawMap(
   buffer: GWU.buffer.Buffer,
   world: World,
@@ -60,9 +63,15 @@ function drawMap(
 
   mgr.everyXY((x, y, entities) => {
     if (entities.length == 0) {
-      buffer.draw(x + x0, y + y0, "!", "red");
+      buffer.draw(x + x0, y + y0, "?", "red");
     } else {
-      const sprite = entities[0].fetch(Sprite)!;
+      const entity =
+        HERO_ASPECT.first(entities) ||
+        // PEDRO_ASPECT.first(entities) ||
+        // BOX_ASPECT.first(entities) ||
+        TILE_ASPECT.first(entities)!;
+
+      const sprite = entity.fetch(Sprite)!;
       buffer.draw(x + x0, y + y0, sprite.ch, sprite.fg, sprite.bg);
     }
   }, new Aspect(Pos, Sprite));

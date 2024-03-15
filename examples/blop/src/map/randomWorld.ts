@@ -1,6 +1,6 @@
-import { random, grid } from "gw-utils/index";
-// import { Blob } from "gw-utils/dist/blob";
-import { carve } from "gw-dig/index";
+import { random, grid } from "gw-utils";
+// import { Blob } from "gw-utils/blob";
+import { carve } from "gw-dig";
 import {
   EMBER,
   FLOOR,

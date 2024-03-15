@@ -3,11 +3,16 @@ import { World } from "gw-ecs/world/world";
 import { createHero } from "../comps/hero";
 import * as Constants from "../constants";
 import { addLog } from "../ui/log";
-import { findEmptyTileForSpawn, setTileType } from "./utils";
+import {
+  findClosestEmptyFloor as findClosestSpawnTile,
+  findEmptyTileForSpawn,
+  findSpawnTileFarFrom,
+  setTileType,
+} from "./utils";
 import { STAIRS } from "../comps";
 import { makeRandomWorld } from "./randomWorld";
 import { type XY, manhattanDistanceFromTo } from "gw-utils/xy";
-import { PosManager } from "gw-ecs/utils/positions";
+import { Pos, PosManager } from "gw-ecs/utils/positions";
 
 class Game {
   hero: Entity | null;
@@ -21,12 +26,6 @@ class Game {
 
 export function nextLevel(world: World) {
   const game = world.getUniqueOr(Game, () => new Game());
-
-  let hero = game.hero;
-  if (!hero) {
-    hero = createHero(world);
-    game.hero = hero;
-  }
 
   // Clean the world
   // - all entities other than Hero
@@ -66,29 +65,39 @@ export function nextLevel(world: World) {
 function makeNormalLevel(world: World, depth: number) {
   makeRandomWorld(world);
 
-  // var stairsLocation = findEmptyTileForSpawn(world);
-  // setTileType(world, stairsLocation, STAIRS);
-  // var playerPos = findPlayerCell(world, stairsLocation);
+  const game = world.getUnique(Game);
+
+  let hero = game.hero;
+  let startingHeroXY = { x: 5, y: 5 };
+  if (!hero) {
+    hero = createHero(world);
+    game.hero = hero;
+  } else {
+    const pos = hero.fetch(Pos)!;
+    startingHeroXY = { x: pos.x, y: pos.y };
+  }
+
+  const heroXY = findClosestSpawnTile(world, startingHeroXY);
+  const mgr = world.getUnique(PosManager);
+  mgr.set(hero, heroXY.x, heroXY.y);
+
+  //
+  var stairsXY = findSpawnTileFarFrom(
+    world,
+    heroXY,
+    Constants.STAIRS_MIN_DISTANCE
+  );
+  setTileType(world, stairsXY, STAIRS);
+
   // var blops = makeBlops(world, playerPos, depth);
   // var items = makeItems(world, playerPos, depth);
+
   return {
     world: world,
     // playerPos: playerPos,
     // pickables: items,
     // blops: blops,
   };
-}
-
-function findPlayerCell(world: World, stairsLocation: XY) {
-  // eslint-disable-next-line no-constant-condition
-  const pos = findEmptyTileForSpawn(world, (xy) => {
-    return (
-      manhattanDistanceFromTo(xy, stairsLocation) >=
-      Constants.STAIRS_MIN_DISTANCE
-    );
-  });
-
-  return pos;
 }
 
 // function makeBlops(world, playerPos, depth) {
