@@ -164,6 +164,10 @@ export class Level implements ComponentSource {
     return this._uniques.get(comp);
   }
 
+  getUniqueOr<T>(comp: Component<T>, fn: () => T): T {
+    return this._uniques.getOr(comp, fn);
+  }
+
   removeUnique<T>(comp: Component<T>) {
     this._uniques.delete(comp);
   }

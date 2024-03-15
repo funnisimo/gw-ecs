@@ -83,6 +83,10 @@ export class Entity {
       : this._setComp(comp!, val);
   }
 
+  setAll(...val: any[]): void {
+    val.forEach((v) => this.set(v));
+  }
+
   _setComp(comp: AnyComponent, val: any): void {
     const data = this._comps.get(comp);
     if (!data) {

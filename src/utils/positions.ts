@@ -101,6 +101,15 @@ export class PosManager implements EntityWatcher, WorldInit {
     world.entities().notify(this); // Register interest in destroy events
   }
 
+  fill(createFn: (x: number, y: number) => Entity) {
+    for (let x = 0; x < this.width; ++x) {
+      for (let y = 0; y < this.height; ++y) {
+        const entity = createFn(x, y);
+        this.set(entity, x, y);
+      }
+    }
+  }
+
   hasAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): boolean {
     for (let entity of this._entities.values()) {
       if (entity.fetch(Pos)!.equals(x, y)) {
@@ -122,6 +131,21 @@ export class PosManager implements EntityWatcher, WorldInit {
       }
     }
     return out;
+  }
+
+  firstAt(
+    x: number,
+    y: number,
+    aspect?: Aspect,
+    sinceTick = 0
+  ): Entity | undefined {
+    for (let entity of this._entities.values()) {
+      if (entity.fetch(Pos)!.equals(x, y)) {
+        if (!aspect || aspect.match(entity, sinceTick)) {
+          return entity;
+        }
+      }
+    }
   }
 
   getFor(entity: Entity): Pos | undefined {
