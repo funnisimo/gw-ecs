@@ -13,19 +13,10 @@ import { STAIRS } from "../comps";
 import { makeRandomWorld } from "./randomWorld";
 import { type XY, manhattanDistanceFromTo } from "gw-utils/xy";
 import { Pos, PosManager } from "gw-ecs/utils/positions";
-
-class Game {
-  hero: Entity | null;
-  depth: number;
-
-  constructor() {
-    this.hero = null;
-    this.depth = 0;
-  }
-}
+import { Game } from "../uniques";
 
 export function nextLevel(world: World) {
-  const game = world.getUniqueOr(Game, () => new Game());
+  const game = world.getUnique(Game);
 
   // Clean the world
   // - all entities other than Hero

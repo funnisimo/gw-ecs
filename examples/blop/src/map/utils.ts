@@ -4,6 +4,7 @@ import { FLOOR, Tile } from "../comps";
 import { PosManager } from "gw-ecs/utils/positions";
 import { Aspect } from "gw-ecs/world/aspect";
 import { Random, random } from "gw-utils/rng";
+import { Collider } from "gw-ecs/utils/collisions";
 
 class RandomXY {
   _indexes: number[];
@@ -93,4 +94,9 @@ export function setTileType(world: World, xy: XY.XY, tile: Tile) {
   if (!entity)
     throw new Error("Failed to find tile at pos: " + xy.x + "," + xy.y);
   entity.setAll(tile, tile.sprite);
+  if (tile.collider) {
+    entity.set(tile.collider);
+  } else {
+    entity.remove(Collider);
+  }
 }

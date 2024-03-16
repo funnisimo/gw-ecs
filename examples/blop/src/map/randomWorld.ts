@@ -29,7 +29,8 @@ export function makeRandomWorld(world: World) {
   const mgr = new PosManager(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
   world.setUnique(mgr);
 
-  mgr.fill(() => world.create(WALL, WALL.sprite));
+  // TODO - Bundles!
+  mgr.fill(() => world.create(WALL, WALL.sprite, WALL.collider));
 
   dig(world);
   generatePatches(mgr);

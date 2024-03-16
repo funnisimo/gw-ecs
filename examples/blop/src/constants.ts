@@ -69,11 +69,10 @@ export const HELP_HEIGHT = 4;
 
 export const MAP_WIDTH = WORLD_WIDTH;
 export const MAP_HEIGHT = WORLD_HEIGHT;
-export const MAP_TOP = HELP_HEIGHT + 4;
-export const MAP_LEFT = 0;
-
-export const MAP_HEADER_TOP = HELP_HEIGHT + 1;
+export const MAP_HEADER_TOP = HELP_TOP + HELP_HEIGHT + 1;
 export const MAP_HEADER_WIDTH = MAP_WIDTH;
+export const MAP_TOP = MAP_HEADER_TOP + 2;
+export const MAP_LEFT = 0;
 
 export const SIDEBAR_LEFT = MAP_WIDTH + 2;
 export const SIDEBAR_TOP = MAP_TOP;
@@ -83,7 +82,7 @@ export const SIDEBAR_HEIGHT = MAP_HEIGHT + 2; // including header
 export const LOG_TOP = MAP_TOP + MAP_HEIGHT + 2;
 export const LOG_LEFT = 0;
 export const LOG_WIDTH = SCREEN_WIDTH;
-export const LOG_HEIGHT = SCREEN_HEIGHT - LOG_TOP - 1;
+export const LOG_HEIGHT = SCREEN_HEIGHT - LOG_TOP;
 
 // export const TEXT_WIDTH_COEF = 2;
 // export const LOG_TEXT_WIDTH = LOG_WIDTH * TEXT_WIDTH_COEF;

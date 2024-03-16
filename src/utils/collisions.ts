@@ -17,12 +17,12 @@ export class Collider {
           return false;
         }
       } else {
-        if (!otherTags.includes(tag)) {
-          return false;
+        if (otherTags.includes(tag)) {
+          return true;
         }
       }
     }
-    return true;
+    return false;
   }
 }
 

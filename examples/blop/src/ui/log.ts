@@ -1,7 +1,12 @@
 import * as Constants from "../constants";
 
+export interface LogEntry {
+  msg: string;
+  count: number;
+}
+
 let oldLogsIndex = Infinity;
-export var logs: string[] = [];
+export var logs: LogEntry[] = [];
 
 // export function drawLogs(logDisplay) {
 //   var yLine = _constants__WEBPACK_IMPORTED_MODULE_0__.LOG_HEIGHT - 1;
@@ -53,7 +58,7 @@ export var logs: string[] = [];
 export function addLog(message: string) {
   // TODO - split at log display width...
 
-  logs.unshift(message);
+  logs.unshift({ msg: message, count: 1 });
   if (logs.length > Constants.LOG_HEIGHT + 2) {
     logs.length = Constants.LOG_HEIGHT + 2;
   }
@@ -62,7 +67,7 @@ export function addLog(message: string) {
 }
 
 export function addEmptyLine(limitToOne = true) {
-  if (!limitToOne || (logs.length && logs[0] !== "")) {
+  if (!limitToOne || (logs.length && logs[0].msg !== "")) {
     addLog("");
   }
 }

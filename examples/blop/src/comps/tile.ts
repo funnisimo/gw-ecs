@@ -1,8 +1,10 @@
 import { Sprite, type SpriteConfig } from "./sprite";
+import { Collider } from "gw-ecs/utils/collisions";
 
 export interface TileConfig extends SpriteConfig {
   name: string;
   blocksVision?: boolean;
+  blocksMove?: boolean;
   slide?: boolean;
   shock?: boolean;
   hurt?: number;
@@ -12,27 +14,32 @@ export interface TileConfig extends SpriteConfig {
 export class Tile {
   name: string;
   blocksVision: boolean;
+  blocksMove: boolean;
   slide: boolean;
   shock: boolean;
   hurt: number;
   stairs: boolean;
   sprite: Sprite;
+  collider: Collider | null;
 
   constructor(name: string, opts: Omit<TileConfig, "name"> = { ch: "!" }) {
     this.name = name;
     this.blocksVision = opts.blocksVision || false;
+    this.blocksMove = opts.blocksMove || false;
     this.slide = opts.slide || false;
     this.shock = opts.shock || false;
     this.hurt = opts.hurt || 0;
     this.stairs = opts.stairs || false;
     this.sprite = new Sprite(opts.ch, opts.fg, opts.bg);
+    this.collider = this.blocksMove ? new Collider("wall") : null;
   }
 }
 
 export const FLOOR = new Tile("Ground", { ch: ".", fg: "grey" });
-export const GRASS = new Tile("GRass", { ch: ",", fg: "green" });
+export const GRASS = new Tile("Grass", { ch: ",", fg: "green" });
 export const WALL = new Tile("Wall", {
   blocksVision: true,
+  blocksMove: true,
   ch: "#",
   fg: "grey",
 });

@@ -10,6 +10,16 @@ describe("collisions", () => {
       expect(c.match([])).toBeFalse();
       expect(c.match(["a"])).toBeTrue();
     });
+    test("handle 2", () => {
+      const c = new Collider("a", "b");
+      expect(c.tags).toEqual(["a", "b"]);
+      expect(c.match([])).toBeFalse();
+      expect(c.match(["a"])).toBeTrue();
+      expect(c.match(["b"])).toBeTrue();
+      expect(c.match(["c"])).toBeFalse();
+      expect(c.match(["a", "c"])).toBeTrue();
+      expect(c.match(["c", "b"])).toBeTrue();
+    });
   });
 
   describe("CollisionManager", () => {

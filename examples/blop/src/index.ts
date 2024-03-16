@@ -2,17 +2,35 @@ import * as GWU from "gw-utils";
 import * as Constants from "./constants";
 import type { ColorBase } from "gw-utils/color";
 import { Aspect, World } from "gw-ecs/world";
-import { Hero, Sprite, Tile } from "./comps";
+import { Hero, Move, Sprite, Tile } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { Pos, PosManager } from "gw-ecs/utils/positions";
-import { logs } from "./ui/log";
+import { logs, addLog } from "./ui/log";
+import { CollisionManager } from "gw-ecs/utils/collisions";
+import { MoveSystem } from "./systems";
+import { Game } from "./uniques";
 
 console.log("Hello, search for the " + Constants.BLOPULET_NAME);
+
+function blockedMove() {
+  addLog("Blocked");
+  // Does not count as turn for actor (esp hero)
+  return true; // We handled the collision
+}
 
 const world = new World()
   .registerComponent(Hero)
   .registerComponent(Tile)
-  .registerComponent(Sprite);
+  .registerComponent(Sprite)
+  .registerComponent(Move)
+  .addSystem(new MoveSystem())
+  .setUnique(new Game())
+  .setUnique(new CollisionManager(), (col) => {
+    col
+      // .register(["hero"], ["blop"], attack)
+      // .register(["blop"], ["hero"], attack)
+      .register("actor", "wall", blockedMove);
+  });
 
 const gw = GWU.app.start({
   div: "game",
@@ -38,12 +56,25 @@ const gw = GWU.app.start({
       console.log("click", ev.x, ev.y);
     },
     keypress(this: GWU.app.Scene, ev: GWU.app.Event) {
-      if (ev.key == " ") {
+      const game = world.getUnique(Game);
+      if (ev.dir) {
+        const hero = game.hero;
+        if (hero) {
+          console.log("keypress - move", ev.dir);
+          hero.set(new Move(ev.dir));
+        }
+      } else if (ev.key == " ") {
         nextLevel(world);
-        this.needsDraw = true;
+        game.changed = true;
       } else {
         console.log("key", ev.key);
       }
+    },
+    update(dt: number) {
+      world.runSystems(dt);
+      const game = world.getUnique(Game);
+      this.needsDraw = game.changed;
+      game.changed = false;
     },
     draw(buffer: GWU.buffer.Buffer) {
       drawLineH(buffer, 0, 5, 50, "-", "white", "black");
@@ -93,7 +124,9 @@ function drawMap(
 function drawLog(buffer: GWU.buffer.Buffer, x0: number, y0: number) {
   for (let i = 0; i < Constants.LOG_HEIGHT; ++i) {
     let y = Constants.LOG_TOP + Constants.LOG_HEIGHT - i - 1;
-    buffer.drawText(Constants.LOG_LEFT, y, logs[i]);
+    const log = logs[i];
+    const msg = log ? log.msg : "";
+    buffer.drawText(Constants.LOG_LEFT, y, msg);
   }
 }
 
