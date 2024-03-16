@@ -83,11 +83,11 @@ export class Pos {
 
 export class PosManager implements EntityWatcher, WorldInit {
   _size: [number, number];
-  _entities: Map<Index, Entity[]>;
+  _entitiesAt: Map<Index, Entity[]>;
 
   constructor(width: number, height: number) {
     this._size = [width, height];
-    this._entities = new Map();
+    this._entitiesAt = new Map();
   }
 
   get width(): number {
@@ -123,7 +123,7 @@ export class PosManager implements EntityWatcher, WorldInit {
 
   hasAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): boolean {
     const index = this._getIndex(x, y);
-    const entities = this._entities.get(index);
+    const entities = this._entitiesAt.get(index);
     if (!entities) return false;
     return aspect
       ? entities.some((e) => aspect.match(e, sinceTick))
@@ -132,7 +132,7 @@ export class PosManager implements EntityWatcher, WorldInit {
 
   getAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): Entity[] {
     const index = this._getIndex(x, y);
-    const entities = this._entities.get(index);
+    const entities = this._entitiesAt.get(index);
     if (!entities) return [];
     return aspect
       ? entities.filter((e) => aspect.match(e, sinceTick))
@@ -156,7 +156,7 @@ export class PosManager implements EntityWatcher, WorldInit {
     const pos = entity.update(Pos);
     if (pos) {
       const oldIndex = this._getIndex(pos.x, pos.y);
-      const oldEntities = this._entities.get(oldIndex);
+      const oldEntities = this._entitiesAt.get(oldIndex);
       if (oldEntities) {
         const entityIndex = oldEntities.indexOf(entity);
         if (entityIndex >= 0) {
@@ -168,10 +168,10 @@ export class PosManager implements EntityWatcher, WorldInit {
       entity._setComp(Pos, new Pos(/* this, */ x, y));
     }
     const index = this._getIndex(x, y);
-    let entities = this._entities.get(index);
+    let entities = this._entitiesAt.get(index);
     if (!entities) {
       entities = [];
-      this._entities.set(index, entities);
+      this._entitiesAt.set(index, entities);
     }
     entities.push(entity);
   }
@@ -180,7 +180,7 @@ export class PosManager implements EntityWatcher, WorldInit {
     const pos = entity.fetch(Pos);
     if (!pos) return;
     const index = this._getIndex(pos.x, pos.y);
-    let entities = this._entities.get(index);
+    let entities = this._entitiesAt.get(index);
     if (!entities) return;
     const entityIndex = entities.indexOf(entity);
     if (entityIndex >= 0) {
@@ -226,11 +226,11 @@ export class PosManager implements EntityWatcher, WorldInit {
   toJSON(): string {
     return JSON.stringify({
       size: this._size,
-      // entities: [...this._entities.entries()].map(([index, entities]) => {
-      //   const x = index % this._size[0];
-      //   const y = Math.floor(index / this._size[0]);
-      //   return [x, y, entities.length];
-      // }),
+      entities: [...this._entitiesAt.entries()].map(([index, entities]) => {
+        const x = index % this._size[0];
+        const y = Math.floor(index / this._size[0]);
+        return [x, y, entities.length];
+      }),
     });
   }
 }

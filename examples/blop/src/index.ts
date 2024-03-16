@@ -18,6 +18,10 @@ function blockedMove() {
   return true; // We handled the collision
 }
 
+function gotoNextLevel() {
+  nextLevel(world);
+}
+
 const world = new World()
   .registerComponent(Hero)
   .registerComponent(Tile)
@@ -29,7 +33,8 @@ const world = new World()
     col
       // .register(["hero"], ["blop"], attack)
       // .register(["blop"], ["hero"], attack)
-      .register("actor", "wall", blockedMove);
+      .register("actor", "wall", blockedMove)
+      .register("hero", "stairs", gotoNextLevel);
   });
 
 const gw = GWU.app.start({

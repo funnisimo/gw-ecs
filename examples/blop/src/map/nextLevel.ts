@@ -22,17 +22,17 @@ export function nextLevel(world: World) {
   // - all entities other than Hero
   // - detachEntity(hero) + destroyAllEntities() + attachEntity(hero) ?
 
-  const depth = game.depth + 1;
+  game.depth += 1;
   // var newLevel;
 
   // if (depth >= Constants.END_DEPTH) {
   //   makeBlopuletWorld(world);
   // } else {
-  makeNormalLevel(world, depth);
+  makeNormalLevel(world, game.depth);
   // }
 
   addLog("");
-  addLog("=== LEVEL " + depth + " ===");
+  addLog("=== LEVEL " + game.depth + " ===");
 
   //   return {
   //     depth: depth,

@@ -1,3 +1,4 @@
+import { Aspect } from "gw-ecs/world";
 import { Sprite, type SpriteConfig } from "./sprite";
 import { Collider } from "gw-ecs/utils/collisions";
 
@@ -31,7 +32,12 @@ export class Tile {
     this.hurt = opts.hurt || 0;
     this.stairs = opts.stairs || false;
     this.sprite = new Sprite(opts.ch, opts.fg, opts.bg);
-    this.collider = this.blocksMove ? new Collider("wall") : null;
+    this.collider = null;
+    if (this.blocksMove) {
+      this.collider = new Collider("wall");
+    } else if (this.stairs) {
+      this.collider = new Collider("stairs");
+    }
   }
 }
 
@@ -56,3 +62,5 @@ export const STAIRS = new Tile("Stairs", {
   ch: ">",
   fg: "white",
 });
+
+export const TILE_ASPECT = new Aspect(Tile);
