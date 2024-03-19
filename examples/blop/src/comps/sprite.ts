@@ -1,25 +1,7 @@
-import * as Color from "gw-utils/color";
+import { Sprite, type SpriteConfig } from "gw-utils/sprite";
 
-export interface SpriteConfig {
-  ch: string;
-  fg?: Color.ColorBase;
-  bg?: Color.ColorBase;
-}
-
-export class Sprite {
-  ch: string;
-  fg: Color.Color;
-  bg: Color.Color;
-
-  constructor(
-    ch: string,
-    fg: Color.ColorBase = "white",
-    bg: Color.ColorBase = null
-  ) {
-    this.ch = ch;
-    this.fg = Color.make(fg);
-    this.bg = Color.make(bg);
-  }
-}
+export { Sprite, type SpriteConfig };
 
 export const HeroSprite = new Sprite("@", "yellow");
+export const TriggerSprite = new Sprite("$", "green");
+export const EffectSprite = new Sprite("$", "cyan");

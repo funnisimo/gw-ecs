@@ -63,4 +63,6 @@ export const STAIRS = new Tile("Stairs", {
   fg: "white",
 });
 
+export const PATCH_TILES = [GRASS, FOG, WATER, EMBER, ICE];
+
 export const TILE_ASPECT = new Aspect(Tile);

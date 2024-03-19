@@ -2,24 +2,28 @@ import * as GWU from "gw-utils";
 import * as Constants from "./constants";
 import type { ColorBase } from "gw-utils/color";
 import { Aspect, World } from "gw-ecs/world";
-import { Hero, Move, Sprite, Tile } from "./comps";
+import { Blop, Hero, Move, Sprite, Tile } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { Pos, PosManager } from "gw-ecs/utils/positions";
-import { logs, addLog } from "./ui/log";
+import { logs, addLog, makeLogsOld } from "./ui/log";
 import { CollisionManager } from "gw-ecs/utils/collisions";
 import { MoveSystem } from "./systems";
 import { Game } from "./uniques";
+import { GameEvent } from "./queues";
+import { EventSystem } from "./systems/events";
+import { DNA } from "./comps/dna";
 
 console.log("Hello, search for the " + Constants.BLOPULET_NAME);
 
 function blockedMove() {
-  addLog("Blocked");
+  addLog("#{red}Blocked#{}");
   // Does not count as turn for actor (esp hero)
   return true; // We handled the collision
 }
 
 function gotoNextLevel() {
   nextLevel(world);
+  return true; // We handled the collision
 }
 
 const world = new World()
@@ -27,7 +31,11 @@ const world = new World()
   .registerComponent(Tile)
   .registerComponent(Sprite)
   .registerComponent(Move)
+  .registerComponent(Blop)
+  .registerComponent(DNA)
+  .registerQueue(GameEvent)
   .addSystem(new MoveSystem())
+  .addSystem(new EventSystem())
   .setUnique(new Game())
   .setUnique(new CollisionManager(), (col) => {
     col
@@ -35,7 +43,8 @@ const world = new World()
       // .register(["blop"], ["hero"], attack)
       .register("actor", "wall", blockedMove)
       .register("hero", "stairs", gotoNextLevel);
-  });
+  })
+  .start();
 
 const gw = GWU.app.start({
   div: "game",
@@ -63,12 +72,14 @@ const gw = GWU.app.start({
     keypress(this: GWU.app.Scene, ev: GWU.app.Event) {
       const game = world.getUnique(Game);
       if (ev.dir) {
+        makeLogsOld();
         const hero = game.hero;
         if (hero) {
           console.log("keypress - move", ev.dir);
           hero.set(new Move(ev.dir));
         }
       } else if (ev.key == " ") {
+        makeLogsOld();
         nextLevel(world);
         game.changed = true;
       } else {
@@ -130,7 +141,16 @@ function drawLog(buffer: GWU.buffer.Buffer, x0: number, y0: number) {
   for (let i = 0; i < Constants.LOG_HEIGHT; ++i) {
     let y = Constants.LOG_TOP + Constants.LOG_HEIGHT - i - 1;
     const log = logs[i];
-    const msg = log ? log.msg : "";
+    let msg = "";
+
+    if (log) {
+      msg = log.msg;
+
+      if (log.count > 1) {
+        msg += ` (x${log.count})`;
+      }
+    }
+
     buffer.drawText(Constants.LOG_LEFT, y, msg);
   }
 }

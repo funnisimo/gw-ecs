@@ -4,15 +4,21 @@ import { Aspect, World, WorldInit } from "../world/index.js";
 export class Pos {
   _x: number;
   _y: number;
+  _lastX: number;
+  _lastY: number;
   //   _mgr: PosManager;
 
-  constructor(/* mgr: PosManager, */ x = 0, y = 0) {
+  constructor(/* mgr: PosManager, */ x = 0, y = 0, lastX = 0, lastY = 0) {
     this._x = x;
     this._y = y;
+    this._lastX = lastX;
+    this._lastY = lastY;
     // this._mgr = mgr;
   }
 
   _set(x: number, y: number) {
+    this._lastX = this._x;
+    this._lastY = this._y;
     this._x = x;
     this._y = y;
   }
@@ -22,6 +28,17 @@ export class Pos {
   }
   get y(): number {
     return this._y;
+  }
+
+  get lastX(): number {
+    return this._lastX;
+  }
+  get lastY(): number {
+    return this._lastY;
+  }
+
+  lastXY(): { x: number; y: number } {
+    return { x: this._lastX, y: this._lastY };
   }
 
   // copy(pos: { x: number; y: number }): void {
@@ -55,7 +72,7 @@ export class Pos {
     if (typeof x === "object") {
       return this.plus(x.x, x.y);
     }
-    return new Pos((x || 0) + this._x, (y || 0) + this._y);
+    return new Pos((x || 0) + this._x, (y || 0) + this._y, this._x, this._y);
   }
 
   minus(pos: { x: number; y: number }): Pos;
@@ -64,7 +81,7 @@ export class Pos {
     if (typeof x === "object") {
       return this.minus(x.x, x.y);
     }
-    return new Pos(this._x - (x || 0), this._y - (y || 0));
+    return new Pos(this._x - (x || 0), this._y - (y || 0), this._x, this._y);
   }
 
   equals(pos: { x: number; y: number }): boolean;

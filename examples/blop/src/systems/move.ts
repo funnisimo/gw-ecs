@@ -7,6 +7,7 @@ import { Move } from "../comps/move";
 import { COLLIDER_ASPECT, CollisionManager } from "gw-ecs/utils/collisions";
 import { Game } from "../uniques";
 import { TILE_ASPECT, Tile } from "../comps";
+import { GameEvent } from "../queues";
 
 export class MoveSystem extends EntitySystem {
   constructor() {
@@ -42,6 +43,7 @@ export class MoveSystem extends EntitySystem {
       posMgr.set(entity, newX, newY);
       game.changed = true; // Force redraw
       // need fov update
+      level.push(new GameEvent(entity, "move", { dir: dxy }));
 
       // check for pickups
 

@@ -1,10 +1,10 @@
-import type { World } from "gw-ecs/world/world";
 import * as XY from "gw-utils/xy";
 import { FLOOR, Tile } from "../comps";
 import { PosManager } from "gw-ecs/utils/positions";
 import { Aspect } from "gw-ecs/world/aspect";
 import { Random, random } from "gw-utils/rng";
 import { Collider } from "gw-ecs/utils/collisions";
+import type { Level } from "gw-ecs/world/level";
 
 class RandomXY {
   _indexes: number[];
@@ -44,8 +44,8 @@ class RandomXY {
   }
 }
 
-export function findClosestEmptyFloor(world: World, pos: XY.XY): XY.XY {
-  const mgr = world.getUnique(PosManager);
+export function findClosestEmptyFloor(level: Level, pos: XY.XY): XY.XY {
+  const mgr = level.getUnique(PosManager);
   const locs = XY.closestMatchingLocs(pos.x, pos.y, (x, y) => {
     const entities = mgr.getAt(x, y);
     if (entities.length != 1) return false;
@@ -53,18 +53,18 @@ export function findClosestEmptyFloor(world: World, pos: XY.XY): XY.XY {
     return tileEntity.fetch(Tile) === FLOOR;
   });
   if (!locs || !locs.length) throw new Error("Failed to find open floor tile.");
-  const rng = world.getUnique(Random) || random;
+  const rng = level.getUnique(Random) || random;
   const loc = rng.item(locs);
   return XY.asXY(loc);
 }
 
 export function findEmptyTileForSpawn(
-  world: World,
+  level: Level,
   matchFn?: (xy: XY.XY) => boolean
 ): XY.XY {
-  const mgr = world.getUnique(PosManager);
+  const mgr = level.getUnique(PosManager);
 
-  const rng = world.getUnique(Random) || random;
+  const rng = level.getUnique(Random) || random;
   let locs = new RandomXY(mgr.width, mgr.height, rng);
 
   const loc = locs.find((xy) => {
@@ -79,17 +79,17 @@ export function findEmptyTileForSpawn(
   throw new Error("Failed to: findEmptyTileForSpawn");
 }
 
-export function findSpawnTileFarFrom(world: World, farLoc: XY.XY, dist = 10) {
+export function findSpawnTileFarFrom(level: Level, farLoc: XY.XY, dist = 10) {
   // eslint-disable-next-line no-constant-condition
-  const pos = findEmptyTileForSpawn(world, (xy) => {
+  const pos = findEmptyTileForSpawn(level, (xy) => {
     return XY.manhattanDistanceFromTo(xy, farLoc) >= dist;
   });
 
   return pos;
 }
 
-export function setTileType(world: World, xy: XY.XY, tile: Tile) {
-  const mgr = world.getUnique(PosManager);
+export function setTileType(level: Level, xy: XY.XY, tile: Tile) {
+  const mgr = level.getUnique(PosManager);
   const entity = mgr.firstAt(xy.x, xy.y, new Aspect(Tile));
   if (!entity)
     throw new Error("Failed to find tile at pos: " + xy.x + "," + xy.y);

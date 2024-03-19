@@ -1,62 +1,36 @@
+import type { Entity } from "gw-ecs/entity/entity";
 import * as Constants from "../constants";
+import { Blop, Sprite } from "../comps";
+import { removeColors } from "gw-utils/text";
 
 export interface LogEntry {
   msg: string;
   count: number;
 }
 
-let oldLogsIndex = Infinity;
+let oldLogsIndex = 0;
 export var logs: LogEntry[] = [];
-
-// export function drawLogs(logDisplay) {
-//   var yLine = _constants__WEBPACK_IMPORTED_MODULE_0__.LOG_HEIGHT - 1;
-//   var i = 0;
-
-//   var _iterator = _createForOfIteratorHelper(logs),
-//     _step;
-
-//   try {
-//     for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-//       var message = _step.value;
-
-//       if (i >= oldLogsIndex) {
-//         message = (0,
-//         _graphics_coloredText__WEBPACK_IMPORTED_MODULE_1__.coloredText)(
-//           message.replaceAll(/%c{[^}]*}/gm, ""),
-//           _constants__WEBPACK_IMPORTED_MODULE_0__.GREYED_COLOR
-//         );
-//       }
-
-//       var lineCount = (0,
-//       _graphics_coloredText__WEBPACK_IMPORTED_MODULE_1__.coloredTextLineCount)(
-//         message,
-//         _constants__WEBPACK_IMPORTED_MODULE_0__.LOG_TEXT_WIDTH
-//       );
-//       var textLine = yLine - lineCount + 1;
-
-//       if (textLine < 0) {
-//         break;
-//       }
-
-//       logDisplay.drawText(0, yLine - lineCount + 1, message, {
-//         width: _constants__WEBPACK_IMPORTED_MODULE_0__.LOG_TEXT_WIDTH,
-//       });
-//       i += 1;
-//       yLine -= lineCount;
-
-//       if (yLine < 0) {
-//         break;
-//       }
-//     }
-//   } catch (err) {
-//     _iterator.e(err);
-//   } finally {
-//     _iterator.f();
-//   }
-// }
 
 export function addLog(message: string) {
   // TODO - split at log display width...
+
+  if (logs.length > 0) {
+    const first = logs[0];
+    if (first.msg == message) {
+      first.count += 1;
+      if (oldLogsIndex == 0) {
+        oldLogsIndex = 1;
+      }
+      return;
+    } else if (removeColors(first.msg) == removeColors(message)) {
+      first.msg = message;
+      first.count += 1;
+      if (oldLogsIndex == 0) {
+        oldLogsIndex = 1;
+      }
+      return;
+    }
+  }
 
   logs.unshift({ msg: message, count: 1 });
   if (logs.length > Constants.LOG_HEIGHT + 2) {
@@ -77,6 +51,24 @@ export function clearLogs() {
   oldLogsIndex = 0;
 }
 
-export function setLogsOld() {
+export function makeLogsOld() {
+  for (let i = oldLogsIndex; i > 0; --i) {
+    const log = logs[i - 1];
+    log.msg = removeColors(log.msg);
+    if (logs.length > i) {
+      if (log.msg === logs[i].msg) {
+        logs[i].count += 1;
+        logs.splice(i - 1, 1); // delete this log
+      }
+    }
+  }
   oldLogsIndex = 0;
+  logs.length = Math.min(logs.length, Constants.LOG_HEIGHT);
+}
+
+export function coloredName(entity: Entity): string {
+  let blop = entity.fetch(Blop)!;
+  let sprite = entity.fetch(Sprite)!;
+
+  return "#{" + sprite.fg.css() + "}" + blop.name + "#{}";
 }

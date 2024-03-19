@@ -126,6 +126,14 @@ export class Entity {
     return !!data && data.removed > tick;
   }
 
+  fetchRemoved<T>(comp: Component<T>, sinceTick: number = 0): T | undefined {
+    const data = this._comps.get(comp);
+    if (data && data.removed > sinceTick) {
+      return data.data;
+    }
+    return undefined;
+  }
+
   update<T>(comp: Component<T>): T | undefined {
     const data = this._comps.get(comp);
     if (!data || data.removed >= 0) return undefined;
