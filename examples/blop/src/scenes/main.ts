@@ -1,16 +1,24 @@
 import { Event, Scene } from "gw-utils/app";
 import * as Constants from "../constants";
 import { nextLevel } from "../map/nextLevel";
-import { Pos, PosManager } from "gw-ecs/utils/positions";
+import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Game } from "../uniques";
 import { coloredName, logs, makeLogsOld } from "../ui/log";
-import { Blop, HERO_ASPECT, Move, Sprite, TILE_ASPECT } from "../comps";
+import {
+  Blop,
+  FX_ASPECT,
+  HERO_ASPECT,
+  Move,
+  Sprite,
+  TILE_ASPECT,
+} from "../comps";
 import { type Buffer } from "gw-utils/buffer";
 import { Aspect, type Level } from "gw-ecs/world";
 import { world } from "../world";
 import { getBlopEntityAt, getTileType } from "../map/utils";
 import { DNA } from "../comps/dna";
-import type { Entity } from "gw-ecs/entity/entity";
+import type { Entity } from "gw-ecs/entity";
+import { Mixer, type SpriteData } from "gw-utils/sprite";
 
 export const mainScene = {
   start() {
@@ -48,6 +56,7 @@ export const mainScene = {
     const game = world.getUnique(Game);
     if (ev.dir) {
       makeLogsOld();
+      game.focus = null;
       const hero = game.hero;
       if (hero) {
         console.log("keypress - move", ev.dir);
@@ -55,6 +64,7 @@ export const mainScene = {
       }
     } else if (ev.key == " ") {
       makeLogsOld();
+      game.focus = null;
       nextLevel(world);
       game.changed = true;
     } else {
@@ -62,7 +72,8 @@ export const mainScene = {
     }
   },
   update(this: Scene, dt: number) {
-    world.runSystems(dt);
+    world.addTime(dt);
+    world.runSystems();
     const game = world.getUnique(Game);
     this.needsDraw = game.changed;
     game.changed = false;
@@ -131,7 +142,12 @@ function drawMap(buffer: Buffer, x0: number, y0: number) {
         // BOX_ASPECT.first(entities) ||
         TILE_ASPECT.first(entities)!;
 
-      const sprite = entity.fetch(Sprite)!;
+      let sprite: SpriteData = entity.fetch(Sprite)!;
+
+      const fx = FX_ASPECT.first(entities);
+      if (fx) {
+        sprite = new Mixer(sprite).drawSprite(fx.fetch(Sprite)!).bake();
+      }
 
       const isFocus = focus && focus.x == x && focus.y == y;
       if (isFocus) {

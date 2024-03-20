@@ -1,15 +1,14 @@
 import { type Random, random } from "gw-utils/rng";
 import { xy } from "gw-utils";
 import type { GameEvent } from "../queues";
-import type { Entity } from "gw-ecs/entity/entity";
+import type { Entity } from "gw-ecs/entity";
 import { NAMED_DIRS, type Loc } from "gw-utils/xy";
-import type { World } from "gw-ecs/world";
-import { Pos, PosManager } from "gw-ecs/utils/positions";
+import { Pos, PosManager } from "gw-ecs/common/positions";
 import { GRASS, PATCH_TILES, TILE_ASPECT, Tile } from "./tile";
 import { capitalize } from "gw-utils/text";
 import { TriggerSprite } from "./sprite";
 import { Pickup } from "./pickup";
-import type { Level } from "gw-ecs/world/level";
+import type { Level } from "gw-ecs/world";
 
 export type TriggerFn = (event: GameEvent, owner: Entity) => boolean;
 

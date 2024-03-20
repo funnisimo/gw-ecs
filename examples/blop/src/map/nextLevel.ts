@@ -1,18 +1,16 @@
-import { Entity } from "gw-ecs/entity/entity";
-import { World } from "gw-ecs/world/world";
+import { Entity } from "gw-ecs/entity";
+import { World } from "gw-ecs/world";
 import { createHero } from "../comps/hero";
 import * as Constants from "../constants";
 import { addLog } from "../ui/log";
 import {
   findClosestEmptyFloor as findClosestSpawnTile,
-  findEmptyTileForSpawn,
   findSpawnTileFarFrom,
   setTileType,
 } from "./utils";
 import { STAIRS } from "../comps";
 import { makeRandomWorld } from "./randomWorld";
-import { type XY, manhattanDistanceFromTo } from "gw-utils/xy";
-import { Pos, PosManager } from "gw-ecs/utils/positions";
+import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Game } from "../uniques";
 
 export function nextLevel(world: World) {

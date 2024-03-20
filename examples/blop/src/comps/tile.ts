@@ -1,6 +1,6 @@
 import { Aspect } from "gw-ecs/world";
 import { Sprite, type SpriteConfig } from "./sprite";
-import { Collider } from "gw-ecs/utils/collisions";
+import { Collider } from "gw-ecs/common/collisions";
 
 export interface TileConfig extends SpriteConfig {
   name: string;

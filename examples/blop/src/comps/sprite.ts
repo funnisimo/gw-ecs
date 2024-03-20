@@ -11,3 +11,5 @@ export const ComplexBlopSprite = new Sprite("C", "blue");
 
 export const TriggerSprite = new Sprite("$", "green");
 export const EffectSprite = new Sprite("$", "cyan");
+
+export const BumpSprite = new Sprite(null, null, "red");

@@ -1,10 +1,10 @@
 import type { GameEvent } from "../queues";
-import type { Entity } from "gw-ecs/entity/entity";
-import { PosManager } from "gw-ecs/utils/positions";
+import type { Entity } from "gw-ecs/entity";
+import { PosManager } from "gw-ecs/common/positions";
 import { findEmptyTileForSpawn } from "../map/utils";
 import { Blop, EffectSprite, Hero, Pickup } from "./index";
 import { addLog, coloredName } from "../ui/log";
-import type { Level } from "gw-ecs/world/level";
+import type { Level } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 
 export abstract class Effect {

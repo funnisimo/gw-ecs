@@ -29,6 +29,7 @@ export class World extends Level {
     return this;
   }
 
+  // TODO - steps -> opts?: string[] | { runSet?: string, runStep?: string, runIf?: RunIfFn, enable?: boolean, steps?: string[] }
   addSystemSet(name: string, steps?: string[]): this {
     this._systems.addSet(name, steps);
     return this;

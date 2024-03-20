@@ -1,11 +1,10 @@
 import * as XY from "gw-utils/xy";
 import { BLOP_ASPECT, FLOOR, TILE_ASPECT, Tile } from "../comps";
-import { PosManager } from "gw-ecs/utils/positions";
-import { Aspect } from "gw-ecs/world/aspect";
+import { PosManager } from "gw-ecs/common/positions";
 import { Random, random } from "gw-utils/rng";
-import { Collider } from "gw-ecs/utils/collisions";
-import type { Level } from "gw-ecs/world/level";
-import type { Entity } from "gw-ecs/entity/entity";
+import { Collider } from "gw-ecs/common/collisions";
+import type { Level } from "gw-ecs/world";
+import type { Entity } from "gw-ecs/entity";
 
 class RandomXY {
   _indexes: number[];

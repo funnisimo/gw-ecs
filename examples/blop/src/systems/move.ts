@@ -14,6 +14,11 @@ export class MoveSystem extends EntitySystem {
     super(new Aspect(Move, Pos));
   }
 
+  shouldRun(level: Level, _time: number, _delta: number): boolean {
+    const game = level.getUnique(Game);
+    return game.ready;
+  }
+
   processEntity(
     level: Level,
     entity: Entity,

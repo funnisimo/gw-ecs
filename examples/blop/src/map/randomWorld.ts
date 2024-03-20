@@ -11,8 +11,8 @@ import {
   WALL,
   WATER,
 } from "../comps/tile";
-import type { World } from "gw-ecs/world/world";
-import { PosManager } from "gw-ecs/utils/positions";
+import type { World } from "gw-ecs/world";
+import { PosManager } from "gw-ecs/common/positions";
 import * as Constants from "../constants";
 import { forRect } from "gw-utils/xy";
 import { setTileType } from "./utils";

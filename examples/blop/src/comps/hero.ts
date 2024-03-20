@@ -1,7 +1,7 @@
-import { type Entity } from "gw-ecs/entity/entity";
+import { type Entity } from "gw-ecs/entity";
 import { type World, Aspect } from "gw-ecs/world";
 import { HeroSprite } from "./sprite";
-import { Collider } from "gw-ecs/utils/collisions";
+import { Collider } from "gw-ecs/common/collisions";
 import { Blop } from "./blop";
 import { DNA } from "./dna";
 import { MoveDirTrigger } from ".";
