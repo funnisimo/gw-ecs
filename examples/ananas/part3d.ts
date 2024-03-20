@@ -2,13 +2,13 @@ import terminal from "terminal-kit";
 import * as ROT from "rot-js";
 import { Aspect, World } from "gw-ecs/world";
 import { EntitySystem, System } from "gw-ecs/system";
-import { Pos, PosManager } from "gw-ecs/utils";
+import { Pos, PosManager } from "gw-ecs/common";
 import { Entity } from "gw-ecs/entity";
 import {
   CollisionManager,
   Collider,
   COLLIDER_ASPECT,
-} from "gw-ecs/utils/collisions";
+} from "gw-ecs/common/collisions";
 
 type XY = { x: number; y: number };
 

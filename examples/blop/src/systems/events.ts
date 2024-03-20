@@ -1,10 +1,10 @@
 import { System } from "gw-ecs/system/system";
-import type { QueueReader } from "gw-ecs/utils/queue";
+import type { QueueReader } from "gw-ecs/world/queue";
 import type { Level } from "gw-ecs/world/level";
 import { GameEvent } from "../queues";
 import { DNA } from "../comps/dna";
 import { addLog, coloredName } from "../ui/log";
-import type { Entity } from "gw-ecs/entity/entity";
+import type { Entity } from "gw-ecs/entity";
 
 export class EventSystem extends System {
   reader!: QueueReader<GameEvent>;

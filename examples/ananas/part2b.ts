@@ -2,7 +2,7 @@ import terminal from "terminal-kit";
 import * as ROT from "rot-js";
 import { Aspect, World } from "gw-ecs/world";
 import { EntitySystem, System } from "gw-ecs/system";
-import { Pos, PosManager } from "gw-ecs/utils";
+import { Pos, PosManager } from "gw-ecs/common";
 import { Entity } from "gw-ecs/entity";
 
 function ifDo<T>(maybeVal: T, doFn: (t: NonNullable<T>) => any): boolean {

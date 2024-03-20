@@ -1,7 +1,7 @@
 import terminal from "terminal-kit";
 import { Entity } from "gw-ecs/entity/entity.js";
 import { World } from "gw-ecs/world/world.js";
-import { PosManager, Pos } from "gw-ecs/utils/positions.js";
+import { PosManager, Pos } from "gw-ecs/common/positions.js";
 import { Aspect } from "gw-ecs/world/aspect.js";
 import { System } from "gw-ecs/system/system.js";
 import { EntitySystem } from "gw-ecs/system/entitySystem.js";
@@ -99,8 +99,7 @@ class MoveSystem extends EntitySystem {
     const dxy = DIR[dir];
 
     if (posMgr.getAt(pos.x + dxy[0], pos.y + dxy[1], wallAspect).length == 0) {
-      pos.x += dxy[0];
-      pos.y += dxy[1];
+      posMgr.set(entity, pos.x + dxy[0], pos.y + dxy[1]);
       term("^g%s\n", dir);
     } else {
       term("^rblocked\n");

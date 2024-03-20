@@ -2,7 +2,7 @@ import terminal from "terminal-kit";
 import * as ROT from "rot-js";
 import { Aspect, World } from "gw-ecs/world";
 import { System } from "gw-ecs/system";
-import { PosManager, Pos } from "gw-ecs/utils";
+import { PosManager } from "gw-ecs/common";
 
 type XY = { x: number; y: number };
 

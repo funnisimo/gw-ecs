@@ -1,10 +1,10 @@
 import type { Entity } from "gw-ecs/entity/entity";
 import { EntitySystem } from "gw-ecs/system/entitySystem";
-import { Pos, PosManager } from "gw-ecs/utils/positions";
+import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Aspect } from "gw-ecs/world";
 import type { Level } from "gw-ecs/world/level";
 import { Move } from "../comps/move";
-import { COLLIDER_ASPECT, CollisionManager } from "gw-ecs/utils/collisions";
+import { COLLIDER_ASPECT, CollisionManager } from "gw-ecs/common/collisions";
 import { Game } from "../uniques";
 import { TILE_ASPECT, Tile } from "../comps";
 import { GameEvent } from "../queues";

@@ -2,7 +2,7 @@ import { World } from "gw-ecs/world";
 import { Blop, Hero, Move, Sprite, Tile } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { addLog } from "./ui/log";
-import { CollisionManager } from "gw-ecs/utils/collisions";
+import { CollisionManager } from "gw-ecs/common/collisions";
 import { MoveSystem } from "./systems";
 import { Game } from "./uniques";
 import { GameEvent } from "./queues";
