@@ -1,10 +1,11 @@
 import * as XY from "gw-utils/xy";
-import { FLOOR, Tile } from "../comps";
+import { BLOP_ASPECT, FLOOR, TILE_ASPECT, Tile } from "../comps";
 import { PosManager } from "gw-ecs/utils/positions";
 import { Aspect } from "gw-ecs/world/aspect";
 import { Random, random } from "gw-utils/rng";
 import { Collider } from "gw-ecs/utils/collisions";
 import type { Level } from "gw-ecs/world/level";
+import type { Entity } from "gw-ecs/entity/entity";
 
 class RandomXY {
   _indexes: number[];
@@ -90,7 +91,7 @@ export function findSpawnTileFarFrom(level: Level, farLoc: XY.XY, dist = 10) {
 
 export function setTileType(level: Level, xy: XY.XY, tile: Tile) {
   const mgr = level.getUnique(PosManager);
-  const entity = mgr.firstAt(xy.x, xy.y, new Aspect(Tile));
+  const entity = mgr.firstAt(xy.x, xy.y, TILE_ASPECT);
   if (!entity)
     throw new Error("Failed to find tile at pos: " + xy.x + "," + xy.y);
   entity.setAll(tile, tile.sprite);
@@ -99,4 +100,16 @@ export function setTileType(level: Level, xy: XY.XY, tile: Tile) {
   } else {
     entity.remove(Collider);
   }
+}
+
+export function getTileType(level: Level, xy: XY.XY): Tile {
+  const mgr = level.getUnique(PosManager);
+  const entity = mgr.firstAt(xy.x, xy.y, TILE_ASPECT)!;
+  return entity.fetch(Tile)!;
+}
+
+export function getBlopEntityAt(level: Level, xy: XY.XY): Entity | undefined {
+  const mgr = level.getUnique(PosManager);
+  const entity = mgr.firstAt(xy.x, xy.y, BLOP_ASPECT);
+  return entity;
 }

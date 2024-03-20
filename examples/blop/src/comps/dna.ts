@@ -18,4 +18,11 @@ export class DNA {
     this.triggers.push(null);
     this.effects.push(null);
   }
+
+  clone(): DNA {
+    const clone = new DNA(this.length);
+    clone.triggers = this.triggers.slice();
+    clone.effects = this.effects.slice();
+    return clone;
+  }
 }

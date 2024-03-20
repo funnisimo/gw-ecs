@@ -1,7 +1,7 @@
 import type { Entity } from "gw-ecs/entity/entity";
 import * as Constants from "../constants";
 import { Blop, Sprite } from "../comps";
-import { removeColors } from "gw-utils/text";
+import { removeColors, splitIntoLines } from "gw-utils/text";
 
 export interface LogEntry {
   msg: string;
@@ -14,30 +14,34 @@ export var logs: LogEntry[] = [];
 export function addLog(message: string) {
   // TODO - split at log display width...
 
-  if (logs.length > 0) {
-    const first = logs[0];
-    if (first.msg == message) {
-      first.count += 1;
-      if (oldLogsIndex == 0) {
-        oldLogsIndex = 1;
+  const msgs = splitIntoLines(message, Constants.LOG_WIDTH);
+
+  for (let msg of msgs) {
+    if (logs.length > 0) {
+      const first = logs[0];
+      if (first.msg == msg) {
+        first.count += 1;
+        if (oldLogsIndex == 0) {
+          oldLogsIndex = 1;
+        }
+        return;
+      } else if (removeColors(first.msg) == removeColors(msg)) {
+        first.msg = msg;
+        first.count += 1;
+        if (oldLogsIndex == 0) {
+          oldLogsIndex = 1;
+        }
+        return;
       }
-      return;
-    } else if (removeColors(first.msg) == removeColors(message)) {
-      first.msg = message;
-      first.count += 1;
-      if (oldLogsIndex == 0) {
-        oldLogsIndex = 1;
-      }
-      return;
     }
-  }
 
-  logs.unshift({ msg: message, count: 1 });
-  if (logs.length > Constants.LOG_HEIGHT + 2) {
-    logs.length = Constants.LOG_HEIGHT + 2;
-  }
+    logs.unshift({ msg, count: 1 });
+    if (logs.length > Constants.LOG_HEIGHT + 2) {
+      logs.length = Constants.LOG_HEIGHT + 2;
+    }
 
-  oldLogsIndex += 1;
+    oldLogsIndex += 1;
+  }
 }
 
 export function addEmptyLine(limitToOne = true) {
