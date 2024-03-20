@@ -2,10 +2,19 @@ export class Blop {
   name: string;
   health: number;
   maxHealth: number;
+  power: number;
+  charge: number;
 
-  constructor(name: string, maxHealth: number) {
+  constructor(name: string, maxHealth: number, power: number = 2) {
     this.name = name;
     this.health = maxHealth;
     this.maxHealth = maxHealth;
+    this.power = power;
+    this.charge = 1;
   }
 }
+
+export const SMALL_BLOP = new Blop("Small Blop", 4, 2);
+export const FAT_BLOP = new Blop("Fat Blop", 12, 1);
+export const WARRIOR_BLOP = new Blop("Warrior Blop", 8, 4);
+export const COMPLEX_BLOP = new Blop("Complex Blop", 5, 2);

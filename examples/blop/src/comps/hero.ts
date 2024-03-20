@@ -1,5 +1,5 @@
-import type { Entity } from "gw-ecs/entity/entity";
-import type { World } from "gw-ecs/world/world";
+import { type Entity } from "gw-ecs/entity/entity";
+import { type World, Aspect } from "gw-ecs/world";
 import { HeroSprite } from "./sprite";
 import { Collider } from "gw-ecs/utils/collisions";
 import { Blop } from "./blop";
@@ -8,6 +8,8 @@ import { MoveDirTrigger } from ".";
 import { HealEffect } from "./effect";
 
 export class Hero {}
+
+export const HERO_ASPECT = new Aspect(Hero);
 
 export function createHero(world: World): Entity {
   const dna = new DNA(2);
