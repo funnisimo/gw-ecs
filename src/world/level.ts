@@ -2,12 +2,7 @@ import { AnyComponent, Component } from "../component/component.js";
 import { ComponentManager } from "../component/manager.js";
 import { CompStore } from "../component/store.js";
 import { ComponentSource, Entities, Entity } from "../entity/entity.js";
-import {
-  Queue,
-  QueueManager,
-  QueueReader,
-  QueueStore,
-} from "../utils/queue.js";
+import { Queue, QueueManager, QueueReader, QueueStore } from "./queue.js";
 import { Resources } from "./resources.js";
 
 export interface LevelInit {
