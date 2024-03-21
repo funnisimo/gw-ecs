@@ -1,6 +1,6 @@
 import "jest-extended";
 import { Schedule } from "./schedule.js";
-import { SystemFn } from "../system/functionSystem.js";
+import { SystemFn } from "../system/system.js";
 
 describe("schedule", () => {
   test("a, b, a, b, ...", () => {

@@ -1,47 +1,19 @@
 import { Aspect } from "../world/aspect.js";
-import { System } from "./system.js";
+import { RunIfFn, System } from "./system.js";
 import { Entity } from "../entity/entity.js";
 import { Level } from "../world/level.js";
 
-export abstract class EntitySystem extends System {
-  // protected entities: Entity[];
+export class EntitySystem extends System {
   _aspect: Aspect;
 
-  constructor(aspect: Aspect) {
-    super();
+  constructor(aspect: Aspect, runIf?: RunIfFn) {
+    super(runIf);
     this._aspect = aspect;
-    // this.entities = [];
   }
-
-  // accept(entity: Entity, components: AnyComponent[]): boolean {
-  //   const present = this.entities.includes(entity);
-  //   const valid = this.aspect.accept(components);
-  //   if (!present && valid) {
-  //     this.entities.push(entity);
-  //     return true;
-  //   } else if (present && !valid) {
-  //     this.entities = this.entities.filter((sEntity) => sEntity !== entity);
-  //   }
-  //   return valid;
-  // }
 
   accept(entity: Entity): boolean {
     return this._aspect.match(entity, this.lastTick);
   }
-
-  // public removeEntities(entitiesToRemove: Entity[]) {
-  //   this.entities = this.entities.filter(
-  //     (entity) => !entitiesToRemove.includes(entity)
-  //   );
-  // }
-
-  // public process(): void {
-  //   if (this.isEnabled()) {
-  //     this.beforeProcess();
-  //     this.processEntities();
-  //     this.afterProcess();
-  //   }
-  // }
 
   run(level: Level, time: number, delta: number): void {
     for (let e of this._aspect.all(level, this.lastTick)) {
@@ -49,13 +21,35 @@ export abstract class EntitySystem extends System {
     }
   }
 
-  abstract processEntity(
+  processEntity(
+    _level: Level,
+    _entity: Entity,
+    _time: number,
+    _delta: number
+  ): void {}
+}
+
+export type EntitySystemFn = (
+  level: Level,
+  entity: Entity,
+  time: number,
+  delta: number
+) => void;
+
+export class EntityFunctionSystem extends EntitySystem {
+  _fn: EntitySystemFn;
+
+  constructor(fn: EntitySystemFn, runIf?: RunIfFn) {
+    super(new Aspect(), runIf);
+    this._fn = fn;
+  }
+
+  processEntity(
     level: Level,
     entity: Entity,
     time: number,
     delta: number
-  ): void;
-
-  // /* tslint:disable:no-empty */
-  // public doProcess(): void {}
+  ): void {
+    this._fn(level, entity, time, delta);
+  }
 }

@@ -1,23 +1,34 @@
 import { Entity } from "../entity/entity.js";
 import { Level } from "../world/level.js";
-import { EntitySystem } from "./entitySystem.js";
 import {
+  EntitySystem,
   EntityFunctionSystem,
   EntitySystemFn,
-  FunctionSystem,
-  SystemFn,
-} from "./functionSystem.js";
-import { System } from "./system.js";
+} from "./entitySystem.js";
+import { System, FunctionSystem, SystemFn } from "./system.js";
 
 export type SystemOrder = "pre" | "post" | "normal";
 
-export class SystemStep {
+export interface SystemStep {
+  name: string;
+  start(level: Level): void;
+  run(level: Level, time: number, delta: number): boolean;
+  rebase(zeroTime: number): void;
+  addSystem(
+    sys: System | SystemFn,
+    order?: SystemOrder,
+    enabled?: boolean
+  ): void;
+}
+
+export class SystemStep extends System {
   name: string;
   preSystems: System[];
   systems: System[];
   postSystems: System[];
 
-  constructor(name: string) {
+  constructor(name: string = "update") {
+    super();
     this.name = name;
     this.systems = [];
     this.preSystems = [];
@@ -45,6 +56,7 @@ export class SystemStep {
   }
 
   start(level: Level) {
+    super.start(level);
     this.preSystems.forEach((s) => s.start(level));
     this.systems.forEach((s) => s.start(level));
     this.postSystems.forEach((s) => s.start(level));
@@ -97,7 +109,17 @@ export class EntitySystemStep extends SystemStep {
     if (typeof sys === "function") {
       sys = new EntityFunctionSystem(sys);
     }
+    if (!(sys instanceof EntitySystem)) {
+      throw new Error("Must be EntitySystem");
+    }
     super.addSystem(sys, order);
+  }
+
+  run(level: Level, time: number, delta: number): boolean {
+    for (let e of level.entities()) {
+      this.runEntity(level, e, time, delta);
+    }
+    return true;
   }
 
   runEntity(
@@ -145,14 +167,16 @@ export class EntitySystemStep extends SystemStep {
 export interface AddStepOpts {
   before?: string;
   after?: string;
+  step?: SystemStep | EntitySystemStep;
 }
 
-export class SystemSet {
-  name: string;
-  steps: SystemStep[];
+export class SystemSet extends System {
+  // name: string;
+  steps: (SystemStep | EntitySystemStep)[];
 
-  constructor(name: string, steps: string[] = ["update"]) {
-    this.name = name;
+  constructor(/* name: string, */ steps: string[] = ["update"]) {
+    super();
+    // this.name = name;
     this.steps = steps.map((n) => this._createStep(n));
   }
 
@@ -173,13 +197,22 @@ export class SystemSet {
   }
 
   addSystem(
-    system: System | SystemFn,
-    stepName = "update",
-    enabled = true
-  ): this {
-    if (typeof system === "function") {
-      system = new FunctionSystem(system);
+    system: System | SystemFn | EntitySystem | EntitySystemFn,
+    enabled?: boolean
+  ): this;
+  addSystem(
+    stepName: string,
+    system: System | SystemFn | EntitySystem | EntitySystemFn,
+    enabled?: boolean
+  ): this;
+  addSystem(...args: any[]) {
+    let stepName = "update";
+    if (typeof args[0] === "string") {
+      stepName = args.shift();
     }
+    const system = args.shift();
+    const enabled = args.shift();
+
     let order: SystemOrder = "normal";
     if (stepName.includes("-")) {
       [order, stepName] = stepName.split("-") as [SystemOrder, string];
@@ -189,16 +222,24 @@ export class SystemSet {
       throw new Error(
         "Failed to find system step [" +
           stepName +
-          "] in system set [" +
-          this.name +
+          // "] in system set [" +
+          // this.name +
           "]"
       );
     }
+    // @ts-ignore
     step.addSystem(system, order, enabled);
     return this;
   }
 
   addStep(name: string, opts: AddStepOpts = {}): this {
+    const step = opts.step || this._createStep(name);
+    step.name = name;
+
+    if (this.steps.find((step) => step.name === name)) {
+      throw new Error("Step already exists: " + name);
+    }
+
     if (name.includes("-")) throw new Error('step names cannot include "-".');
     if (opts.before) {
       const index = this.steps.findIndex((step) => step.name == opts.before);
@@ -206,40 +247,41 @@ export class SystemSet {
         throw new Error(
           "Failed to find step for addStep option 'before: " +
             opts.before +
-            "' in SystemSet '" +
-            this.name +
+            // "' in SystemSet '" +
+            // this.name +
             "'"
         );
       }
-      this.steps.splice(index, 0, new SystemStep(name));
+      this.steps.splice(index, 0, step);
     } else if (opts.after) {
       let index = this.steps.findIndex((step) => step.name == opts.after);
       if (index < 0) {
         throw new Error(
           "Failed to find step for addStep option 'after: " +
             opts.before +
-            "' in SystemSet '" +
-            this.name +
+            // "' in SystemSet '" +
+            // this.name +
             "'"
         );
       }
       index += 1;
       if (index == this.steps.length) {
-        this.steps.push(new SystemStep(name));
+        this.steps.push(step);
       } else {
-        this.steps.splice(index, 0, new SystemStep(name));
+        this.steps.splice(index, 0, step);
       }
     } else {
-      this.steps.push(new SystemStep(name));
+      this.steps.push(step);
     }
     return this;
   }
 
-  getStep(name: string): SystemStep | undefined {
+  getStep(name: string): SystemStep | EntitySystemStep | undefined {
     return this.steps.find((s) => s.name == name);
   }
 
   start(level: Level) {
+    super.start(level);
     this.steps.forEach((s) => s.start(level));
   }
 
@@ -270,12 +312,32 @@ export class EntitySystemSet extends SystemSet {
     return new EntitySystemStep(name);
   }
 
-  // @ts-ignore
-  addSystem(system: EntitySystem | EntitySystemFn, stepName = "update"): this {
-    if (typeof system === "function") {
-      system = new EntityFunctionSystem(system);
+  addStep(name: string, opts: AddStepOpts = {}): this {
+    const step = opts.step || this._createStep(name);
+    if (!(step instanceof EntitySystemStep)) {
+      throw new Error("Step must be EntitySystemStep");
     }
-    return super.addSystem(system, stepName);
+    opts.step = step;
+    return super.addStep(name, opts);
+  }
+
+  // // @ts-ignore
+  // addSystem(
+  //   stepName: string,
+  //   system: EntitySystem | EntitySystemFn,
+  //   enabled = true
+  // ): this {
+  //   if (typeof system === "function") {
+  //     system = new EntityFunctionSystem(system);
+  //   }
+  //   return super.addSystem(stepName, system, enabled);
+  // }
+
+  run(level: Level, time: number, delta: number): boolean {
+    for (let e of level.entities()) {
+      this.runEntity(level, e, time, delta);
+    }
+    return true;
   }
 
   runEntity(
@@ -292,28 +354,48 @@ export class EntitySystemSet extends SystemSet {
 }
 
 export class SystemManager {
-  _sets: Map<string, SystemSet>;
+  _sets: Map<string, SystemSet | EntitySystemSet>;
 
   constructor() {
     this._sets = new Map();
-    this._sets.set("default", new SystemSet("default"));
+    this._sets.set("default", new SystemSet());
   }
 
-  addSet(name: string, steps?: string[]): SystemManager {
+  addSet(
+    name: string,
+    set?: string[] | SystemSet | EntitySystemSet
+  ): SystemManager {
+    let newSet: SystemSet | EntitySystemSet;
+    if (!set) {
+      newSet = new SystemSet();
+    } else if (Array.isArray(set)) {
+      newSet = new SystemSet(set);
+    } else {
+      newSet = set;
+    }
     if (!this._sets.has(name)) {
-      this._sets.set(name, new SystemSet(name, steps));
+      this._sets.set(name, newSet);
     }
     return this;
   }
 
-  getSet(name: string = "default"): SystemSet | undefined {
+  getSet(name: string = "default"): SystemSet | EntitySystemSet | undefined {
     return this._sets.get(name);
   }
 
-  addStep(step: string, opts?: AddStepOpts): SystemManager;
-  addStep(set: string, step: string, opts?: AddStepOpts): SystemManager;
   addStep(
-    ...args: [string, AddStepOpts?] | [string, string, AddStepOpts?]
+    step: string,
+    opts?: AddStepOpts | SystemStep | EntitySystemStep
+  ): SystemManager;
+  addStep(
+    set: string,
+    step: string,
+    opts?: AddStepOpts | SystemStep | EntitySystemStep
+  ): SystemManager;
+  addStep(
+    ...args:
+      | [string, (AddStepOpts | SystemStep | EntitySystemStep)?]
+      | [string, string, (AddStepOpts | SystemStep | EntitySystemStep)?]
   ): SystemManager {
     if (args.length == 1) {
       args = ["default", args[0], {}];
@@ -321,20 +403,34 @@ export class SystemManager {
       args = ["default", args[0], args[1]];
     }
 
-    const [setName, stepName, opts] = args as [string, string, AddStepOpts?];
+    let [setName, stepName, opts] = args as [
+      string,
+      string,
+      (AddStepOpts | SystemStep | EntitySystemStep)?
+    ];
     const set = this._sets.get(setName);
     if (!set) throw new Error("Failed to find System Set: " + setName);
+    if (opts instanceof SystemStep || opts instanceof EntitySystemStep) {
+      opts = { step: opts };
+    }
     set.addStep(stepName, opts);
 
     return this;
   }
 
-  addSystem(system: System | SystemFn, enabled?: boolean): this;
-  addSystem(inStep: string, system: System | SystemFn, enabled?: boolean): this;
+  addSystem(
+    system: System | SystemFn | EntitySystem | EntitySystemFn,
+    enabled?: boolean
+  ): this;
+  addSystem(
+    inStep: string,
+    system: System | SystemFn | EntitySystem | EntitySystemFn,
+    enabled?: boolean
+  ): this;
   addSystem(
     inSet: string,
     inStep: string,
-    system: System | SystemFn,
+    system: System | SystemFn | EntitySystem | EntitySystemFn,
     enabled?: boolean
   ): this;
   addSystem(...args: any[]): this {
@@ -347,14 +443,14 @@ export class SystemManager {
       setName = stepName;
       stepName = args.shift();
     }
-    let system: System;
-    if (args[0] instanceof System) {
-      system = args.shift();
-    } else if (typeof args[0] === "function") {
-      system = new FunctionSystem(args.shift());
-    } else {
-      throw new Error("No system provided.");
-    }
+    let system = args.shift();
+    // if (args[0] instanceof System) {
+    //   system = args.shift();
+    // } else if (typeof args[0] === "function") {
+    //   system = new FunctionSystem(args.shift());
+    // } else {
+    //   throw new Error("No system provided.");
+    // }
 
     let enabled = true;
     if (typeof args[0] === "boolean") {
@@ -365,7 +461,7 @@ export class SystemManager {
     if (!set) {
       throw new Error("Missing System Set: " + setName);
     }
-    set.addSystem(system, stepName, enabled);
+    set.addSystem(stepName, system, enabled);
     return this;
   }
 

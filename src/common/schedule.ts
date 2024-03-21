@@ -1,5 +1,5 @@
 import { Entity } from "../entity/entity.js";
-import { SystemFn } from "../system/functionSystem.js";
+import { SystemFn } from "../system/system.js";
 
 export type TaskType = Entity | SystemFn;
 

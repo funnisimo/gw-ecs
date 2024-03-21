@@ -1,8 +1,8 @@
 import terminal from "terminal-kit";
 import { World } from "gw-ecs/world/world";
 import { EntitySystem } from "gw-ecs/system/entitySystem";
-import { EntitySystemSet } from "gw-ecs/system/manager";
-import { System } from "gw-ecs/system";
+import { EntitySystemSet, type AddStepOpts } from "gw-ecs/system/manager";
+import { System, type EntitySystemFn } from "gw-ecs/system";
 import { Entity } from "gw-ecs/entity";
 import { Aspect } from "gw-ecs/world/aspect";
 import { Schedule } from "gw-ecs/common/schedule";
@@ -117,23 +117,35 @@ class Actor {
 }
 
 class GameTurn {
-  systems: EntitySystemSet;
   schedule: Schedule;
   paused = false;
 
   constructor() {
-    this.systems = new EntitySystemSet("gameturn", [
-      "start",
-      "move",
-      "act",
-      "finish",
-    ]);
     this.schedule = new Schedule();
   }
 }
 
 class GameTurnSystem extends System {
+  setName: string;
+  systems!: EntitySystemSet;
+
+  constructor(setName: string) {
+    super();
+    this.setName = setName;
+  }
+
   start(world: World) {
+    // @ts-ignore
+    this.systems = world.getSystemSet(this.setName);
+    if (!this.systems) {
+      throw new Error(
+        "Could not find configured EntitySytemSet: " + this.setName
+      );
+    } else if (!(this.systems instanceof EntitySystemSet)) {
+      throw new Error(
+        "Configured system set is not an EntitySytemSet: " + this.setName
+      );
+    }
     const gameTurn = world.getUnique(GameTurn);
 
     const actors = world.getStore(Actor)!;
@@ -194,7 +206,7 @@ class GameTurnSystem extends System {
       .getUnique(Messages)
       .add(`^gRun entity^ - ${entity.index} @ ${gameTurn.schedule.time}`);
     actor.ready = false;
-    gameTurn.systems.runEntity(world, entity, time, delta);
+    this.systems.runEntity(world, entity, time, delta);
     return true;
   }
 }
@@ -211,16 +223,21 @@ const world = new World()
   .registerComponent(Name)
   .registerComponent(Actor)
   .setUnique(new Messages())
-  .setUnique(new GameTurn(), (gt) => {
-    const systems = gt.systems;
-    systems
-      .addSystem(new LogSystem("start"), "start")
-      .addSystem(new LogSystem("move"), "move")
-      .addSystem(new LogSystem("act"), "act")
-      .addSystem(new LogSystem("finish"), "finish")
-      .addSystem(new ScheduleEntitySystem(), "finish");
-  })
-  .addSystem(new GameTurnSystem())
+  .setUnique(new GameTurn())
+  .addSystemSet(
+    "gameturn",
+    // Lots of ways to add systems to the gameturn system set
+    new EntitySystemSet(["start", "move", "act", "finish"])
+      .addSystem("start", new LogSystem("start"))
+      .addSystem("move", new LogSystem("move")),
+    (set) => {
+      set
+        .addSystem("act", new LogSystem("act"))
+        .addSystem("finish", new LogSystem("finish"));
+    }
+  )
+  .addSystem("gameturn", "finish", new ScheduleEntitySystem())
+  .addSystem(new GameTurnSystem("gameturn"))
   .addSystem(new DrawSystem())
   .init((w) => {
     const eA = w.create(new Name("a"), new Actor()); // This is our Hero (user controlled)

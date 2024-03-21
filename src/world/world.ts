@@ -1,7 +1,16 @@
 import { System } from "../system/system.js";
-import { AddStepOpts, SystemManager } from "../system/manager.js";
+import {
+  AddStepOpts,
+  EntitySystemSet,
+  EntitySystemStep,
+  SystemManager,
+  SystemSet,
+  SystemStep,
+  EntitySystemFn,
+  SystemFn,
+  EntitySystem,
+} from "../system/index.js";
 import { Level } from "./level.js";
-import { SystemFn } from "../system/functionSystem.js";
 
 export interface WorldInit {
   worldInit?(world: World): void;
@@ -30,35 +39,62 @@ export class World extends Level {
     return this;
   }
 
-  // TODO - steps -> opts?: string[] | { runSet?: string, runStep?: string, runIf?: RunIfFn, enable?: boolean, steps?: string[] }
-  addSystemSet(name: string, steps?: string[]): this {
+  addSystemSet(
+    name: string,
+    steps?: string[] | SystemSet | EntitySystemSet,
+    init?: (set: SystemSet | EntitySystemSet) => void
+  ): this {
     this._systems.addSet(name, steps);
+    if (init) {
+      init(this._systems.getSet(name)!);
+    }
     return this;
   }
 
-  addSystemStep(set: string, step: string, opts?: AddStepOpts): World;
-  addSystemStep(step: string, opts?: AddStepOpts): World;
   addSystemStep(
-    ...args: [string, AddStepOpts?] | [string, string, AddStepOpts?]
+    set: string,
+    step: string,
+    opts?: AddStepOpts | SystemStep | EntitySystemStep
+  ): World;
+  addSystemStep(
+    step: string,
+    opts?: AddStepOpts | SystemStep | EntitySystemStep
+  ): World;
+  addSystemStep(
+    ...args:
+      | [string, (AddStepOpts | SystemStep | EntitySystemStep)?]
+      | [string, string, (AddStepOpts | SystemStep | EntitySystemStep)?]
   ): this {
     // @ts-ignore
     this._systems.addStep(...args);
     return this;
   }
 
-  addSystem(system: System | SystemFn, enable?: boolean): World;
-  addSystem(inStep: string, system: System | SystemFn, enable?: boolean): World;
+  addSystem(
+    system: System | SystemFn | EntitySystem | EntitySystemFn,
+    enable?: boolean
+  ): World;
+  addSystem(
+    inStep: string,
+    system: System | SystemFn | EntitySystem | EntitySystemFn,
+    enable?: boolean
+  ): World;
   addSystem(
     inSet: string,
     inStep: string,
-    system: System | SystemFn,
+    system: System | SystemFn | EntitySystem | EntitySystemFn,
     enable?: boolean
   ): World;
   addSystem(
     ...args:
-      | [System | SystemFn, boolean?]
-      | [string, System | SystemFn, boolean?]
-      | [string, string, System | SystemFn, boolean?]
+      | [System | SystemFn | EntitySystem | EntitySystemFn, boolean?]
+      | [string, System | SystemFn | EntitySystem | EntitySystemFn, boolean?]
+      | [
+          string,
+          string,
+          System | SystemFn | EntitySystem | EntitySystemFn,
+          boolean?
+        ]
   ): this {
     // @ts-ignore
     this._systems.addSystem(...args);
@@ -86,6 +122,10 @@ export class World extends Level {
     }
     this._systems.runSet(set, this, time, delta);
     // this.maintain();
+  }
+
+  getSystemSet(name: string): SystemSet | EntitySystemSet | undefined {
+    return this._systems.getSet(name);
   }
 
   addTime(delta: number): this {

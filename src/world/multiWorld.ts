@@ -4,8 +4,7 @@ import { AnyComponent, Component } from "../component/component.js";
 import { AnyCompStoreCtr, SetStore } from "../component/store.js";
 import { AnyQueue, Queue } from "./queue.js";
 import { AddStepOpts, SystemManager } from "../system/manager.js";
-import { System } from "../system/system.js";
-import { SystemFn } from "../system/functionSystem.js";
+import { System, SystemFn } from "../system/system.js";
 import { Level } from "./level.js";
 
 export interface Global<T> extends Function {

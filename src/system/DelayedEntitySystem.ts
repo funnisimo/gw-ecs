@@ -1,30 +1,8 @@
-import { DelayedSystem } from "./delayedSystem.js";
-import { Entity } from "../entity/entity.js";
 import { Aspect } from "../world/aspect.js";
-import { World } from "../world/world.js";
+import { IntervalEntitySystem } from "./intervalEntitySystem.js";
 
-export abstract class DelayedEntitySystem extends DelayedSystem {
-  private _aspect: Aspect;
-
+export abstract class DelayedEntitySystem extends IntervalEntitySystem {
   public constructor(aspect: Aspect, delay: number) {
-    super(delay);
-    this._aspect = aspect;
+    super(aspect, 0, delay);
   }
-
-  accept(entity: Entity): boolean {
-    return this._aspect.match(entity, this.lastTick);
-  }
-
-  run(world: World, time: number, delta: number): void {
-    for (let e of this._aspect.all(world, this.lastTick)) {
-      this.processEntity(world, e, time, delta);
-    }
-  }
-
-  abstract processEntity(
-    world: World,
-    entity: Entity,
-    time: number,
-    delta: number
-  ): void;
 }

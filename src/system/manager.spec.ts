@@ -8,6 +8,8 @@ import {
   SystemStep,
 } from "./manager.js";
 import { World } from "../world/world.js";
+import { EntitySystem } from "./entitySystem.js";
+import { Aspect } from "../world/aspect.js";
 
 describe("manager", () => {
   describe("SystemStep", () => {
@@ -99,13 +101,13 @@ describe("manager", () => {
 
   describe("SystemSet", () => {
     test("add a system", () => {
-      const set = new SystemSet("test");
+      const set = new SystemSet();
       const a = jest.fn();
       const b = jest.fn();
       const c = jest.fn();
 
       set.addSystem(a);
-      set.addSystem(b, "update");
+      set.addSystem("update", b);
       set.addSystem(c);
 
       expect(set.steps[0].name).toEqual("update");
@@ -118,14 +120,14 @@ describe("manager", () => {
       ]);
     });
     test('add "pre-" + "post-" systems', () => {
-      const set = new SystemSet("test");
+      const set = new SystemSet();
       const a = jest.fn();
       const b = jest.fn();
       const c = jest.fn();
 
-      set.addSystem(a, "update");
-      set.addSystem(b, "post-update");
-      set.addSystem(c, "pre-update");
+      set.addSystem("update", a);
+      set.addSystem("post-update", b);
+      set.addSystem("pre-update", c);
 
       expect(set.steps[0].name).toEqual("update");
       let all: [System, string][] = [];
@@ -143,13 +145,13 @@ describe("manager", () => {
 
   describe("EntitySystemSet", () => {
     test("add a system", () => {
-      const set = new EntitySystemSet("test");
+      const set = new EntitySystemSet();
       const a = jest.fn();
       const b = jest.fn();
       const c = jest.fn();
 
       set.addSystem(a);
-      set.addSystem(b, "update");
+      set.addSystem("update", b);
       set.addSystem(c);
 
       expect(set.steps[0].name).toEqual("update");
@@ -162,14 +164,14 @@ describe("manager", () => {
       ]);
     });
     test('add "pre-" + "post-" systems', () => {
-      const set = new EntitySystemSet("test");
+      const set = new EntitySystemSet();
       const a = jest.fn();
       const b = jest.fn();
       const c = jest.fn();
 
-      set.addSystem(a, "update");
-      set.addSystem(b, "post-update");
-      set.addSystem(c, "pre-update");
+      set.addSystem("update", a);
+      set.addSystem("post-update", b);
+      set.addSystem("pre-update", c);
 
       expect(set.steps[0].name).toEqual("update");
       let all: [System, string][] = [];
@@ -231,9 +233,9 @@ describe("manager", () => {
       manager.addStep("start", { before: "update" });
       manager.addStep("finish", { after: "update" });
 
-      manager.addSystem(new TestSystem("a"), "pre-finish");
-      manager.addSystem(new TestSystem("b"), "update");
-      manager.addSystem(new TestSystem("c"), "post-start");
+      manager.addSystem("pre-finish", new TestSystem("a"));
+      manager.addSystem("update", new TestSystem("b"));
+      manager.addSystem("post-start", new TestSystem("c"));
 
       const defaultSet = manager.getSet()!;
       expect(defaultSet.steps).toHaveLength(3);
@@ -252,9 +254,9 @@ describe("manager", () => {
       manager.addStep("panic", "start", { before: "update" });
       manager.addStep("panic", "finish", { after: "update" });
 
-      manager.addSystem(new TestSystem("a"), "panic", "post-finish");
-      manager.addSystem(new TestSystem("b"), "panic", "pre-update");
-      manager.addSystem(new TestSystem("c"), "panic", "start");
+      manager.addSystem("panic", "post-finish", new TestSystem("a"));
+      manager.addSystem("panic", "pre-update", new TestSystem("b"));
+      manager.addSystem("panic", "start", new TestSystem("c"));
 
       const world = new World().setUnique(new RunOrder());
       manager.start(world);
@@ -268,15 +270,68 @@ describe("manager", () => {
 
       manager.addSet("panic", ["start", "update", "finish"]);
 
-      manager.addSystem(new TestSystem("a"), "panic", "post-finish");
-      manager.addSystem(new TestSystem("b"), "panic", "update");
-      manager.addSystem(new TestSystem("c"), "panic", "pre-start");
+      manager.addSystem("panic", "post-finish", new TestSystem("a"));
+      manager.addSystem("panic", "update", new TestSystem("b"));
+      manager.addSystem("panic", "pre-start", new TestSystem("c"));
 
       const world = new World().setUnique(new RunOrder());
       manager.start(world);
       manager.runSet("panic", world, 0, 0);
 
       expect(world.getUnique(RunOrder).get()).toEqual(["c", "b", "a"]);
+    });
+  });
+
+  describe("EntitySystems", () => {
+    class TestSystem extends System {
+      name: string;
+
+      constructor(name: string) {
+        super();
+        this.name = name;
+      }
+    }
+
+    class TestEntitySystem extends EntitySystem {
+      name: string;
+
+      constructor(name: string) {
+        super(new Aspect());
+        this.name = name;
+      }
+    }
+
+    test("add entity step", () => {
+      const mgr = new SystemManager();
+      const step = new EntitySystemStep();
+      mgr.addStep("turn", { step });
+      expect(step.systems).toHaveLength(0);
+      mgr.addSystem("turn", new TestEntitySystem("b"));
+      expect(step.systems).toHaveLength(1);
+
+      expect(() => mgr.addSystem("turn", new TestSystem("a"))).toThrow(
+        "Must be EntitySystem"
+      );
+      mgr.addSystem(new TestSystem("c")); // update step
+      expect(step.systems).toHaveLength(1); // not added to this step
+
+      mgr.addStep("calc", new EntitySystemStep()); // add another
+    });
+
+    test("add entity set", () => {
+      const mgr = new SystemManager();
+      const set = new EntitySystemSet(["a", "b", "c"]);
+      mgr.addSet("turn", set);
+      expect(set.steps).toHaveLength(3);
+      mgr.addStep("turn", "d");
+      expect(set.steps).toHaveLength(4);
+
+      expect(set.getStep("d")).toHaveLength(0);
+      mgr.addSystem("turn", "d", new TestEntitySystem("d"));
+      expect(set.getStep("d")).toHaveLength(1);
+      expect(() => mgr.addSystem("turn", "d", new TestSystem("d"))).toThrow(
+        "Must be EntitySystem"
+      );
     });
   });
 });
