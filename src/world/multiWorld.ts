@@ -3,9 +3,10 @@ import { World, WorldInit } from "./world.js";
 import { AnyComponent, Component } from "../component/component.js";
 import { AnyCompStoreCtr, SetStore } from "../component/store.js";
 import { AnyQueue, Queue } from "./queue.js";
-import { AddStepOpts, SystemManager } from "../system/manager.js";
+import { SystemManager } from "../system/manager.js";
 import { System, SystemFn } from "../system/system.js";
 import { Level } from "./level.js";
+import { AddStepOpts } from "../system/systemSet.js";
 
 export interface Global<T> extends Function {
   new (...args: any[]): T;

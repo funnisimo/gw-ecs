@@ -1,8 +1,8 @@
 import terminal from "terminal-kit";
 import { World } from "gw-ecs/world/world";
 import { EntitySystem } from "gw-ecs/system/entitySystem";
-import { EntitySystemSet, type AddStepOpts } from "gw-ecs/system/manager";
-import { System, type EntitySystemFn } from "gw-ecs/system";
+import { EntitySystemSet } from "gw-ecs/system/systemSet";
+import { System } from "gw-ecs/system";
 import { Entity } from "gw-ecs/entity";
 import { Aspect } from "gw-ecs/world/aspect";
 import { Schedule } from "gw-ecs/common/schedule";

@@ -1,14 +1,14 @@
 import terminal from "terminal-kit";
 import * as ROT from "rot-js";
-import { Aspect, World } from "gw-ecs/world";
+import { Aspect, Level, World } from "gw-ecs/world";
 import { EntitySystem, System } from "gw-ecs/system";
-import { Pos, PosManager } from "gw-ecs/utils";
+import { Pos, PosManager } from "gw-ecs/common";
 import { Entity } from "gw-ecs/entity";
 import {
   CollisionManager,
   Collider,
   COLLIDER_ASPECT,
-} from "gw-ecs/utils/collisions";
+} from "gw-ecs/common/collisions";
 
 type XY = { x: number; y: number };
 
@@ -33,14 +33,14 @@ class GameInfo {
 }
 
 abstract class EntityTurnSystem extends EntitySystem {
-  isEnabled(): boolean {
-    return super.isEnabled() && this.world.getUnique(GameInfo).takeTurn;
+  shouldRun(level: Level): boolean {
+    return super.isEnabled() && level.getUnique(GameInfo).takeTurn;
   }
 }
 
 class TurnOverSystem extends System {
-  protected doProcess(): void {
-    const game = this.world.getUnique(GameInfo);
+  run(level: Level): void {
+    const game = level.getUnique(GameInfo);
     game.takeTurn = false;
   }
 }
@@ -54,9 +54,9 @@ class OpenSystem extends EntityTurnSystem {
     super(new Aspect(Open, Pos));
   }
 
-  protected processEntity(entity: Entity): void {
-    const term = this.world.getUnique(Term).term;
-    const posMgr = this.world.getUnique(PosManager);
+  processEntity(level: Level, entity: Entity): void {
+    const term = level.getUnique(Term).term;
+    const posMgr = level.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
 
     entity.remove(Open);
@@ -71,7 +71,7 @@ class OpenSystem extends EntityTurnSystem {
 
     if (!box.ananas) {
       term.moveTo(0, 26).eraseLine.green("Empty");
-      boxEntity.add(EMPTY_BOX_SPRITE);
+      boxEntity.set(EMPTY_BOX_SPRITE);
     } else {
       term.moveTo(0, 26).eraseLine.green("You found the ^yananas^ !");
       term.processExit(0);
@@ -101,9 +101,9 @@ class MoveSystem extends EntityTurnSystem {
     super(new Aspect(Move, Pos));
   }
 
-  protected processEntity(entity: Entity): void {
-    const term = this.world.getUnique(Term).term;
-    const posMgr = this.world.getUnique(PosManager);
+  processEntity(level: Level, entity: Entity): void {
+    const term = level.getUnique(Term).term;
+    const posMgr = level.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
 
     const dxy = entity.remove(Move)!.dir;
@@ -112,7 +112,7 @@ class MoveSystem extends EntityTurnSystem {
 
     const others = posMgr.getAt(newX, newY, COLLIDER_ASPECT);
     if (others.length > 0) {
-      if (this.world.getUnique(CollisionManager).collide(entity, others)) {
+      if (level.getUnique(CollisionManager).collide(entity, others)) {
         return;
       }
     }
@@ -143,12 +143,12 @@ class PedroSystem extends EntityTurnSystem {
     super(new Aspect(Pedro));
   }
 
-  protected processEntity(entity: Entity): void {
+  processEntity(level: Level, entity: Entity): void {
     const pedro = entity.update(Pedro)!;
     const pedroPos = entity.fetch(Pos)!;
 
     let goal: XY | null = null;
-    const heroEntity = this.world.getUnique(GameInfo).hero;
+    const heroEntity = level.getUnique(GameInfo).hero;
     const heroFov = heroEntity.fetch(FOV);
     if (heroFov) {
       if (heroFov.isVisible(pedroPos.x, pedroPos.y)) {
@@ -159,14 +159,14 @@ class PedroSystem extends EntityTurnSystem {
 
     if (!goal && pedro.path.length == 0) {
       // Pick a random box...
-      const boxes = [...this.world.getStore(Box).entities()];
+      const boxes = [...level.getStore(Box).entities()];
       const box = ROT.RNG.getItem(boxes)!;
       // Find a path to that box...
       goal = box.fetch(Pos)!;
     }
 
     if (goal) {
-      const posMgr = this.world.getUnique(PosManager);
+      const posMgr = level.getUnique(PosManager);
       /* prepare path to given coords */
       var astar = new ROT.Path.AStar(
         goal.x,
@@ -207,7 +207,7 @@ class PedroSystem extends EntityTurnSystem {
     // Pick the next step in the path
     const dest = pedro.path.splice(0, 1)[0];
     const dir = dest.minus(pedroPos);
-    entity.add(new Move(dir));
+    entity.set(new Move(dir));
   }
 }
 
@@ -259,14 +259,14 @@ class FovSystem extends EntitySystem {
     super(new Aspect(FOV).updated(Pos));
   }
 
-  protected processEntity(entity: Entity): void {
+  processEntity(level: Level, entity: Entity): void {
     const fov = entity.update(FOV)!;
     const pos = entity.fetch(Pos)!;
 
-    const posMgr = this.world.getUnique(PosManager);
+    const posMgr = level.getUnique(PosManager);
 
     /* input callback */
-    function lightPasses(x, y) {
+    function lightPasses(x: number, y: number) {
       const tileEntity = posMgr.getAt(x, y, TILE_ASPECT)[0];
       if (!tileEntity) return false;
       return !tileEntity.has(Collider); // TODO - tile.blocksVision?
@@ -331,9 +331,9 @@ class DrawSystem extends System {
     this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
   }
 
-  protected doProcess(): void {
+  run(level: Level): void {
     const buf = this._buf;
-    const map = this.world.getUnique(PosManager);
+    const map = level.getUnique(PosManager);
 
     map.everyXY((x, y, es) => {
       const entity =
@@ -359,7 +359,7 @@ function digMap(world: World) {
     const sprite = blocks ? WALL_SPRITE : FLOOR_SPRITE;
     const tile = world.create(new Tile(), sprite);
     if (blocks) {
-      tile.add(new Collider());
+      tile.set(new Collider("wall"));
     } else {
       floors.push({ x, y });
     }
@@ -390,7 +390,12 @@ function placeHero(world: World, locs: XY[]): XY {
   const posMgr = world.getUnique(PosManager);
   var index = Math.floor(ROT.RNG.getUniform() * locs.length);
   var loc = locs.splice(index, 1)[0];
-  const hero = world.create(new Hero(), HERO_SPRITE, new FOV(), new Collider());
+  const hero = world.create(
+    new Hero(),
+    HERO_SPRITE,
+    new FOV(),
+    new Collider("hero", "actor")
+  );
   posMgr.set(hero, loc.x, loc.y);
   world.setUnique(new GameInfo(hero));
   return loc;
@@ -408,7 +413,11 @@ function placePedro(world: World, avoidLoc: XY, locs: XY[]) {
   const index = dist.indexOf(maxDist);
   var loc = locs.splice(index, 1)[0];
 
-  const pedro = world.create(new Pedro(), PEDRO_SPRITE, new Collider());
+  const pedro = world.create(
+    new Pedro(),
+    PEDRO_SPRITE,
+    new Collider("pedro", "actor")
+  );
   posMgr.set(pedro, loc.x, loc.y);
 }
 
@@ -437,11 +446,11 @@ term.on("key", function (name: string) {
     term.processExit(0);
   } else if (["LEFT", "RIGHT", "UP", "DOWN"].includes(name)) {
     const game = world.getUnique(GameInfo);
-    game.hero.add(new Move(DIRS[name]));
+    game.hero.set(new Move(DIRS[name]));
     game.takeTurn = true;
   } else if ([" ", "ENTER"].includes(name)) {
     const game = world.getUnique(GameInfo);
-    game.hero.add(new Open());
+    game.hero.set(new Open());
     game.takeTurn = true;
   } else {
     term.moveTo(0, 26).eraseLine.red("Unknown key: ", name);
@@ -461,10 +470,9 @@ const world = new World()
   .setUnique(new Term(term))
   .setUnique(new CollisionManager(), (col) => {
     col
-      .register(HERO_ASPECT, PEDRO_ASPECT, gameOver)
-      .register(PEDRO_ASPECT, HERO_ASPECT, gameOver)
-      .register(HERO_ASPECT, TILE_ASPECT, blockedMove)
-      .register(PEDRO_ASPECT, TILE_ASPECT, blockedMove);
+      .register("hero", "pedro", gameOver)
+      .register("pedro", "hero", gameOver)
+      .register("actor", "wall", blockedMove);
   })
   .addSystem(new PedroSystem())
   .addSystem(new MoveSystem())

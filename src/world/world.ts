@@ -1,16 +1,18 @@
 import { System } from "../system/system.js";
 import {
-  AddStepOpts,
-  EntitySystemSet,
   EntitySystemStep,
   SystemManager,
-  SystemSet,
   SystemStep,
   EntitySystemFn,
   SystemFn,
   EntitySystem,
 } from "../system/index.js";
 import { Level } from "./level.js";
+import {
+  AddStepOpts,
+  EntitySystemSet,
+  SystemSet,
+} from "../system/systemSet.js";
 
 export interface WorldInit {
   worldInit?(world: World): void;

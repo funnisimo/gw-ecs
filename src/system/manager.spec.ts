@@ -1,15 +1,11 @@
 import "jest-extended";
 import { System } from "./system.js";
-import {
-  EntitySystemSet,
-  EntitySystemStep,
-  SystemManager,
-  SystemSet,
-  SystemStep,
-} from "./manager.js";
+import { SystemManager } from "./manager.js";
 import { World } from "../world/world.js";
 import { EntitySystem } from "./entitySystem.js";
 import { Aspect } from "../world/aspect.js";
+import { SystemStep, EntitySystemStep } from "./systemStep.js";
+import { EntitySystemSet, SystemSet } from "./systemSet.js";
 
 describe("manager", () => {
   describe("SystemStep", () => {
