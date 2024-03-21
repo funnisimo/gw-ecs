@@ -33,3 +33,9 @@ export abstract class IntervalEntitySystem extends EntitySystem {
     return true;
   }
 }
+
+export abstract class DelayedEntitySystem extends IntervalEntitySystem {
+  public constructor(aspect: Aspect, delay: number) {
+    super(aspect, 0, delay);
+  }
+}
