@@ -1,7 +1,6 @@
 import { Entity } from "../entity/entity.js";
 import { SystemFn } from "../system/functionSystem.js";
 
-export type TaskFn = (dt: number) => boolean;
 export type TaskType = Entity | SystemFn;
 
 interface TaskInfo {

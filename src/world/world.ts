@@ -1,6 +1,7 @@
 import { System } from "../system/system.js";
 import { AddStepOpts, SystemManager } from "../system/manager.js";
 import { Level } from "./level.js";
+import { SystemFn } from "../system/functionSystem.js";
 
 export interface WorldInit {
   worldInit?(world: World): void;
@@ -45,16 +46,22 @@ export class World extends Level {
     return this;
   }
 
-  addSystem(system: System, enable?: boolean): World;
-  addSystem(system: System, inStep: string, enable?: boolean): World;
+  addSystem(system: System | SystemFn, enable?: boolean): World;
+  addSystem(inStep: string, system: System | SystemFn, enable?: boolean): World;
   addSystem(
-    system: System,
     inSet: string,
     inStep: string,
+    system: System | SystemFn,
     enable?: boolean
   ): World;
-  addSystem(system: System, ...args: any[]): this {
-    this._systems.addSystem(system, ...args);
+  addSystem(
+    ...args:
+      | [System | SystemFn, boolean?]
+      | [string, System | SystemFn, boolean?]
+      | [string, string, System | SystemFn, boolean?]
+  ): this {
+    // @ts-ignore
+    this._systems.addSystem(...args);
     return this;
   }
 

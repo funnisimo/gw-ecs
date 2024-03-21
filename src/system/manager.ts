@@ -310,15 +310,14 @@ export class SystemManager {
     return this._sets.get(name);
   }
 
-  addStep(set: string, step: string, opts?: AddStepOpts): SystemManager;
   addStep(step: string, opts?: AddStepOpts): SystemManager;
+  addStep(set: string, step: string, opts?: AddStepOpts): SystemManager;
   addStep(
     ...args: [string, AddStepOpts?] | [string, string, AddStepOpts?]
   ): SystemManager {
     if (args.length == 1) {
       args = ["default", args[0], {}];
-    }
-    if (typeof args[1] !== "string") {
+    } else if (typeof args[1] !== "string") {
       args = ["default", args[0], args[1]];
     }
 
@@ -331,34 +330,35 @@ export class SystemManager {
   }
 
   addSystem(system: System | SystemFn, enabled?: boolean): this;
-  addSystem(system: System | SystemFn, inStep: string, enabled?: boolean): this;
+  addSystem(inStep: string, system: System | SystemFn, enabled?: boolean): this;
   addSystem(
-    system: System | SystemFn,
     inSet: string,
     inStep: string,
+    system: System | SystemFn,
     enabled?: boolean
   ): this;
-  addSystem(system: System | SystemFn, ...args: any[]): this {
-    if (typeof system === "function") {
-      system = new FunctionSystem(system);
+  addSystem(...args: any[]): this {
+    let setName = "default";
+    let stepName = "update";
+    if (typeof args[0] === "string") {
+      stepName = args.shift();
+    }
+    if (typeof args[0] === "string") {
+      setName = stepName;
+      stepName = args.shift();
+    }
+    let system: System;
+    if (args[0] instanceof System) {
+      system = args.shift();
+    } else if (typeof args[0] === "function") {
+      system = new FunctionSystem(args.shift());
+    } else {
+      throw new Error("No system provided.");
     }
 
-    const defaultArgs = ["default", "update", true];
-    if (typeof args[0] === "string" && typeof args[1] !== "string") {
-      args.unshift("default");
-    }
-    while (args.length < defaultArgs.length) {
-      args.push(defaultArgs[args.length]);
-    }
-    let [setName, stepName, enabled] = args as [string, string, boolean];
-
-    if (typeof setName === "boolean") {
-      enabled = setName;
-      setName = "default";
-    }
-    if (typeof stepName === "boolean") {
-      enabled = stepName;
-      stepName = "update";
+    let enabled = true;
+    if (typeof args[0] === "boolean") {
+      enabled = args.shift();
     }
 
     const set = this._sets.get(setName);

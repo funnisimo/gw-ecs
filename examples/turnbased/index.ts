@@ -2,11 +2,10 @@ import terminal from "terminal-kit";
 import { World } from "gw-ecs/world/world";
 import { EntitySystem } from "gw-ecs/system/entitySystem";
 import { EntitySystemSet } from "gw-ecs/system/manager";
-import { System } from "gw-ecs/system/system";
-import { Entity } from "gw-ecs/entity/entity";
-import { Aspect } from "gw-ecs/world";
-import { Schedule } from "gw-ecs/utils/schedule";
-import { StoreWatcher } from "gw-ecs/component/store";
+import { System } from "gw-ecs/system";
+import { Entity } from "gw-ecs/entity";
+import { Aspect } from "gw-ecs/world/aspect";
+import { Schedule } from "gw-ecs/common/schedule";
 
 class Messages {
   data: string[] = [];

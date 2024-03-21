@@ -1,4 +1,4 @@
-import { World } from "gw-ecs/world/world";
+import { World } from "gw-ecs/world";
 import {
   Blop,
   BumpSprite,
