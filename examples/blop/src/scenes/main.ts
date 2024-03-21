@@ -6,11 +6,13 @@ import { Game } from "../uniques";
 import { coloredName, logs, makeLogsOld } from "../ui/log";
 import {
   Blop,
+  EFFECT_ASPECT,
   FX_ASPECT,
   HERO_ASPECT,
   Move,
   Sprite,
   TILE_ASPECT,
+  TRIGGER_ASPECT,
 } from "../comps";
 import { type Buffer } from "gw-utils/buffer";
 import { Aspect, type Level } from "gw-ecs/world";
@@ -108,7 +110,7 @@ export const mainScene = {
   },
 };
 
-function drawMapHeader(
+export function drawMapHeader(
   buffer: Buffer,
   x0: number,
   y0: number,
@@ -127,7 +129,7 @@ function drawMapHeader(
   );
 }
 
-function drawMap(buffer: Buffer, x0: number, y0: number) {
+export function drawMap(buffer: Buffer, x0: number, y0: number) {
   const mgr = world.getUnique(PosManager);
   const game = world.getUnique(Game);
   const focus = game.focus;
@@ -138,8 +140,8 @@ function drawMap(buffer: Buffer, x0: number, y0: number) {
     } else {
       const entity =
         HERO_ASPECT.first(entities) ||
-        // PEDRO_ASPECT.first(entities) ||
-        // BOX_ASPECT.first(entities) ||
+        TRIGGER_ASPECT.first(entities) ||
+        EFFECT_ASPECT.first(entities) ||
         TILE_ASPECT.first(entities)!;
 
       let sprite: SpriteData = entity.fetch(Sprite)!;
@@ -159,7 +161,7 @@ function drawMap(buffer: Buffer, x0: number, y0: number) {
   }, new Aspect(Pos, Sprite));
 }
 
-function drawLog(
+export function drawLog(
   buffer: Buffer,
   x0: number,
   y0: number,
@@ -183,7 +185,7 @@ function drawLog(
   }
 }
 
-function drawStatus(
+export function drawStatus(
   buffer: Buffer,
   x0: number,
   y0: number,
@@ -204,7 +206,7 @@ function drawStatus(
   buffer.drawText(x0, y0 + h - 1, tile.name);
 }
 
-function drawBlopStatus(
+export function drawBlopStatus(
   entity: Entity,
   buffer: Buffer,
   x0: number,
@@ -246,12 +248,12 @@ function drawBlopStatus(
     buffer.drawText(
       x0,
       y0 + 5 + i,
-      `$ #{green ${triggerText}} : #{teal ${effectText}}`
+      `§ #{green ${triggerText}} : #{teal ${effectText}}`
     );
   }
 }
 
-function drawLines(buffer: Buffer) {
+export function drawLines(buffer: Buffer) {
   buffer.drawLineH(
     0,
     Constants.HELP_HEIGHT + 1,

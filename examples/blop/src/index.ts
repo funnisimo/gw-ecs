@@ -1,6 +1,7 @@
 import * as GWU from "gw-utils";
 import * as Constants from "./constants";
 import { mainScene } from "./scenes";
+import { world } from "./world";
 
 console.log("Hello, search for the " + Constants.BLOPULET_NAME);
 
@@ -9,5 +10,10 @@ const gw = GWU.app.start({
   width: 50,
   height: 40,
   tileWidth: 15,
-  scene: mainScene,
+  scenes: {
+    main: mainScene,
+    add_dna: {},
+  },
 });
+
+world.setUnique(gw);

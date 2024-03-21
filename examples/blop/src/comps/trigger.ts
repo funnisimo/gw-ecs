@@ -4,15 +4,17 @@ import type { GameEvent } from "../queues";
 import type { Entity } from "gw-ecs/entity";
 import { NAMED_DIRS, type Loc } from "gw-utils/xy";
 import { Pos, PosManager } from "gw-ecs/common/positions";
-import { GRASS, PATCH_TILES, TILE_ASPECT, Tile } from "./tile";
+import { PATCH_TILES, TILE_ASPECT, Tile } from "./tile";
 import { capitalize } from "gw-utils/text";
 import { TriggerSprite } from "./sprite";
 import { Pickup } from "./pickup";
-import type { Level } from "gw-ecs/world";
+import { Aspect, type Level } from "gw-ecs/world";
+import { Hero } from "./hero";
+import { App } from "gw-utils/app";
 
 export type TriggerFn = (event: GameEvent, owner: Entity) => boolean;
 
-export abstract class Trigger {
+export class Trigger {
   name: string;
   description: string;
 
@@ -21,8 +23,12 @@ export abstract class Trigger {
     this.description = description;
   }
 
-  abstract matches(level: Level, event: GameEvent, owner: Entity): boolean;
+  matches(level: Level, event: GameEvent, owner: Entity): boolean {
+    return false;
+  }
 }
+
+export const TRIGGER_ASPECT = new Aspect(Trigger);
 
 export class WaitTrigger extends Trigger {
   constructor() {
@@ -153,5 +159,14 @@ export function createRandomTrigger(level: Level, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(triggerClasses);
   const trigger = new cls();
-  return level.create(TriggerSprite, trigger, Pickup);
+  return level.create(TriggerSprite, trigger, new Pickup(pickupTrigger));
+}
+
+export function pickupTrigger(level: Level, actor: Entity, item: Entity) {
+  if (!item.has(Trigger)) return;
+  if (!actor.has(Hero)) return;
+
+  const app = level.getUnique(App);
+  app.show("add_dna", { level, entity: actor, chromosome: item });
+  // TODO - run 'add_to_dna' scene
 }

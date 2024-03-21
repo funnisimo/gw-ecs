@@ -37,6 +37,10 @@ export class Pos {
     return this._lastY;
   }
 
+  xy(): { x: number; y: number } {
+    return { x: this._x, y: this._y };
+  }
+
   lastXY(): { x: number; y: number } {
     return { x: this._lastX, y: this._lastY };
   }
@@ -92,6 +96,10 @@ export class Pos {
     }
     return this._x == (x || 0) && this._y == (y || 0);
   }
+
+  clone(): Pos {
+    return new Pos(this._x, this._y, this._lastX, this._lastY);
+  }
 }
 
 // Need World Hook for Destroy Entity
@@ -138,6 +146,7 @@ export class PosManager implements EntityWatcher, WorldInit {
     }
   }
 
+  // TODO - hasAt(xy, aspect?)
   hasAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): boolean {
     const index = this._getIndex(x, y);
     const entities = this._entitiesAt.get(index);
@@ -147,6 +156,7 @@ export class PosManager implements EntityWatcher, WorldInit {
       : entities.length > 0;
   }
 
+  // TODO - getAt(xy, aspect?, sinceTick=0)
   getAt(x: number, y: number, aspect?: Aspect, sinceTick = 0): Entity[] {
     const index = this._getIndex(x, y);
     const entities = this._entitiesAt.get(index);
@@ -156,6 +166,7 @@ export class PosManager implements EntityWatcher, WorldInit {
       : entities;
   }
 
+  // TODO - firstAt(xy, aspect?, sinceTick)
   firstAt(
     x: number,
     y: number,
@@ -169,6 +180,7 @@ export class PosManager implements EntityWatcher, WorldInit {
     return entity.fetch(Pos);
   }
 
+  // TODO - set(entity, xy)
   set(entity: Entity, x: number, y: number) {
     const pos = entity.update(Pos);
     if (pos) {

@@ -8,7 +8,7 @@ import {
   findSpawnTileFarFrom,
   setTileType,
 } from "./utils";
-import { STAIRS } from "../comps";
+import { STAIRS, createRandomEffect, createRandomTrigger } from "../comps";
 import { makeRandomWorld } from "./randomWorld";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Game } from "../uniques";
@@ -79,6 +79,16 @@ function makeNormalLevel(world: World, depth: number) {
     Constants.STAIRS_MIN_DISTANCE
   );
   setTileType(world, stairsXY, STAIRS);
+
+  const triggerXY = findClosestSpawnTile(world, startingHeroXY);
+  console.log("trigger @", triggerXY);
+  const trigger = createRandomTrigger(world);
+  mgr.set(trigger, triggerXY.x, triggerXY.y);
+
+  const effectXY = findClosestSpawnTile(world, startingHeroXY);
+  console.log("effect @", effectXY);
+  const effect = createRandomEffect(world);
+  mgr.set(effect, effectXY.x, effectXY.y);
 
   // var blops = makeBlops(world, playerPos, depth);
   // var items = makeItems(world, playerPos, depth);

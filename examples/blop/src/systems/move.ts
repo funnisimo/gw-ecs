@@ -48,7 +48,7 @@ export class MoveSystem extends EntitySystem {
       posMgr.set(entity, newX, newY);
       game.changed = true; // Force redraw
       // need fov update
-      level.push(new GameEvent(entity, "move", { dir: dxy }));
+      level.push(new GameEvent(entity, "move", { dir: dxy, pos: pos.clone() }));
 
       // check for pickups
 

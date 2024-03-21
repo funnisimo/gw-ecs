@@ -4,10 +4,10 @@ import { PosManager } from "gw-ecs/common/positions";
 import { findEmptyTileForSpawn } from "../map/utils";
 import { Blop, EffectSprite, Hero, Pickup } from "./index";
 import { addLog, coloredName } from "../ui/log";
-import type { Level } from "gw-ecs/world";
+import { Aspect, type Level } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 
-export abstract class Effect {
+export class Effect {
   name: string;
   description: string;
 
@@ -16,8 +16,12 @@ export abstract class Effect {
     this.description = description;
   }
 
-  abstract apply(level: Level, event: GameEvent, owner: Entity): boolean;
+  apply(level: Level, event: GameEvent, owner: Entity): boolean {
+    return false;
+  }
 }
+
+export const EFFECT_ASPECT = new Aspect(Effect);
 
 export class TeleportEffect extends Effect {
   constructor() {
@@ -87,5 +91,5 @@ export function createRandomEffect(level: Level, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(effectClasses);
   const effect = new cls();
-  return level.create(EffectSprite, effect, Pickup);
+  return level.create(EffectSprite, effect, new Pickup(() => {}));
 }

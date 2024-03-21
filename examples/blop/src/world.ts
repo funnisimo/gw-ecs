@@ -1,5 +1,16 @@
-import { World } from "gw-ecs/world";
-import { Blop, BumpSprite, FX, Hero, Move, Sprite, Tile } from "./comps";
+import { World } from "gw-ecs/world/world";
+import {
+  Blop,
+  BumpSprite,
+  Effect,
+  FX,
+  Hero,
+  Move,
+  Pickup,
+  Sprite,
+  Tile,
+  Trigger,
+} from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { addLog } from "./ui/log";
 import { CollisionManager } from "gw-ecs/common/collisions";
@@ -34,11 +45,15 @@ export const world = new World()
   .registerComponent(Blop)
   .registerComponent(DNA)
   .registerComponent(FX)
+  .registerComponent(Trigger)
+  .registerComponent(Effect)
+  .registerComponent(Pickup)
   .registerQueue(GameEvent)
   .addSystem(new TimerSystem())
   .addSystem(new MoveSystem())
   .addSystem(new EventSystem())
   .setUnique(new Game())
+  .setUnique(new Timers())
   .setUnique(new CollisionManager(), (col) => {
     col
       // .register(["hero"], ["blop"], attack)
@@ -46,5 +61,11 @@ export const world = new World()
       .register("actor", "wall", blockedMove)
       .register("hero", "stairs", gotoNextLevel);
   })
-  .setUnique(new Timers())
   .start();
+
+declare global {
+  var WORLD: World;
+}
+
+// @ts-ignore - TODO - Why do we have to ignore this?
+globalThis.WORLD = world;
