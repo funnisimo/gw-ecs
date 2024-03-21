@@ -25,7 +25,7 @@ Lets start by creating a simple application that will get user keyboard input an
 
     term.grabInput(true);
 
-    term.on("key", function (name, matches, data) {
+    term.on("key", function (name: string) {
         if (name === "CTRL_C" || name === "q") {
             term.blue("QUIT\n");
             term.grabInput(false);

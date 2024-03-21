@@ -1,10 +1,10 @@
 import terminal from "terminal-kit";
-import { Entity } from "gw-ecs/entity/entity.js";
-import { World } from "gw-ecs/world/world.js";
-import { PosManager, Pos } from "gw-ecs/common/positions.js";
-import { Aspect } from "gw-ecs/world/aspect.js";
-import { System } from "gw-ecs/system/system.js";
-import { EntitySystem } from "gw-ecs/system/entitySystem.js";
+import { Entity } from "gw-ecs/entity/entity";
+import { World } from "gw-ecs/world/world";
+import { PosManager, Pos } from "gw-ecs/common/positions";
+import { Aspect } from "gw-ecs/world/aspect";
+import { System } from "gw-ecs/system/system";
+import { EntitySystem } from "gw-ecs/system/entitySystem";
 
 // COMPONENTS
 

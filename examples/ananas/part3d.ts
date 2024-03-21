@@ -264,7 +264,7 @@ class FovSystem extends EntitySystem {
     const posMgr = world.getUnique(PosManager);
 
     /* input callback */
-    function lightPasses(x, y) {
+    function lightPasses(x: number, y: number) {
       const tileEntity = posMgr.getAt(x, y, TILE_ASPECT)[0];
       if (!tileEntity) return false;
       return !tileEntity.has(Collider); // TODO - tile.blocksVision?
@@ -433,7 +433,7 @@ term.clear();
 
 term.grabInput(true);
 
-term.on("key", function (name, matches, data) {
+term.on("key", function (name: string) {
   if (name === "CTRL_C" || name === "q") {
     term.moveTo(0, 26).eraseLine.blue("QUIT");
     term.grabInput(false);
