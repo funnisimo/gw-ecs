@@ -46,6 +46,7 @@ describe("SystemStep", () => {
     expect(step.name).toEqual("update");
     expect(step.length).toEqual(0);
   });
+
   test("addSystem", () => {
     const world = new World();
     const cb = jest.fn();
@@ -69,6 +70,7 @@ describe("SystemStep", () => {
     expect(cb).toHaveBeenNthCalledWith(2, 2);
     expect(cb).toHaveBeenNthCalledWith(3, 3);
   });
+
   test("addSystem with EntitySystem", () => {
     const world = new World();
     const entity = world.create();
@@ -162,6 +164,7 @@ describe("EntitySystemStep", () => {
     expect(step.name).toEqual("update");
     expect(step.length).toEqual(0);
   });
+
   test("addSystem", () => {
     const world = new World();
     const entity = world.create();
@@ -195,6 +198,7 @@ describe("EntitySystemStep", () => {
     expect(cb).toHaveBeenNthCalledWith(5, 2, entity2);
     expect(cb).toHaveBeenNthCalledWith(6, 3, entity2);
   });
+
   test("add fn system", () => {
     const world = new World();
     const entity = world.create();
@@ -230,6 +234,7 @@ describe("EntitySystemStep", () => {
       [expect.objectContaining({ _fn: c }), "update"],
     ]);
   });
+
   test('add "pre-" + "post-" systems', () => {
     const step = new EntitySystemStep("update");
     const a = jest.fn();
@@ -249,6 +254,7 @@ describe("EntitySystemStep", () => {
       [expect.objectContaining({ _fn: b }), "post-update"],
     ]);
   });
+
   test.todo("add a system before another system");
   test.todo("add a system after another system");
 });
