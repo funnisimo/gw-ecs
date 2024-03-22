@@ -16,7 +16,7 @@ describe("World", function () {
       this.callback = callback;
     }
 
-    processEntity(_world: World, entity: Entity): void {
+    runEntity(_world: World, entity: Entity): void {
       this.callback(entity);
     }
   }
@@ -126,13 +126,13 @@ describe("World", function () {
     }
 
     class DeleteSystem extends EntitySystem {
-      processEntity(world: World, entity: Entity): void {
+      runEntity(world: World, entity: Entity): void {
         world.queueDestroy(entity);
       }
     }
 
     class DeleteNowSystem extends EntitySystem {
-      processEntity(world: World, entity: Entity): void {
+      runEntity(world: World, entity: Entity): void {
         world.destroyNow(entity);
       }
     }

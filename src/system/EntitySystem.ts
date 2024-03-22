@@ -6,9 +6,9 @@ import { Level } from "../world/level.js";
 export class EntitySystem extends System {
   _aspect: Aspect;
 
-  constructor(aspect: Aspect, runIf?: RunIfFn) {
+  constructor(aspect?: Aspect, runIf?: RunIfFn) {
     super(runIf);
-    this._aspect = aspect;
+    this._aspect = aspect || new Aspect();
   }
 
   accept(entity: Entity): boolean {
@@ -17,16 +17,11 @@ export class EntitySystem extends System {
 
   run(level: Level, time: number, delta: number): void {
     for (let e of this._aspect.all(level, this.lastTick)) {
-      this.processEntity(level, e, time, delta);
+      this.runEntity(level, e, time, delta);
     }
   }
 
-  processEntity(
-    _level: Level,
-    _entity: Entity,
-    _time: number,
-    _delta: number
-  ): void {}
+  runEntity(level: Level, entity: Entity, time: number, delta: number): void {}
 }
 
 export type EntitySystemFn = (
@@ -44,12 +39,7 @@ export class EntityFunctionSystem extends EntitySystem {
     this._fn = fn;
   }
 
-  processEntity(
-    level: Level,
-    entity: Entity,
-    time: number,
-    delta: number
-  ): void {
+  runEntity(level: Level, entity: Entity, time: number, delta: number): void {
     this._fn(level, entity, time, delta);
   }
 }

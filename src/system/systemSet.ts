@@ -6,30 +6,38 @@ import { SystemOrder, SystemStep, EntitySystemStep } from "./systemStep";
 export interface AddStepOpts {
   before?: string;
   after?: string;
-  step?: SystemStep;
+}
+
+export function isAddStepOpts(x: any): x is AddStepOpts {
+  if (typeof x !== "object") return false;
+  return ["before", "after"].some((n) => n in x);
 }
 
 export class SystemSet extends System {
-  // name: string;
-  steps: SystemStep[];
+  name: string;
+  steps: (SystemStep | EntitySystemStep)[];
 
-  constructor(/* name: string, */ steps: string[] = ["update"]) {
+  constructor(name: string = "default", steps: string[] = ["update"]) {
     super();
-    // this.name = name;
+    this.name = name;
     this.steps = steps.map((n) => this._createStep(n));
   }
 
-  setSteps(steps: string[]) {
-    if (this.steps.some((step) => step.length > 0)) {
-      throw new Error(
-        "Cannot reset steps on a SystemSet that already has systems in it."
-      );
-    }
-    if (steps.some((name) => name.includes("-"))) {
-      throw new Error("SystemSets cannot have names that include a '-'.");
-    }
-    this.steps = steps.map((n) => this._createStep(n));
+  get length(): number {
+    return this.steps.length;
   }
+
+  // setSteps(steps: string[]) {
+  //   if (this.steps.some((step) => step.length > 0)) {
+  //     throw new Error(
+  //       "Cannot reset steps on a SystemSet that already has systems in it."
+  //     );
+  //   }
+  //   if (steps.some((name) => name.includes("-"))) {
+  //     throw new Error("SystemSets cannot have names that include a '-'.");
+  //   }
+  //   this.steps = steps.map((n) => this._createStep(n));
+  // }
 
   _createStep(name: string): SystemStep {
     return new SystemStep(name);
@@ -68,15 +76,22 @@ export class SystemSet extends System {
     return this;
   }
 
-  addStep(name: string, opts: AddStepOpts = {}): this {
-    const step = (opts.step || this._createStep(name)) as SystemStep;
-    step.name = name;
+  addStep(
+    name: string | SystemStep | EntitySystemStep,
+    opts: AddStepOpts = {}
+  ): this {
+    let step: SystemStep | EntitySystemStep;
+    if (typeof name === "string") {
+      if (name.includes("-")) throw new Error('step names cannot include "-".');
+      step = this._createStep(name);
+    } else {
+      step = name;
+    }
 
-    if (this.steps.find((step) => step.name === name)) {
+    if (this.steps.find((existing) => step.name === existing.name)) {
       throw new Error("Step already exists: " + name);
     }
 
-    if (name.includes("-")) throw new Error('step names cannot include "-".');
     if (opts.before) {
       const index = this.steps.findIndex((step) => step.name == opts.before);
       if (index < 0) {
@@ -112,7 +127,7 @@ export class SystemSet extends System {
     return this;
   }
 
-  getStep(name: string): SystemStep | undefined {
+  getStep(name: string): SystemStep | EntitySystemStep | undefined {
     return this.steps.find((s) => s.name == name);
   }
 
@@ -136,12 +151,6 @@ export class SystemSet extends System {
   }
 }
 
-export interface AddEntityStepOpts {
-  before?: string;
-  after?: string;
-  step?: EntitySystemStep;
-}
-
 export class EntitySystemSet extends SystemSet {
   // @ts-ignore
   declare steps: EntitySystemStep[];
@@ -152,13 +161,8 @@ export class EntitySystemSet extends SystemSet {
   }
 
   // @ts-ignore
-  addStep(name: string, opts: AddEntityStepOpts = {}): this {
-    const step = opts.step || this._createStep(name);
-    if (!(step instanceof EntitySystemStep)) {
-      throw new Error("Step must be EntitySystemStep");
-    }
-    opts.step = step;
-    return super.addStep(name, opts as AddStepOpts);
+  addStep(name: string | EntitySystemStep, opts: AddStepOpts = {}): this {
+    super.addStep(name as unknown as SystemStep, opts);
   }
 
   run(level: Level, time: number, delta: number): void {
@@ -167,15 +171,7 @@ export class EntitySystemSet extends SystemSet {
     }
   }
 
-  runEntity(
-    level: Level,
-    entity: Entity,
-    time: number,
-    delta: number
-  ): boolean {
-    return this.steps.reduce(
-      (out, step) => step.runEntity(level, entity, time, delta) || out,
-      false
-    );
+  runEntity(level: Level, entity: Entity, time: number, delta: number): void {
+    this.steps.forEach((step) => step.runEntity(level, entity, time, delta));
   }
 }

@@ -12,7 +12,7 @@ describe("entity system", () => {
       super(aspect);
     }
 
-    processEntity(): void {}
+    runEntity(): void {}
   }
 
   it("use its aspect to check whether an entity match or not", () => {

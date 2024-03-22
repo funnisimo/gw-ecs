@@ -22,7 +22,7 @@ class OpenSystem extends EntitySystem {
     super(new Aspect(Open, Pos));
   }
 
-  processEntity(world: World, entity: Entity): void {
+  runEntity(world: World, entity: Entity): void {
     const term = world.getUnique(Term).term;
     const posMgr = world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
@@ -69,7 +69,7 @@ class MoveSystem extends EntitySystem {
     super(new Aspect(Move, Pos));
   }
 
-  processEntity(world: World, entity: Entity): void {
+  runEntity(world: World, entity: Entity): void {
     const term = world.getUnique(Term).term;
     const posMgr = world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;

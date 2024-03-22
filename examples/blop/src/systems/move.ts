@@ -19,12 +19,7 @@ export class MoveSystem extends EntitySystem {
     return game.ready;
   }
 
-  processEntity(
-    level: Level,
-    entity: Entity,
-    time: number,
-    delta: number
-  ): void {
+  runEntity(level: Level, entity: Entity, time: number, delta: number): void {
     const game = level.getUnique(Game);
     const posMgr = level.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;

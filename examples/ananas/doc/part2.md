@@ -108,7 +108,7 @@ Our `doProcess` removes the `Move` component and uses it's `dirName` along with 
             super(new Aspect(Move, Pos));
         }
 
-        protected processEntity(entity: Entity): void {
+        runEntity(entity: Entity): void {
             const term = this.world.getUnique(Term).term;
             const posMgr = this.world.getUnique(PosManager);
             const pos = entity.fetch(Pos)!;
@@ -203,7 +203,7 @@ And we can add the new component and system. The system removes the `Open` compo
             super(new Aspect(Open, Pos));
         }
 
-        protected processEntity(entity: Entity): void {
+        runEntity(entity: Entity): void {
             const term = this.world.getUnique(Term).term;
             const posMgr = this.world.getUnique(PosManager);
             const pos = entity.fetch(Pos)!;

@@ -2,10 +2,10 @@ import { Level } from "../world/level.js";
 import { EntitySystem, EntitySystemFn } from "./entitySystem.js";
 import { System, SystemFn } from "./system.js";
 import {
-  AddEntityStepOpts,
   AddStepOpts,
   EntitySystemSet,
   SystemSet,
+  isAddStepOpts,
 } from "./systemSet.js";
 import { SystemStep, EntitySystemStep } from "./systemStep.js";
 
@@ -14,25 +14,25 @@ export class SystemManager {
 
   constructor() {
     this._sets = new Map();
-    this._sets.set("default", new SystemSet());
+    this._sets.set("default", new SystemSet("default"));
   }
 
+  addSet(set: SystemSet | EntitySystemSet): SystemSet;
+  addSet(name: string, steps?: string[]): SystemSet;
   addSet(
-    name: string,
-    set?: string[] | SystemSet | EntitySystemSet
-  ): SystemManager {
+    name: string | SystemSet | EntitySystemSet,
+    steps?: string[]
+  ): SystemSet | EntitySystemSet {
     let newSet: SystemSet | EntitySystemSet;
-    if (!set) {
-      newSet = new SystemSet();
-    } else if (Array.isArray(set)) {
-      newSet = new SystemSet(set);
+    if (typeof name === "string") {
+      newSet = new SystemSet(name, steps);
     } else {
-      newSet = set;
+      newSet = name;
     }
-    if (!this._sets.has(name)) {
-      this._sets.set(name, newSet);
+    if (!this._sets.has(newSet.name)) {
+      this._sets.set(newSet.name, newSet);
     }
-    return this;
+    return newSet;
   }
 
   getSet(name: string = "default"): SystemSet | EntitySystemSet | undefined {
@@ -40,49 +40,46 @@ export class SystemManager {
   }
 
   addStep(
-    step: string,
-    opts?: AddStepOpts | AddEntityStepOpts | SystemStep | EntitySystemStep
+    step: string | SystemStep | EntitySystemStep,
+    opts?: AddStepOpts
   ): SystemManager;
   addStep(
     set: string,
-    step: string,
-    opts?: AddStepOpts | AddEntityStepOpts | SystemStep | EntitySystemStep
+    step: string | SystemStep | EntitySystemStep,
+    opts?: AddStepOpts
   ): SystemManager;
   addStep(
     ...args:
-      | [
-          string,
-          (AddStepOpts | AddEntityStepOpts | SystemStep | EntitySystemStep)?
-        ]
-      | [
-          string,
-          string,
-          (AddStepOpts | AddEntityStepOpts | SystemStep | EntitySystemStep)?
-        ]
+      | [string | SystemStep | EntitySystemStep, AddStepOpts?]
+      | [string, string | SystemStep | EntitySystemStep, AddStepOpts?]
   ): SystemManager {
+    let set: SystemSet | EntitySystemSet;
+    let step: string | SystemStep | EntitySystemStep;
+    let opts: AddStepOpts = {};
     if (args.length == 1) {
-      args = ["default", args[0], {}];
-    } else if (typeof args[1] !== "string") {
-      args = ["default", args[0], args[1]];
+      set = this._sets.get("default")!;
+      if (!set) throw new Error("'default' set not found.");
+      step = args[0];
+    } else if (args.length == 2) {
+      if (isAddStepOpts(args[1])) {
+        set = this._sets.get("default")!;
+        if (!set) throw new Error("'default' set not found.");
+        step = args[0];
+        opts = args[1];
+      } else {
+        set = this._sets.get(args[0] as string)!;
+        if (!set) throw new Error(`'${args[0]}' set not found.`);
+        step = args[1]!;
+      }
+    } else if (args.length == 3) {
+      set = this._sets.get(args[0] as string)!;
+      step = args[1];
+      opts = args[2]!;
+    } else {
+      throw new Error("Too many arguments.");
     }
 
-    let [setName, stepName, opts] = args as [
-      string,
-      string,
-      (AddStepOpts | AddEntityStepOpts | SystemStep | EntitySystemStep)?
-    ];
-    const set = this._sets.get(setName);
-    if (!set) throw new Error("Failed to find System Set: " + setName);
-    let useOpts: AddStepOpts | AddEntityStepOpts = {};
-    if (opts instanceof SystemStep || opts instanceof EntitySystemStep) {
-      // @ts-ignore
-      useOpts = { step: opts };
-    } else if (opts) {
-      useOpts = opts;
-    }
-    // @ts-ignore
-    set.addStep(stepName, useOpts);
-
+    set.addStep(step as string, opts);
     return this;
   }
 

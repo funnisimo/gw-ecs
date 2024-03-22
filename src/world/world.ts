@@ -42,13 +42,13 @@ export class World extends Level {
   }
 
   addSystemSet(
-    name: string,
-    steps?: string[] | SystemSet | EntitySystemSet,
-    init?: (set: SystemSet | EntitySystemSet) => void
+    name: string | SystemSet | EntitySystemSet,
+    init?: (set: SystemSet) => void
   ): this {
-    this._systems.addSet(name, steps);
+    // @ts-ignore
+    const set = this._systems.addSet(name);
     if (init) {
-      init(this._systems.getSet(name)!);
+      init(set);
     }
     return this;
   }

@@ -15,7 +15,7 @@ describe("interval entity system", () => {
       this.fakeCallback = callback;
     }
 
-    processEntity(_world: World, entity: Entity): void {
+    runEntity(_world: World, entity: Entity): void {
       this.fakeCallback(entity);
     }
   }
@@ -28,7 +28,7 @@ describe("interval entity system", () => {
       this.fakeCallback = callback;
     }
 
-    processEntity(_world: World, entity: Entity): void {
+    runEntity(_world: World, entity: Entity): void {
       this.fakeCallback(entity);
     }
   }
@@ -191,7 +191,7 @@ describe("delayed entity system", () => {
       this.fakeCallback = callback;
     }
 
-    public processEntity(_world: World, entity: Entity): void {
+    public runEntity(_world: World, entity: Entity): void {
       this.fakeCallback(entity);
     }
   }

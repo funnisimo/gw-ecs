@@ -39,12 +39,7 @@ class LogSystem extends EntitySystem {
     this.name = name;
   }
 
-  processEntity(
-    world: World,
-    entity: Entity,
-    time: number,
-    delta: number
-  ): void {
+  runEntity(world: World, entity: Entity, time: number, delta: number): void {
     const name = entity.fetch(Name);
     const nameText = name ? name.name : "unknown";
     const msg = `${this.name} - ${nameText}`;
@@ -58,12 +53,7 @@ class ScheduleEntitySystem extends EntitySystem {
     super(new Aspect());
   }
 
-  processEntity(
-    world: World,
-    entity: Entity,
-    time: number,
-    delta: number
-  ): void {
+  runEntity(world: World, entity: Entity, time: number, delta: number): void {
     const gameTurn = world.getUnique(GameTurn);
     const actor = entity.fetch(Actor)!;
     gameTurn.schedule.add(entity, actor.actTime);

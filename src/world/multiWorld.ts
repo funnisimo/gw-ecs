@@ -6,7 +6,11 @@ import { AnyQueue, Queue } from "./queue.js";
 import { SystemManager } from "../system/manager.js";
 import { System, SystemFn } from "../system/system.js";
 import { Level } from "./level.js";
-import { AddStepOpts } from "../system/systemSet.js";
+import {
+  AddStepOpts,
+  EntitySystemSet,
+  SystemSet,
+} from "../system/systemSet.js";
 
 export interface Global<T> extends Function {
   new (...args: any[]): T;
@@ -105,8 +109,9 @@ export class MultiWorld {
     return this;
   }
 
-  addSystemSet(name: string, steps?: string[]): this {
-    this._systems.addSet(name, steps);
+  addSystemSet(name: string | SystemSet | EntitySystemSet): this {
+    // @ts-ignore
+    this._systems.addSet(name);
     return this;
   }
 

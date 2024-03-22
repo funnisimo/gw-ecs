@@ -7,7 +7,7 @@ import {
   EntitySystemFn,
 } from "./entitySystem";
 
-export type SystemOrder = "pre" | "post" | "normal";
+export type SystemOrder = "pre" | "normal" | "post";
 
 export interface SystemStep {
   name: string;
@@ -23,21 +23,21 @@ export interface SystemStep {
 
 export class SystemStep extends System {
   name: string;
-  preSystems: System[];
-  systems: System[];
-  postSystems: System[];
+  _preSystems: System[];
+  _systems: System[];
+  _postSystems: System[];
 
-  constructor(name: string = "update") {
+  constructor(name: string) {
     super();
     this.name = name;
-    this.systems = [];
-    this.preSystems = [];
-    this.postSystems = [];
+    this._systems = [];
+    this._preSystems = [];
+    this._postSystems = [];
   }
 
   get length(): number {
     return (
-      this.preSystems.length + this.systems.length + this.postSystems.length
+      this._preSystems.length + this._systems.length + this._postSystems.length
     );
   }
 
@@ -47,25 +47,27 @@ export class SystemStep extends System {
     }
     sys.setEnabled(enabled);
     if (order === "pre") {
-      this.preSystems.push(sys);
+      this._preSystems.push(sys);
     } else if (order === "post") {
-      this.postSystems.push(sys);
+      this._postSystems.push(sys);
     } else {
-      this.systems.push(sys);
+      this._systems.push(sys);
     }
   }
 
   start(level: Level) {
     super.start(level);
-    this.preSystems.forEach((s) => s.start(level));
-    this.systems.forEach((s) => s.start(level));
-    this.postSystems.forEach((s) => s.start(level));
+    this._preSystems.forEach((s) => s.start(level));
+    this._systems.forEach((s) => s.start(level));
+    this._postSystems.forEach((s) => s.start(level));
   }
 
   run(level: Level, time: number, delta: number): void {
-    this.preSystems.forEach((sys) => this._runSystem(level, sys, time, delta));
-    this.systems.forEach((sys) => this._runSystem(level, sys, time, delta));
-    this.postSystems.forEach((sys) => this._runSystem(level, sys, time, delta));
+    this._preSystems.forEach((sys) => this._runSystem(level, sys, time, delta));
+    this._systems.forEach((sys) => this._runSystem(level, sys, time, delta));
+    this._postSystems.forEach((sys) =>
+      this._runSystem(level, sys, time, delta)
+    );
   }
 
   _runSystem(level: Level, sys: System, time: number, delta: number): boolean {
@@ -79,34 +81,38 @@ export class SystemStep extends System {
   }
 
   rebase(zeroTime: number) {
-    this.preSystems.forEach((s) => s.rebase(zeroTime));
-    this.systems.forEach((s) => s.rebase(zeroTime));
-    this.postSystems.forEach((s) => s.rebase(zeroTime));
+    this._preSystems.forEach((s) => s.rebase(zeroTime));
+    this._systems.forEach((s) => s.rebase(zeroTime));
+    this._postSystems.forEach((s) => s.rebase(zeroTime));
   }
 
   forEach(fn: (sys: System, stepName: string) => void) {
-    this.preSystems.forEach((s) => fn(s, "pre-" + this.name));
-    this.systems.forEach((s) => fn(s, this.name));
-    this.postSystems.forEach((s) => fn(s, "post-" + this.name));
+    this._preSystems.forEach((s) => fn(s, "pre-" + this.name));
+    this._systems.forEach((s) => fn(s, this.name));
+    this._postSystems.forEach((s) => fn(s, "post-" + this.name));
   }
 }
 
 export class EntitySystemStep extends SystemStep {
-  declare preSystems: EntitySystem[];
-  declare systems: EntitySystem[];
-  declare postSystems: EntitySystem[];
+  declare _preSystems: EntitySystem[];
+  declare _systems: EntitySystem[];
+  declare _postSystems: EntitySystem[];
 
   // TODO - Add optional Aspect?
 
   // @ts-ignore
-  addSystem(sys: EntitySystem | EntitySystemFn, order?: SystemOrder) {
+  addSystem(
+    sys: EntitySystem | EntitySystemFn,
+    order?: SystemOrder,
+    enabled = true
+  ) {
     if (typeof sys === "function") {
       sys = new EntityFunctionSystem(sys);
     }
     if (!(sys instanceof EntitySystem)) {
       throw new Error("Must be EntitySystem");
     }
-    super.addSystem(sys, order);
+    super.addSystem(sys, order, enabled);
   }
 
   run(level: Level, time: number, delta: number): void {
@@ -115,23 +121,16 @@ export class EntitySystemStep extends SystemStep {
     }
   }
 
-  runEntity(
-    level: Level,
-    entity: Entity,
-    time: number,
-    delta: number
-  ): boolean {
-    let out = false;
-    out = this.preSystems.reduce((out, sys) => {
-      return this._runEntitySystem(level, sys, entity, time, delta) || out;
-    }, out);
-    out = this.systems.reduce((out, sys) => {
-      return this._runEntitySystem(level, sys, entity, time, delta) || out;
-    }, out);
-    out = this.postSystems.reduce((out, sys) => {
-      return this._runEntitySystem(level, sys, entity, time, delta) || out;
-    }, out);
-    return out;
+  runEntity(level: Level, entity: Entity, time: number, delta: number): void {
+    this._preSystems.forEach((sys) =>
+      this._runEntitySystem(level, sys, entity, time, delta)
+    );
+    this._systems.forEach((sys) =>
+      this._runEntitySystem(level, sys, entity, time, delta)
+    );
+    this._postSystems.forEach((sys) =>
+      this._runEntitySystem(level, sys, entity, time, delta)
+    );
   }
 
   _runEntitySystem(
@@ -145,7 +144,7 @@ export class EntitySystemStep extends SystemStep {
       return false;
     }
     if (!sys.accept(entity)) return false;
-    sys.processEntity(level, entity, time, delta);
+    sys.runEntity(level, entity, time, delta);
     sys.lastTick = level.currentTick();
     level.maintain();
     return true;

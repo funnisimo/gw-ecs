@@ -97,7 +97,7 @@ describe("manager", () => {
 
   describe("SystemSet", () => {
     test("add a system", () => {
-      const set = new SystemSet();
+      const set = new SystemSet("default");
       const a = jest.fn();
       const b = jest.fn();
       const c = jest.fn();
@@ -229,11 +229,17 @@ describe("manager", () => {
       manager.addStep("start", { before: "update" });
       manager.addStep("finish", { after: "update" });
 
+      const defaultSet = manager.getSet()!;
+      expect(defaultSet.steps.map((s) => s.name)).toEqual([
+        "start",
+        "update",
+        "finish",
+      ]);
+
       manager.addSystem("pre-finish", new TestSystem("a"));
       manager.addSystem("update", new TestSystem("b"));
       manager.addSystem("post-start", new TestSystem("c"));
 
-      const defaultSet = manager.getSet()!;
       expect(defaultSet.steps).toHaveLength(3);
 
       const world = new World().setUnique(new RunOrder());
@@ -299,25 +305,26 @@ describe("manager", () => {
 
     test("add entity step", () => {
       const mgr = new SystemManager();
-      const step = new EntitySystemStep();
-      mgr.addStep("turn", { step });
-      expect(step.systems).toHaveLength(0);
+      const step = new EntitySystemStep("turn");
+      mgr.addStep(step);
+      expect(step).toHaveLength(0);
+
       mgr.addSystem("turn", new TestEntitySystem("b"));
-      expect(step.systems).toHaveLength(1);
+      expect(step).toHaveLength(1);
 
       expect(() => mgr.addSystem("turn", new TestSystem("a"))).toThrow(
         "Must be EntitySystem"
       );
       mgr.addSystem(new TestSystem("c")); // update step
-      expect(step.systems).toHaveLength(1); // not added to this step
+      expect(step).toHaveLength(1); // not added to this step
 
-      mgr.addStep("calc", new EntitySystemStep()); // add another
+      mgr.addStep(new EntitySystemStep("calc")); // add another
     });
 
     test("add entity set", () => {
       const mgr = new SystemManager();
-      const set = new EntitySystemSet(["a", "b", "c"]);
-      mgr.addSet("turn", set);
+      const set = new EntitySystemSet("turn", ["a", "b", "c"]);
+      mgr.addSet(set);
       expect(set.steps).toHaveLength(3);
       mgr.addStep("turn", "d");
       expect(set.steps).toHaveLength(4);

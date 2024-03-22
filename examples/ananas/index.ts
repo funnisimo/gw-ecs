@@ -54,7 +54,7 @@ class OpenSystem extends EntityTurnSystem {
     super(new Aspect(Open, Pos));
   }
 
-  processEntity(level: Level, entity: Entity): void {
+  runEntity(level: Level, entity: Entity): void {
     const term = level.getUnique(Term).term;
     const posMgr = level.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
@@ -101,7 +101,7 @@ class MoveSystem extends EntityTurnSystem {
     super(new Aspect(Move, Pos));
   }
 
-  processEntity(level: Level, entity: Entity): void {
+  runEntity(level: Level, entity: Entity): void {
     const term = level.getUnique(Term).term;
     const posMgr = level.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
@@ -143,7 +143,7 @@ class PedroSystem extends EntityTurnSystem {
     super(new Aspect(Pedro));
   }
 
-  processEntity(level: Level, entity: Entity): void {
+  runEntity(level: Level, entity: Entity): void {
     const pedro = entity.update(Pedro)!;
     const pedroPos = entity.fetch(Pos)!;
 
@@ -259,7 +259,7 @@ class FovSystem extends EntitySystem {
     super(new Aspect(FOV).updated(Pos));
   }
 
-  processEntity(level: Level, entity: Entity): void {
+  runEntity(level: Level, entity: Entity): void {
     const fov = entity.update(FOV)!;
     const pos = entity.fetch(Pos)!;
 

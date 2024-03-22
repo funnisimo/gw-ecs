@@ -7,7 +7,7 @@
     "outDir": "dist",
     "target": "esnext",
     "noUnusedLocals": true,
-    "noUnusedParameters": true, // TODO - Make this false
+    "noUnusedParameters": false, // causes too many errors with super/subclasses
     "noEmitOnError": true,
     "declaration": true,
     "moduleResolution": "node",
