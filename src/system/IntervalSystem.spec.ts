@@ -207,7 +207,7 @@ describe("delayed system", () => {
 
       world.addTime(15).runSystems();
       expect(callback).toHaveBeenCalled();
-      expect(system.isEnabled()).toBeFalse();
+      expect(system.shouldRun(world, 0, 0)).toBeFalse();
     });
   });
 });
