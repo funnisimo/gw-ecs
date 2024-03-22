@@ -235,6 +235,48 @@ describe("SystemSet", () => {
     expect(cb).toHaveBeenNthCalledWith(11, 6, entity);
     expect(cb).toHaveBeenNthCalledWith(12, 6, entity2);
   });
+
+  test("add a system", () => {
+    const set = new SystemSet("default");
+    const a = jest.fn();
+    const b = jest.fn();
+    const c = jest.fn();
+
+    set.addSystem(a);
+    set.addSystem("update", b);
+    set.addSystem(c);
+
+    expect(set.steps[0].name).toEqual("update");
+    let all: [System, string][] = [];
+    set.forEach((sys, step) => all.push([sys, step]));
+    expect(all).toEqual([
+      [expect.objectContaining({ _fn: a }), "update"],
+      [expect.objectContaining({ _fn: b }), "update"],
+      [expect.objectContaining({ _fn: c }), "update"],
+    ]);
+  });
+  test('add "pre-" + "post-" systems', () => {
+    const set = new SystemSet();
+    const a = jest.fn();
+    const b = jest.fn();
+    const c = jest.fn();
+
+    set.addSystem("update", a);
+    set.addSystem("post-update", b);
+    set.addSystem("pre-update", c);
+
+    expect(set.steps[0].name).toEqual("update");
+    let all: [System, string][] = [];
+    set.forEach((sys, step) => all.push([sys, step]));
+    expect(all).toEqual([
+      [expect.objectContaining({ _fn: c }), "pre-update"],
+      [expect.objectContaining({ _fn: a }), "update"],
+      [expect.objectContaining({ _fn: b }), "post-update"],
+    ]);
+  });
+
+  test.todo("add a system before another system");
+  test.todo("add a system after another system");
 });
 
 describe("EntitySystemSet", () => {
@@ -362,4 +404,74 @@ describe("EntitySystemSet", () => {
     set.run(world, 0, 0);
     expect(cb).toHaveBeenCalledTimes(2); // 1 entity * 2 systems
   });
+
+  test("add a system", () => {
+    const set = new EntitySystemSet();
+    const a = jest.fn();
+    const b = jest.fn();
+    const c = jest.fn();
+
+    set.addSystem(a);
+    set.addSystem("update", b);
+    set.addSystem(c);
+
+    expect(set.steps[0].name).toEqual("update");
+    let all: [System, string][] = [];
+    set.forEach((sys, step) => all.push([sys, step]));
+    expect(all).toEqual([
+      [expect.objectContaining({ _fn: a }), "update"],
+      [expect.objectContaining({ _fn: b }), "update"],
+      [expect.objectContaining({ _fn: c }), "update"],
+    ]);
+  });
+  test('add "pre-" + "post-" systems', () => {
+    const set = new EntitySystemSet();
+    const a = jest.fn();
+    const b = jest.fn();
+    const c = jest.fn();
+
+    set.addSystem("update", a);
+    set.addSystem("post-update", b);
+    set.addSystem("pre-update", c);
+
+    expect(set.steps[0].name).toEqual("update");
+    let all: [System, string][] = [];
+    set.forEach((sys, step) => all.push([sys, step]));
+    expect(all).toEqual([
+      [expect.objectContaining({ _fn: c }), "pre-update"],
+      [expect.objectContaining({ _fn: a }), "update"],
+      [expect.objectContaining({ _fn: b }), "post-update"],
+    ]);
+  });
+
+  test.todo("add a system before another system");
+  test.todo("add a system after another system");
+});
+
+describe("QueueSystemSet", () => {
+  test.todo("default");
+
+  test.todo("empty");
+
+  test.todo("create with steps");
+
+  test.todo("addStep - push");
+
+  test.todo("addStep - duplicate");
+
+  test.todo("addStep - before");
+
+  test.todo("addStep - before missing");
+
+  test.todo("addStep - after");
+
+  test.todo("addStep - after missing");
+
+  test.todo("addSystem - default step");
+
+  test.todo("addSystem - with step");
+
+  test.todo("addSystem - missing step");
+
+  test.todo("addSystem - fn");
 });
