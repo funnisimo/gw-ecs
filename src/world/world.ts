@@ -188,7 +188,7 @@ export class World {
 
   addSystemSet(
     name: string | SystemSet | EntitySystemSet,
-    init?: (set: SystemSet) => void
+    init?: (set: SystemSet | EntitySystemSet) => void
   ): this {
     // @ts-ignore
     const set = this._systems.addSet(name);
