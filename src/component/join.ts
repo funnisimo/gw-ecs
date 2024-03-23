@@ -7,5 +7,5 @@ export function join(
   ...comps: AnyComponent[]
 ): Iterable<[Entity, AnyComponent[]]> {
   const aspect = new Aspect().with(...comps);
-  return aspect.allEntries(world);
+  return aspect.activeEntries(world);
 }

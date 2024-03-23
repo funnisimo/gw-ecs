@@ -74,6 +74,7 @@ class WorldComponentSource implements ComponentSource {
 }
 
 export class World {
+  _globals: Resources;
   _systems: SystemManager;
   _level: Level;
   _entities: Entities;
@@ -84,8 +85,9 @@ export class World {
   _time: number;
   _currentTick: number;
 
-  constructor() {
+  constructor(globals?: Resources) {
     this._level = new Level("world");
+    this._globals = globals || new Resources();
     this._systems = new SystemManager();
     this._entities = new Entities(new WorldComponentSource(this));
     this._entities.notify(new WorldEntityWatcher(this));
@@ -153,6 +155,32 @@ export class World {
   start(): this {
     this._systems.start(this);
     return this;
+  }
+
+  ////////////////////////
+  // GLOBALS
+
+  setGlobal<T>(
+    val: T & WorldInit,
+    initFn?: (global: T, world: World) => void
+  ): this {
+    this._globals.set(val);
+    const worldInit = val["worldInit"];
+    if (worldInit) {
+      worldInit.call(val, this);
+    }
+    if (initFn) {
+      initFn(val, this);
+    }
+    return this;
+  }
+
+  getGlobal<T>(comp: Component<T>): T {
+    return this._globals.get(comp);
+  }
+
+  removeGlobal<T>(comp: Component<T>) {
+    this._globals.delete(comp);
   }
 
   /////////////////////////////////////

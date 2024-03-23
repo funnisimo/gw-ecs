@@ -1,9 +1,9 @@
-import { World, WorldInit } from "./world.js";
+import { World } from "./world.js";
 import { AnyComponent, Component } from "../component/component.js";
 import { AnyCompStoreCtr, SetStore } from "../component/store.js";
 import { AnyQueue, Queue } from "./queue.js";
 import { Level } from "./level.js";
-import { AnyResourceCtr, Resources } from "./resources.js";
+import { AnyResourceCtr } from "./resources.js";
 import { Entity } from "../entity/entity.js";
 
 // export interface Global<T> extends Function {
@@ -116,24 +116,21 @@ class Levels {
 }
 
 export class MultiWorld extends World {
-  _globals: Resources;
   _registeredComponents: Map<AnyComponent, AnyCompStoreCtr>;
   _registeredQueues: Set<AnyQueue>;
   _registeredUniques: Set<AnyResourceCtr>;
   _levels: Levels;
-  _updateLevelSet: string;
+  _updateLevelAfterSet: string;
 
   constructor() {
     super();
-    this._globals = new Resources();
     this._registeredComponents = new Map();
     this._registeredQueues = new Set();
     this._registeredUniques = new Set();
     this._levels = new Levels();
     this._levels.set(this._level); // add 'default' level to levels
-
     this._globals.set(this._levels);
-    this._updateLevelSet = "default";
+    this._updateLevelAfterSet = "default";
   }
 
   init(fn: (world: MultiWorld) => void): this {
@@ -141,40 +138,14 @@ export class MultiWorld extends World {
     return this;
   }
 
-  updateLevelsAfter(set: string): this {
+  updateLevelAfterSet(set: string): this {
     if (!this._systems.has(set)) {
       throw new Error(
         "Trying to update active level after non-existing system set: " + set
       );
     }
-    this._updateLevelSet = set;
+    this._updateLevelAfterSet = set;
     return this;
-  }
-
-  ////////////////////////
-  // GLOBALS
-
-  setGlobal<T>(
-    val: T & WorldInit,
-    initFn?: (global: T, world: World) => void
-  ): this {
-    this._globals.set(val);
-    const worldInit = val["worldInit"];
-    if (worldInit) {
-      worldInit.call(val, this);
-    }
-    if (initFn) {
-      initFn(val, this);
-    }
-    return this;
-  }
-
-  getGlobal<T>(comp: Component<T>): T {
-    return this._globals.get(comp);
-  }
-
-  removeGlobal<T>(comp: Component<T>) {
-    this._globals.delete(comp);
   }
 
   ///////////////////////////////////
@@ -189,7 +160,7 @@ export class MultiWorld extends World {
 
     // this.maintain();
 
-    if (set === this._updateLevelSet && this._levels._updateActive()) {
+    if (set === this._updateLevelAfterSet && this._levels._updateActive()) {
       this._level = this._levels.active;
     }
   }
