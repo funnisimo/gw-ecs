@@ -2,7 +2,7 @@ import type { Entity } from "gw-ecs/entity/entity";
 import { EntitySystem } from "gw-ecs/system/entitySystem";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Aspect } from "gw-ecs/world";
-import type { Level } from "gw-ecs/world/level";
+import type { Level } from "gw-ecs/world/world";
 import { Move } from "../comps/move";
 import { COLLIDER_ASPECT, CollisionManager } from "gw-ecs/common/collisions";
 import { Game } from "../uniques";
@@ -14,14 +14,14 @@ export class MoveSystem extends EntitySystem {
     super(new Aspect(Move, Pos));
   }
 
-  shouldRun(level: Level, _time: number, _delta: number): boolean {
-    const game = level.getUnique(Game);
+  shouldRun(world: World, _time: number, _delta: number): boolean {
+    const game = world.getUnique(Game);
     return game.ready;
   }
 
-  runEntity(level: Level, entity: Entity, time: number, delta: number): void {
-    const game = level.getUnique(Game);
-    const posMgr = level.getUnique(PosManager);
+  runEntity(world: World, entity: Entity, time: number, delta: number): void {
+    const game = world.getUnique(Game);
+    const posMgr = world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
 
     const dxy = entity.remove(Move)!.dir;
@@ -34,7 +34,7 @@ export class MoveSystem extends EntitySystem {
 
       const others = posMgr.getAt(newX, newY, COLLIDER_ASPECT);
       if (others.length > 0) {
-        if (level.getUnique(CollisionManager).collide(entity, others)) {
+        if (world.getUnique(CollisionManager).collide(entity, others)) {
           game.changed = true; // Force redraw
           return;
         }
@@ -43,7 +43,9 @@ export class MoveSystem extends EntitySystem {
       posMgr.set(entity, newX, newY);
       game.changed = true; // Force redraw
       // need fov update
-      level.push(new GameEvent(entity, "move", { dir: dxy, pos: pos.clone() }));
+      world.pushQueue(
+        new GameEvent(entity, "move", { dir: dxy, pos: pos.clone() })
+      );
 
       // check for pickups
 

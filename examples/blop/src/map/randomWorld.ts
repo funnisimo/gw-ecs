@@ -88,4 +88,4 @@ function generatePatches(mgr: PosManager) {
   }
 }
 
-//# sourceURL=webpack://7drl-2021-blob-genes/./src/state/level/makeRandomWorld.ts?
+//# sourceURL=webpack://7drl-2021-blob-genes/./src/state/world/makeRandomWorld.ts?

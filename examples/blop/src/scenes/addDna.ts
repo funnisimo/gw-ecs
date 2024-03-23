@@ -9,7 +9,7 @@ import { DNA } from "../comps/dna";
 import { coloredName } from "../ui/log";
 
 interface MyData {
-  level: Level;
+  world: World;
   entity: Entity;
   chromosome: Entity;
   dna: DNA;
@@ -21,11 +21,11 @@ interface MyData {
 export const addDna: SceneCreateOpts = {
   start(
     this: Scene,
-    opts: { level: Level; entity: Entity; chromosome: Entity }
+    opts: { world: World; entity: Entity; chromosome: Entity }
   ) {
     const dna = opts.entity.fetch(DNA)!;
 
-    this.data.level = opts.level;
+    this.data.world = opts.world;
     this.data.entity = opts.entity;
     this.data.chromosome = opts.chromosome;
     this.data.dna = dna;
@@ -45,7 +45,7 @@ export const addDna: SceneCreateOpts = {
         } else {
           this.data.dna.effects[this.data.index] = this.data.effect;
         }
-        this.data.level.destroyNow(this.data.chromosome);
+        this.data.world.destroyNow(this.data.chromosome);
       }
       this.stop();
     } else if (ev.dir) {

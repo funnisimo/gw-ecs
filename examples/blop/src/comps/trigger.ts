@@ -23,7 +23,7 @@ export class Trigger {
     this.description = description;
   }
 
-  matches(level: Level, event: GameEvent, owner: Entity): boolean {
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
     return false;
   }
 }
@@ -35,7 +35,7 @@ export class WaitTrigger extends Trigger {
     super("OnWait", "each time its owner waits.");
   }
 
-  matches(level: Level, event: GameEvent, owner: Entity): boolean {
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
     return event.type === "wait" && owner === event.entity;
   }
 }
@@ -45,7 +45,7 @@ export class MoveTrigger extends Trigger {
     super("OnMove", "each time its owner moves.");
   }
 
-  matches(level: Level, event: GameEvent, owner: Entity): boolean {
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
     return event.type === "move" && owner === event.entity;
   }
 }
@@ -58,7 +58,7 @@ export class MoveDirTrigger extends Trigger {
     this.dir = NAMED_DIRS[dir];
   }
 
-  matches(level: Level, event: GameEvent, owner: Entity): boolean {
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
     return (
       event.type === "move" &&
       owner === event.entity &&
@@ -76,10 +76,10 @@ export class ChangeTileTypeTrigger extends Trigger {
     );
   }
 
-  matches(level: Level, event: GameEvent, owner: Entity): boolean {
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
     if (event.type !== "move" || owner !== event.entity) return false;
     const pos = owner.fetch(Pos)!;
-    const posMgr = level.getUnique(PosManager);
+    const posMgr = world.getUnique(PosManager);
 
     const lastTileEntity = posMgr.firstAt(pos.lastX, pos.lastY, TILE_ASPECT);
     const nowTileEntity = posMgr.firstAt(pos.x, pos.y, TILE_ASPECT);
@@ -104,10 +104,10 @@ export class StepOnTrigger extends Trigger {
     this.tile = tile;
   }
 
-  matches(level: Level, event: GameEvent, owner: Entity): boolean {
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
     if (event.type !== "move" || owner !== event.entity) return false;
     const pos = owner.fetch(Pos)!;
-    const posMgr = level.getUnique(PosManager);
+    const posMgr = world.getUnique(PosManager);
 
     const nowTileEntity = posMgr.firstAt(pos.x, pos.y, TILE_ASPECT);
     return !!nowTileEntity && nowTileEntity.fetch(Tile) === this.tile;
@@ -125,7 +125,7 @@ export class EveryXTrigger extends Trigger {
     this.count = 0;
   }
 
-  matches(level: Level, event: GameEvent, owner: Entity): boolean {
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
     if (event.type === "turn" && event.entity === owner) {
       this.count += 1;
       if (this.count >= this.x) {
@@ -155,18 +155,18 @@ export const triggerClasses = [
   ChangeTileTypeTrigger,
 ];
 
-export function createRandomTrigger(level: Level, rng?: Random): Entity {
+export function createRandomTrigger(world: World, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(triggerClasses);
   const trigger = new cls();
-  return level.create(TriggerSprite, trigger, new Pickup(pickupTrigger));
+  return world.create(TriggerSprite, trigger, new Pickup(pickupTrigger));
 }
 
-export function pickupTrigger(level: Level, actor: Entity, item: Entity) {
+export function pickupTrigger(world: World, actor: Entity, item: Entity) {
   if (!item.has(Trigger)) return;
   if (!actor.has(Hero)) return;
 
-  const app = level.getUnique(App);
-  app.show("add_dna", { level, entity: actor, chromosome: item });
+  const app = world.getUnique(App);
+  app.show("add_dna", { world, entity: actor, chromosome: item });
   // TODO - run 'add_to_dna' scene
 }

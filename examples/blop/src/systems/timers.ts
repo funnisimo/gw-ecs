@@ -1,5 +1,5 @@
 import { System } from "gw-ecs/system/system";
-import type { Level } from "gw-ecs/world";
+import type { World } from "gw-ecs/world";
 import { Timers } from "gw-utils/app";
 import { Game } from "../uniques";
 
@@ -8,11 +8,11 @@ export class TimerSystem extends System {
     super();
   }
 
-  run(level: Level, time: number, delta: number): void {
-    const timers = level.getUnique(Timers);
+  run(world: World, time: number, delta: number): void {
+    const timers = world.getUnique(Timers);
     timers.update(delta);
 
-    const game = level.getUnique(Game);
+    const game = world.getUnique(Game);
     game.ready = timers.length == 0;
   }
 }

@@ -1,6 +1,6 @@
 import terminal from "terminal-kit";
 import * as ROT from "rot-js";
-import { Aspect, Level, World } from "gw-ecs/world";
+import { Aspect, World } from "gw-ecs/world";
 import { EntitySystem, System } from "gw-ecs/system";
 import { Pos, PosManager } from "gw-ecs/common";
 import { Entity } from "gw-ecs/entity";
@@ -33,14 +33,14 @@ class GameInfo {
 }
 
 abstract class EntityTurnSystem extends EntitySystem {
-  shouldRun(level: Level): boolean {
-    return super.isEnabled() && level.getUnique(GameInfo).takeTurn;
+  shouldRun(world: World): boolean {
+    return super.isEnabled() && world.getUnique(GameInfo).takeTurn;
   }
 }
 
 class TurnOverSystem extends System {
-  run(level: Level): void {
-    const game = level.getUnique(GameInfo);
+  run(world: World): void {
+    const game = world.getUnique(GameInfo);
     game.takeTurn = false;
   }
 }
@@ -54,9 +54,9 @@ class OpenSystem extends EntityTurnSystem {
     super(new Aspect(Open, Pos));
   }
 
-  runEntity(level: Level, entity: Entity): void {
-    const term = level.getUnique(Term).term;
-    const posMgr = level.getUnique(PosManager);
+  runEntity(world: World, entity: Entity): void {
+    const term = world.getUnique(Term).term;
+    const posMgr = world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
 
     entity.remove(Open);
@@ -101,9 +101,9 @@ class MoveSystem extends EntityTurnSystem {
     super(new Aspect(Move, Pos));
   }
 
-  runEntity(level: Level, entity: Entity): void {
-    const term = level.getUnique(Term).term;
-    const posMgr = level.getUnique(PosManager);
+  runEntity(world: World, entity: Entity): void {
+    const term = world.getUnique(Term).term;
+    const posMgr = world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
 
     const dxy = entity.remove(Move)!.dir;
@@ -112,7 +112,7 @@ class MoveSystem extends EntityTurnSystem {
 
     const others = posMgr.getAt(newX, newY, COLLIDER_ASPECT);
     if (others.length > 0) {
-      if (level.getUnique(CollisionManager).collide(entity, others)) {
+      if (world.getUnique(CollisionManager).collide(entity, others)) {
         return;
       }
     }
@@ -143,12 +143,12 @@ class PedroSystem extends EntityTurnSystem {
     super(new Aspect(Pedro));
   }
 
-  runEntity(level: Level, entity: Entity): void {
+  runEntity(world: World, entity: Entity): void {
     const pedro = entity.update(Pedro)!;
     const pedroPos = entity.fetch(Pos)!;
 
     let goal: XY | null = null;
-    const heroEntity = level.getUnique(GameInfo).hero;
+    const heroEntity = world.getUnique(GameInfo).hero;
     const heroFov = heroEntity.fetch(FOV);
     if (heroFov) {
       if (heroFov.isVisible(pedroPos.x, pedroPos.y)) {
@@ -159,14 +159,14 @@ class PedroSystem extends EntityTurnSystem {
 
     if (!goal && pedro.path.length == 0) {
       // Pick a random box...
-      const boxes = [...level.getStore(Box).entities()];
+      const boxes = [...world.getStore(Box).entities()];
       const box = ROT.RNG.getItem(boxes)!;
       // Find a path to that box...
       goal = box.fetch(Pos)!;
     }
 
     if (goal) {
-      const posMgr = level.getUnique(PosManager);
+      const posMgr = world.getUnique(PosManager);
       /* prepare path to given coords */
       var astar = new ROT.Path.AStar(
         goal.x,
@@ -259,11 +259,11 @@ class FovSystem extends EntitySystem {
     super(new Aspect(FOV).updated(Pos));
   }
 
-  runEntity(level: Level, entity: Entity): void {
+  runEntity(world: World, entity: Entity): void {
     const fov = entity.update(FOV)!;
     const pos = entity.fetch(Pos)!;
 
-    const posMgr = level.getUnique(PosManager);
+    const posMgr = world.getUnique(PosManager);
 
     /* input callback */
     function lightPasses(x: number, y: number) {
@@ -331,9 +331,9 @@ class DrawSystem extends System {
     this._buf = new terminal.ScreenBuffer({ width: 80, height: 30, dst: term });
   }
 
-  run(level: Level): void {
+  run(world: World): void {
     const buf = this._buf;
-    const map = level.getUnique(PosManager);
+    const map = world.getUnique(PosManager);
 
     map.everyXY((x, y, es) => {
       const entity =

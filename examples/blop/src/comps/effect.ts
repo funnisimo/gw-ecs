@@ -2,9 +2,9 @@ import type { GameEvent } from "../queues";
 import type { Entity } from "gw-ecs/entity";
 import { PosManager } from "gw-ecs/common/positions";
 import { findEmptyTileForSpawn } from "../map/utils";
-import { Blop, EffectSprite, Hero, Pickup } from "./index";
+import { Blop, EffectSprite, Pickup } from "./index";
 import { addLog, coloredName } from "../ui/log";
-import { Aspect, type Level } from "gw-ecs/world";
+import { Aspect, type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 
 export class Effect {
@@ -16,7 +16,7 @@ export class Effect {
     this.description = description;
   }
 
-  apply(level: Level, event: GameEvent, owner: Entity): boolean {
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
     return false;
   }
 }
@@ -25,13 +25,13 @@ export const EFFECT_ASPECT = new Aspect(Effect);
 
 export class TeleportEffect extends Effect {
   constructor() {
-    super("Teleport", "teleports the owner to a new location on the level.");
+    super("Teleport", "teleports the owner to a new location on the world.");
   }
 
-  apply(level: Level, event: GameEvent, owner: Entity) {
-    const posMgr = level.getUnique(PosManager);
+  apply(world: World, event: GameEvent, owner: Entity) {
+    const posMgr = world.getUnique(PosManager);
 
-    const newXY = findEmptyTileForSpawn(level);
+    const newXY = findEmptyTileForSpawn(world);
     posMgr.set(owner, newXY.x, newXY.y);
 
     // TODO - emit teleport event?
@@ -44,7 +44,7 @@ export class HealEffect extends Effect {
   constructor() {
     super("Heal", "heals the owner 1 HP.");
   }
-  apply(level: Level, event: GameEvent, owner: Entity): boolean {
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
     if (!owner.has(Blop)) return false;
     const blop = owner.update(Blop)!;
     if (blop.maxHealth <= blop.health) {
@@ -62,7 +62,7 @@ export class HurtSelfEffect extends Effect {
   constructor() {
     super("HurtSelf", "injurs the owner 1 HP.");
   }
-  apply(level: Level, event: GameEvent, owner: Entity): boolean {
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
     if (!owner.has(Blop)) return false;
     const blop = owner.update(Blop)!;
     if (blop.health <= 0) {
@@ -87,9 +87,9 @@ export class HurtSelfEffect extends Effect {
 
 export const effectClasses = [TeleportEffect, HealEffect, HurtSelfEffect];
 
-export function createRandomEffect(level: Level, rng?: Random): Entity {
+export function createRandomEffect(world: World, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(effectClasses);
   const effect = new cls();
-  return level.create(EffectSprite, effect, new Pickup(() => {}));
+  return world.create(EffectSprite, effect, new Pickup(() => {}));
 }

@@ -23,7 +23,7 @@ export const STARTING_PLAYER_DNA_SIZE = 2;
 export const STARTING_PLAYER_ATTACK_DAMAGE = 2;
 export const PLAYER_VISIBILITY_RADIUS = 6;
 export const STAIRS_MIN_DISTANCE = 15;
-export const MIN_BLOP_DISTANCE_AT_START = 4; // Per-level probability
+export const MIN_BLOP_DISTANCE_AT_START = 4; // Per-world probability
 
 export const ADD_CHROMOSOME_ITEM_PROBABILITY = 30;
 export const LOCK_CHROMOSOME_ITEM_PROBABILITY = 10;
@@ -162,7 +162,7 @@ export const BLOPULET_NAME = "The Blopulet";
 export const YES = "Yes";
 export const NO = "No";
 export const STAIRS_QUESTION =
-  "Do you want to go to the next level? You will:\n- Lose every status\n- Get back to max HP";
+  "Do you want to go to the next world? You will:\n- Lose every status\n- Get back to max HP";
 export const UNKNOWN_CELL_NAME = "???";
 export const UNKNOWN_CELL_DESCRIPTION = "This space is unexplored yet.";
 export const PLAYER_DESCRIPTION = "This is YOU!";

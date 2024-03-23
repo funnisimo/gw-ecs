@@ -215,9 +215,8 @@ const world = new World()
   .setUnique(new Messages())
   .setUnique(new GameTurn())
   .addSystemSet(
-    "gameturn",
     // Lots of ways to add systems to the gameturn system set
-    new EntitySystemSet(["start", "move", "act", "finish"])
+    new EntitySystemSet("gameturn", ["start", "move", "act", "finish"])
       .addSystem("start", new LogSystem("start"))
       .addSystem("move", new LogSystem("move")),
     (set) => {

@@ -224,7 +224,7 @@ Here is the [full code](../part1b.ts) so far.
 
 ## Adding some boxes
 
-Our game involves moving around the map, looking in boxes until we find the `ananas` (pineapple). So we need to start our level by adding some boxes randomly around the map.
+Our game involves moving around the map, looking in boxes until we find the `ananas` (pineapple). So we need to start our world by adding some boxes randomly around the map.
 
 First we need to create our `Box` component and register it...
 

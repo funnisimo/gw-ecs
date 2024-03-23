@@ -220,4 +220,4 @@ function makeNormalLevel(world: World, depth: number) {
 //   return items;
 // }
 
-//# sourceURL=webpack://7drl-2021-blob-genes/./src/state/level/nextLevel.ts?
+//# sourceURL=webpack://7drl-2021-blob-genes/./src/state/world/nextLevel.ts?
