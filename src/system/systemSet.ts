@@ -1,7 +1,12 @@
 import { Entity } from "../entity";
-import { World } from "../world";
+import { Queue, QueueReader, World } from "../world";
 import { System, SystemFn } from "./system";
-import { SystemOrder, SystemStep, EntitySystemStep } from "./systemStep";
+import {
+  SystemOrder,
+  SystemStep,
+  EntitySystemStep,
+  QueueSystemStep,
+} from "./systemStep";
 
 export interface AddStepOpts {
   before?: string;
@@ -173,5 +178,51 @@ export class EntitySystemSet extends SystemSet {
 
   runEntity(world: World, entity: Entity, time: number, delta: number): void {
     this.steps.forEach((step) => step.runEntity(world, entity, time, delta));
+  }
+}
+
+export class QueueSystemSet<T> extends SystemSet {
+  // @ts-ignore
+  declare steps: QueueSystemStep<T>[];
+  _comp: Queue<T>;
+  _reader!: QueueReader<T>;
+
+  constructor(name: string, comp: Queue<T>, steps: string[] = ["update"]) {
+    super(name, []);
+    this._comp = comp;
+    if (steps) {
+      // has to happen after _comp is set
+      steps.forEach((s) => this.addStep(s));
+    }
+  }
+
+  // @ts-ignore
+  _createStep(name: string): QueueSystemStep<T> {
+    return new QueueSystemStep<T>(name, this._comp);
+  }
+
+  // @ts-ignore
+  addStep(name: string | QueueSystemStep, opts: AddStepOpts = {}): this {
+    if (name instanceof QueueSystemStep) {
+      if (name._comp !== this._comp) {
+        throw new Error("Steps must have same component as step.");
+      }
+    }
+    super.addStep(name as unknown as SystemStep, opts);
+  }
+
+  start(world: World) {
+    super.start(world);
+    this._reader = world.getReader(this._comp);
+  }
+
+  run(world: World, time: number, delta: number): void {
+    this._reader.forEach((item) => {
+      this.runQueueItem(world, item, time, delta);
+    });
+  }
+
+  runQueueItem(world: World, item: T, time: number, delta: number): void {
+    this.steps.forEach((step) => step.runQueueItem(world, item, time, delta));
   }
 }

@@ -1,10 +1,14 @@
 import "jest-extended";
 import { System } from "./system";
-import { World } from "../world";
+import { Queue, World } from "../world";
 import { EntitySystem } from "./entitySystem";
 import { Entity } from "../entity";
-import { SystemSet, EntitySystemSet } from "./systemSet";
-import { EntitySystemStep, SystemStep } from "./systemStep";
+import { SystemSet, EntitySystemSet, QueueSystemSet } from "./systemSet";
+import { EntitySystemStep, QueueSystemStep, SystemStep } from "./systemStep";
+import { QueueSystem } from "./queueSystem";
+
+class A {}
+class B {}
 
 class TestSystem extends System {
   cb: jest.Func;
@@ -21,7 +25,6 @@ class TestSystem extends System {
   }
 }
 
-// @ts-ignore
 class TestEntitySystem extends EntitySystem {
   cb: jest.Func;
   id: number;
@@ -39,6 +42,21 @@ class TestEntitySystem extends EntitySystem {
     _delta: number
   ): void {
     this.cb(this.id, entity);
+  }
+}
+
+class TestQueueSystem<T> extends QueueSystem<T> {
+  cb: jest.Func;
+  id: number;
+
+  constructor(cb: jest.Func, id: number, comp: Queue<T>) {
+    super(comp);
+    this.cb = cb;
+    this.id = id;
+  }
+
+  runQueueItem(_world: World, item: T, _time: number, _delta: number): void {
+    this.cb(this.id, item);
   }
 }
 
@@ -449,29 +467,81 @@ describe("EntitySystemSet", () => {
 });
 
 describe("QueueSystemSet", () => {
-  test.todo("default");
+  test("default", () => {
+    const set = new QueueSystemSet("name", A);
+    expect(set.name).toEqual("name");
+    expect(set.length).toEqual(1); // update
+    expect(set.getStep("update")).toBeInstanceOf(QueueSystemStep);
+  });
 
-  test.todo("empty");
+  test("empty", () => {
+    const set = new QueueSystemSet("name", A, []);
+    expect(set.name).toEqual("name");
+    expect(set.length).toEqual(0);
+    expect(set.getStep("update")).toBeUndefined();
+  });
 
-  test.todo("create with steps");
+  test("create with steps", () => {
+    const set = new QueueSystemSet("name", A, ["a", "b", "c"]);
+    expect(set.name).toEqual("name");
+    expect(set.length).toEqual(3);
+    expect(set.getStep("update")).toBeUndefined();
+    expect(set.getStep("a")).toBeInstanceOf(QueueSystemStep);
+    expect(set.getStep("b")).toBeInstanceOf(QueueSystemStep);
+    expect(set.getStep("c")).toBeInstanceOf(QueueSystemStep);
+  });
 
-  test.todo("addStep - push");
+  test("addStep - push", () => {
+    const set = new QueueSystemSet("name", A, ["a", "b", "c"]);
+    expect(set.steps.map((s) => s.name)).toEqual(["a", "b", "c"]);
+    set.addStep("d");
+    expect(set.steps.map((s) => s.name)).toEqual(["a", "b", "c", "d"]);
+  });
 
-  test.todo("addStep - duplicate");
+  test("addStep - wrong component", () => {
+    const set = new QueueSystemSet("name", A);
+    expect(set.name).toEqual("name");
+    expect(() => set.addStep(new QueueSystemStep("b", B))).toThrow();
+  });
+
+  test("addStep - duplicate", () => {
+    const set = new QueueSystemSet("name", A, ["a", "b", "c"]);
+    expect(set.name).toEqual("name");
+    expect(() => set.addStep("a")).toThrow();
+    expect(() => set.addStep(new QueueSystemStep("a", A))).toThrow();
+  });
 
   test.todo("addStep - before");
-
   test.todo("addStep - before missing");
-
   test.todo("addStep - after");
-
   test.todo("addStep - after missing");
 
+  test("addSystem - with step", () => {
+    const world = new World().registerQueue(A);
+    const cb = jest.fn();
+    const set = new QueueSystemSet("update", A, ["a", "b", "c"]);
+
+    set.addSystem("b", new TestQueueSystem(cb, 2, A));
+    set.addSystem("c", new TestQueueSystem(cb, 3, A));
+    set.addSystem("a", new TestQueueSystem(cb, 1, A));
+
+    set.start(world);
+
+    const a1 = world.pushQueue(new A());
+    const a2 = world.pushQueue(new A());
+
+    set.run(world, 0, 0);
+    // Process first item completely
+    expect(cb).toHaveBeenNthCalledWith(1, 1, a1);
+    expect(cb).toHaveBeenNthCalledWith(2, 2, a1);
+    expect(cb).toHaveBeenNthCalledWith(3, 3, a1);
+    // Process next item completely
+    expect(cb).toHaveBeenNthCalledWith(4, 1, a2);
+    expect(cb).toHaveBeenNthCalledWith(5, 2, a2);
+    expect(cb).toHaveBeenNthCalledWith(6, 3, a2);
+  });
+
   test.todo("addSystem - default step");
-
-  test.todo("addSystem - with step");
-
   test.todo("addSystem - missing step");
-
   test.todo("addSystem - fn");
 });

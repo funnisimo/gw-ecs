@@ -285,11 +285,12 @@ export class World {
     return store.reader(onlyNew);
   }
 
-  pushQueue<T>(val: T, comp?: Queue<T>) {
+  pushQueue<T>(val: T, comp?: Queue<T>): T {
     // @ts-ignore
     comp = comp || val.constructor;
     const queue = this.getQueue(comp!);
     queue.push(val);
+    return val;
   }
 
   ////////////

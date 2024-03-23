@@ -2,6 +2,7 @@
 
 export * from "./system.js";
 export * from "./entitySystem.js";
+export * from "./queueSystem.js";
 export * from "./intervalSystem.js";
 export * from "./intervalEntitySystem.js";
 export * from "./systemStep.js";

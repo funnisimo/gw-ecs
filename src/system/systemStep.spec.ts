@@ -1,9 +1,13 @@
 import "jest-extended";
 import { System } from "./system";
-import { World } from "../world";
+import { Queue, World } from "../world";
 import { EntitySystem } from "./entitySystem";
-import { EntitySystemStep, SystemStep } from "./systemStep";
+import { EntitySystemStep, QueueSystemStep, SystemStep } from "./systemStep";
 import { Entity } from "../entity";
+import { QueueSystem } from "./queueSystem";
+
+class A {}
+class B {}
 
 class TestSystem extends System {
   cb: jest.Func;
@@ -37,6 +41,21 @@ class TestEntitySystem extends EntitySystem {
     _delta: number
   ): void {
     this.cb(this.id, entity);
+  }
+}
+
+class TestQueueSystem<T> extends QueueSystem<T> {
+  cb: jest.Func;
+  id: number;
+
+  constructor(cb: jest.Func, id: number, comp: Queue<T>) {
+    super(comp);
+    this.cb = cb;
+    this.id = id;
+  }
+
+  runQueueItem(_world: World, item: T, _time: number, _delta: number): void {
+    this.cb(this.id, item);
   }
 }
 
@@ -100,7 +119,36 @@ describe("SystemStep", () => {
     expect(cb).toHaveBeenNthCalledWith(6, 3, entity2);
   });
 
-  test.todo("add system with queue system");
+  test("add system with queue system", () => {
+    const world = new World().registerQueue(A);
+    const cb = jest.fn();
+    const step = new SystemStep("update");
+
+    step.addSystem(new TestQueueSystem<A>(cb, 2, A));
+    expect(step).toHaveLength(1);
+
+    step.addSystem(new TestQueueSystem<A>(cb, 3, A), "post");
+    expect(step).toHaveLength(2);
+
+    step.addSystem(new TestQueueSystem<A>(cb, 1, A), "pre");
+    expect(step).toHaveLength(3);
+
+    step.start(world);
+
+    const a1 = world.pushQueue(new A());
+    const a2 = world.pushQueue(new A());
+
+    step.run(world, 0, 0);
+    // Process first system completely
+    expect(cb).toHaveBeenNthCalledWith(1, 1, a1);
+    expect(cb).toHaveBeenNthCalledWith(2, 1, a2);
+    // Process next system completely
+    expect(cb).toHaveBeenNthCalledWith(3, 2, a1);
+    expect(cb).toHaveBeenNthCalledWith(4, 2, a2);
+    // then the last
+    expect(cb).toHaveBeenNthCalledWith(5, 3, a1);
+    expect(cb).toHaveBeenNthCalledWith(6, 3, a2);
+  });
 
   test("add fn system", () => {
     const world = new World();
@@ -115,47 +163,44 @@ describe("SystemStep", () => {
     expect(cb).toHaveBeenCalledWith(world, 0, 0);
   });
 
-  test("add a system", () => {
+  test("forEach", () => {
     const step = new SystemStep("update");
     const a = jest.fn();
     const b = jest.fn();
     const c = jest.fn();
 
-    step.addSystem(a);
-    step.addSystem(b, "normal");
-    step.addSystem(c);
+    const sysA = step.addSystem(a);
+    const sysB = step.addSystem(b, "normal");
+    const sysC = step.addSystem(c);
 
     expect(step.name).toEqual("update");
     let all: [System, string][] = [];
     step.forEach((sys, step) => all.push([sys, step]));
     expect(all).toEqual([
-      [expect.objectContaining({ _fn: a }), "update"],
-      [expect.objectContaining({ _fn: b }), "update"],
-      [expect.objectContaining({ _fn: c }), "update"],
+      [sysA, "update"],
+      [sysB, "update"],
+      [sysC, "update"],
     ]);
   });
-  test('add "pre-" + "post-" systems', () => {
+  test('forEach with "pre-" + "post-" systems', () => {
     const step = new SystemStep("update");
     const a = jest.fn();
     const b = jest.fn();
     const c = jest.fn();
 
-    step.addSystem(a, "normal");
-    step.addSystem(b, "post");
-    step.addSystem(c, "pre");
+    const sysA = step.addSystem(a, "normal");
+    const sysB = step.addSystem(b, "post");
+    const sysC = step.addSystem(c, "pre");
 
     expect(step.name).toEqual("update");
     let all: [System, string][] = [];
     step.forEach((sys, step) => all.push([sys, step]));
     expect(all).toEqual([
-      [expect.objectContaining({ _fn: c }), "pre-update"],
-      [expect.objectContaining({ _fn: a }), "update"],
-      [expect.objectContaining({ _fn: b }), "post-update"],
+      [sysC, "pre-update"],
+      [sysA, "update"],
+      [sysB, "post-update"],
     ]);
   });
-
-  test.todo("add a system before another system");
-  test.todo("add a system after another system");
 });
 
 describe("EntitySystemStep", () => {
@@ -215,53 +260,114 @@ describe("EntitySystemStep", () => {
     expect(cb).toHaveBeenNthCalledWith(2, world, entity2, 0, 0);
   });
 
-  test("add a system", () => {
+  test("forEach", () => {
     const step = new EntitySystemStep("update");
     const a = jest.fn();
     const b = jest.fn();
     const c = jest.fn();
 
-    step.addSystem(a);
-    step.addSystem(b, "normal");
-    step.addSystem(c);
+    const sysA = step.addSystem(a);
+    const sysB = step.addSystem(b, "normal");
+    const sysC = step.addSystem(c);
 
     expect(step.name).toEqual("update");
     let all: [System, string][] = [];
     step.forEach((sys, step) => all.push([sys, step]));
     expect(all).toEqual([
-      [expect.objectContaining({ _fn: a }), "update"],
-      [expect.objectContaining({ _fn: b }), "update"],
-      [expect.objectContaining({ _fn: c }), "update"],
+      [sysA, "update"],
+      [sysB, "update"],
+      [sysC, "update"],
     ]);
   });
 
-  test('add "pre-" + "post-" systems', () => {
+  test('forEach with "pre-" + "post-" systems', () => {
     const step = new EntitySystemStep("update");
     const a = jest.fn();
     const b = jest.fn();
     const c = jest.fn();
 
-    step.addSystem(a, "normal");
-    step.addSystem(b, "post");
-    step.addSystem(c, "pre");
+    const sysA = step.addSystem(a, "normal");
+    const sysB = step.addSystem(b, "post");
+    const sysC = step.addSystem(c, "pre");
 
     expect(step.name).toEqual("update");
     let all: [System, string][] = [];
     step.forEach((sys, step) => all.push([sys, step]));
     expect(all).toEqual([
-      [expect.objectContaining({ _fn: c }), "pre-update"],
-      [expect.objectContaining({ _fn: a }), "update"],
-      [expect.objectContaining({ _fn: b }), "post-update"],
+      [sysC, "pre-update"],
+      [sysA, "update"],
+      [sysB, "post-update"],
     ]);
   });
-
-  test.todo("add a system before another system");
-  test.todo("add a system after another system");
 });
 
 describe("queueSystemStep", () => {
-  test.todo("create");
-  test.todo("add system");
-  test.todo("add system - not queue system");
-  test.todo("add fn system");
+  test("default empty", () => {
+    const step = new QueueSystemStep("update", A);
+    expect(step.name).toEqual("update");
+    expect(step.length).toEqual(0);
+  });
+
+  test("add system", () => {
+    const world = new World().registerQueue(A);
+    const cb = jest.fn();
+    const step = new QueueSystemStep("update", A);
+
+    step.addSystem(new TestQueueSystem<A>(cb, 2, A));
+    expect(step).toHaveLength(1);
+
+    step.addSystem(new TestQueueSystem<A>(cb, 3, A), "post");
+    expect(step).toHaveLength(2);
+
+    step.addSystem(new TestQueueSystem<A>(cb, 1, A), "pre");
+    expect(step).toHaveLength(3);
+
+    step.start(world);
+
+    const a1 = world.pushQueue(new A());
+    const a2 = world.pushQueue(new A());
+
+    step.run(world, 0, 0);
+    // Process first item completely
+    expect(cb).toHaveBeenNthCalledWith(1, 1, a1);
+    expect(cb).toHaveBeenNthCalledWith(2, 2, a1);
+    expect(cb).toHaveBeenNthCalledWith(3, 3, a1);
+    // Process next item completely
+    expect(cb).toHaveBeenNthCalledWith(4, 1, a2);
+    expect(cb).toHaveBeenNthCalledWith(5, 2, a2);
+    expect(cb).toHaveBeenNthCalledWith(6, 3, a2);
+  });
+
+  test("add system - not queue system", () => {
+    const cb = jest.fn();
+    const step = new QueueSystemStep("update", A);
+    // @ts-ignore
+    expect(() => step.addSystem(new TestSystem(cb, 2))).toThrow(); // Must be QueueSystem
+    // @ts-ignore
+    expect(() => step.addSystem(new TestEntitySystem(cb, 2))).toThrow(); // Must be QueueSystem
+  });
+
+  test("add system - wrong component", () => {
+    const cb = jest.fn();
+    const step = new QueueSystemStep("update", A);
+    expect(() => step.addSystem(new TestQueueSystem(cb, 1, B))).toThrow(); // wrong component
+  });
+
+  test("add fn system", () => {
+    const world = new World().registerQueue(A);
+    const cb = jest.fn();
+    const step = new QueueSystemStep("update", A);
+
+    step.addSystem(cb); // normal is default
+    expect(step.length).toEqual(1);
+
+    step.start(world);
+
+    const a1 = world.pushQueue(new A());
+    const a2 = world.pushQueue(new A());
+
+    step.run(world, 0, 0);
+    expect(cb).toHaveBeenNthCalledWith(1, world, a1, 0, 0);
+    expect(cb).toHaveBeenNthCalledWith(2, world, a2, 0, 0);
+  });
 });

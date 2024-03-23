@@ -1,11 +1,12 @@
 import { Entity } from "../entity";
-import { World } from "../world";
+import { Queue, QueueReader, World } from "../world";
 import { FunctionSystem, System, SystemFn } from "./system";
 import {
   EntityFunctionSystem,
   EntitySystem,
   EntitySystemFn,
 } from "./entitySystem";
+import { QueueFunctionSystem, QueueSystem, QueueSystemFn } from "./queueSystem";
 
 export type SystemOrder = "pre" | "normal" | "post";
 
@@ -18,7 +19,7 @@ export interface SystemStep {
     sys: System | SystemFn,
     order?: SystemOrder,
     enabled?: boolean
-  ): void;
+  ): System;
 }
 
 export class SystemStep extends System {
@@ -41,7 +42,11 @@ export class SystemStep extends System {
     );
   }
 
-  addSystem(sys: System | SystemFn, order?: SystemOrder, enabled = true) {
+  addSystem(
+    sys: System | SystemFn,
+    order?: SystemOrder,
+    enabled = true
+  ): System {
     if (typeof sys === "function") {
       sys = new FunctionSystem(sys);
     }
@@ -53,6 +58,7 @@ export class SystemStep extends System {
     } else {
       this._systems.push(sys);
     }
+    return sys;
   }
 
   start(world: World) {
@@ -105,7 +111,7 @@ export class EntitySystemStep extends SystemStep {
     sys: EntitySystem | EntitySystemFn,
     order?: SystemOrder,
     enabled = true
-  ) {
+  ): EntitySystem {
     if (typeof sys === "function") {
       sys = new EntityFunctionSystem(sys);
     }
@@ -113,12 +119,13 @@ export class EntitySystemStep extends SystemStep {
       throw new Error("Must be EntitySystem");
     }
     super.addSystem(sys, order, enabled);
+    return sys;
   }
 
   run(world: World, time: number, delta: number): void {
-    for (let e of world.entities()) {
-      this.runEntity(world, e, time, delta);
-    }
+    world.level.entities().forEach((entity) => {
+      this.runEntity(world, entity, time, delta);
+    });
   }
 
   runEntity(world: World, entity: Entity, time: number, delta: number): void {
@@ -151,6 +158,82 @@ export class EntitySystemStep extends SystemStep {
   }
 
   forEach(fn: (sys: EntitySystem, order: SystemOrder) => void) {
+    // @ts-ignore
+    super.forEach(fn);
+  }
+}
+
+export class QueueSystemStep<T> extends SystemStep {
+  _comp: Queue<T>;
+  _reader!: QueueReader<T>;
+  declare _preSystems: QueueSystem<T>[];
+  declare _systems: QueueSystem<T>[];
+  declare _postSystems: QueueSystem<T>[];
+
+  constructor(name: string, comp: Queue<T>) {
+    super(name);
+    this._comp = comp;
+  }
+
+  start(world: World): void {
+    this._reader = world.getReader(this._comp);
+    super.start(world);
+  }
+
+  // @ts-ignore
+  addSystem(
+    sys: QueueSystem<T> | QueueSystemFn<T>,
+    order?: SystemOrder,
+    enabled = true
+  ): QueueSystem<T> {
+    if (typeof sys === "function") {
+      sys = new QueueFunctionSystem<T>(this._comp, sys);
+    } else if (this._comp !== sys._comp) {
+      throw new Error("System has wrong component type.");
+    }
+    if (!(sys instanceof QueueSystem)) {
+      throw new Error("Must be QueueSystem");
+    }
+    super.addSystem(sys, order, enabled);
+    return sys;
+  }
+
+  run(world: World, time: number, delta: number): void {
+    // TODO - prefilter systems with 'shouldRun' check?
+    this._reader.forEach((item) => {
+      this.runQueueItem(world, item, time, delta);
+    });
+  }
+
+  runQueueItem(world: World, item: T, time: number, delta: number): void {
+    this._preSystems.forEach((sys) =>
+      this._runQueueSystem(world, sys, item, time, delta)
+    );
+    this._systems.forEach((sys) =>
+      this._runQueueSystem(world, sys, item, time, delta)
+    );
+    this._postSystems.forEach((sys) =>
+      this._runQueueSystem(world, sys, item, time, delta)
+    );
+  }
+
+  _runQueueSystem(
+    world: World,
+    sys: QueueSystem<T>,
+    item: T,
+    time: number,
+    delta: number
+  ): boolean {
+    if (!sys.shouldRun(world, time, delta)) {
+      return false;
+    }
+    sys.runQueueItem(world, item, time, delta);
+    sys.lastTick = world.tick;
+    world.maintain();
+    return true;
+  }
+
+  forEach(fn: (sys: QueueSystem<any>, order: SystemOrder) => void) {
     // @ts-ignore
     super.forEach(fn);
   }
