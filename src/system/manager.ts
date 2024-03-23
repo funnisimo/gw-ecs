@@ -1,29 +1,41 @@
 import { World } from "../world/world.js";
 import { EntitySystem, EntitySystemFn } from "./entitySystem.js";
+import { QueueSystem, QueueSystemFn } from "./queueSystem.js";
 import { System, SystemFn } from "./system.js";
 import {
   AddStepOpts,
   EntitySystemSet,
+  QueueSystemSet,
   SystemSet,
   isAddStepOpts,
 } from "./systemSet.js";
-import { SystemStep, EntitySystemStep } from "./systemStep.js";
+import { SystemStep, EntitySystemStep, QueueSystemStep } from "./systemStep.js";
+
+export type AnySystemSet = SystemSet | EntitySystemSet | QueueSystemSet<any>;
+export type AnySystemStep =
+  | SystemStep
+  | EntitySystemStep
+  | QueueSystemStep<any>;
+export type AnySystem =
+  | System
+  | SystemFn
+  | EntitySystem
+  | EntitySystemFn
+  | QueueSystem<any>
+  | QueueSystemFn<any>;
 
 export class SystemManager {
-  _sets: Map<string, SystemSet | EntitySystemSet>;
+  _sets: Map<string, AnySystemSet>;
 
   constructor() {
     this._sets = new Map();
     this._sets.set("default", new SystemSet("default"));
   }
 
-  addSet(set: SystemSet | EntitySystemSet): SystemSet;
+  addSet(set: AnySystemSet): SystemSet;
   addSet(name: string, steps?: string[]): SystemSet;
-  addSet(
-    name: string | SystemSet | EntitySystemSet,
-    steps?: string[]
-  ): SystemSet | EntitySystemSet {
-    let newSet: SystemSet | EntitySystemSet;
+  addSet(name: string | AnySystemSet, steps?: string[]): AnySystemSet {
+    let newSet: AnySystemSet;
     if (typeof name === "string") {
       newSet = new SystemSet(name, steps);
     } else {
@@ -35,7 +47,7 @@ export class SystemManager {
     return newSet;
   }
 
-  getSet(name: string = "default"): SystemSet | EntitySystemSet | undefined {
+  getSet(name: string = "default"): AnySystemSet | undefined {
     return this._sets.get(name);
   }
 
@@ -43,22 +55,19 @@ export class SystemManager {
     return this._sets.has(name);
   }
 
-  addStep(
-    step: string | SystemStep | EntitySystemStep,
-    opts?: AddStepOpts
-  ): SystemManager;
+  addStep(step: string | AnySystemStep, opts?: AddStepOpts): SystemManager;
   addStep(
     set: string,
-    step: string | SystemStep | EntitySystemStep,
+    step: string | AnySystemStep,
     opts?: AddStepOpts
   ): SystemManager;
   addStep(
     ...args:
-      | [string | SystemStep | EntitySystemStep, AddStepOpts?]
-      | [string, string | SystemStep | EntitySystemStep, AddStepOpts?]
+      | [string | AnySystemStep, AddStepOpts?]
+      | [string, string | AnySystemStep, AddStepOpts?]
   ): SystemManager {
-    let set: SystemSet | EntitySystemSet;
-    let step: string | SystemStep | EntitySystemStep;
+    let set: AnySystemSet;
+    let step: string | AnySystemStep;
     let opts: AddStepOpts = {};
     if (args.length == 1) {
       set = this._sets.get("default")!;
@@ -87,19 +96,12 @@ export class SystemManager {
     return this;
   }
 
-  addSystem(
-    system: System | SystemFn | EntitySystem | EntitySystemFn,
-    enabled?: boolean
-  ): this;
-  addSystem(
-    inStep: string,
-    system: System | SystemFn | EntitySystem | EntitySystemFn,
-    enabled?: boolean
-  ): this;
+  addSystem(system: AnySystem, enabled?: boolean): this;
+  addSystem(inStep: string, system: AnySystem, enabled?: boolean): this;
   addSystem(
     inSet: string,
     inStep: string,
-    system: System | SystemFn | EntitySystem | EntitySystemFn,
+    system: AnySystem,
     enabled?: boolean
   ): this;
   addSystem(...args: any[]): this {

@@ -1,18 +1,11 @@
-import { System } from "../system/system.js";
 import {
-  EntitySystemStep,
   SystemManager,
-  SystemStep,
-  EntitySystemFn,
-  SystemFn,
-  EntitySystem,
+  AnySystemSet,
+  AnySystem,
+  AnySystemStep,
 } from "../system/index.js";
 import { Level } from "./level.js";
-import {
-  AddStepOpts,
-  EntitySystemSet,
-  SystemSet,
-} from "../system/systemSet.js";
+import { AddStepOpts } from "../system/systemSet.js";
 import {
   ComponentSource,
   Entities,
@@ -187,8 +180,8 @@ export class World {
   // SYSTEMS
 
   addSystemSet(
-    name: string | SystemSet | EntitySystemSet,
-    init?: (set: SystemSet | EntitySystemSet) => void
+    name: string | AnySystemSet,
+    init?: (set: AnySystemSet) => void
   ): this {
     // @ts-ignore
     const set = this._systems.addSet(name);
@@ -200,48 +193,33 @@ export class World {
 
   addSystemStep(
     set: string,
-    step: string | SystemStep | EntitySystemStep,
+    step: string | AnySystemStep,
     opts?: AddStepOpts
   ): World;
-  addSystemStep(
-    step: string | SystemStep | EntitySystemStep,
-    opts?: AddStepOpts
-  ): World;
+  addSystemStep(step: string | AnySystemStep, opts?: AddStepOpts): World;
   addSystemStep(
     ...args:
-      | [string | SystemStep | EntitySystemStep, AddStepOpts?]
-      | [string, string | SystemStep | EntitySystemStep, AddStepOpts?]
+      | [string | AnySystemStep, AddStepOpts?]
+      | [string, string | AnySystemStep, AddStepOpts?]
   ): this {
     // @ts-ignore
     this._systems.addStep(...args);
     return this;
   }
 
-  addSystem(
-    system: System | SystemFn | EntitySystem | EntitySystemFn,
-    enable?: boolean
-  ): World;
-  addSystem(
-    inStep: string,
-    system: System | SystemFn | EntitySystem | EntitySystemFn,
-    enable?: boolean
-  ): World;
+  addSystem(system: AnySystem, enable?: boolean): World;
+  addSystem(inStep: string, system: AnySystem, enable?: boolean): World;
   addSystem(
     inSet: string,
     inStep: string,
-    system: System | SystemFn | EntitySystem | EntitySystemFn,
+    system: AnySystem,
     enable?: boolean
   ): World;
   addSystem(
     ...args:
-      | [System | SystemFn | EntitySystem | EntitySystemFn, boolean?]
-      | [string, System | SystemFn | EntitySystem | EntitySystemFn, boolean?]
-      | [
-          string,
-          string,
-          System | SystemFn | EntitySystem | EntitySystemFn,
-          boolean?
-        ]
+      | [AnySystem, boolean?]
+      | [string, AnySystem, boolean?]
+      | [string, string, AnySystem, boolean?]
   ): this {
     // @ts-ignore
     this._systems.addSystem(...args);
@@ -261,7 +239,7 @@ export class World {
     // this.maintain();
   }
 
-  getSystemSet(name: string): SystemSet | EntitySystemSet | undefined {
+  getSystemSet(name: string): AnySystemSet | undefined {
     return this._systems.getSet(name);
   }
 
