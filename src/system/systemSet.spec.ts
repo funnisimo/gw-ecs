@@ -1,6 +1,6 @@
 import "jest-extended";
 import { System } from "./system";
-import { Level, World } from "../world";
+import { World } from "../world";
 import { EntitySystem } from "./entitySystem";
 import { Entity } from "../entity";
 import { SystemSet, EntitySystemSet } from "./systemSet";
@@ -16,7 +16,7 @@ class TestSystem extends System {
     this.id = id;
   }
 
-  run(_level: Level, _time: number, _delta: number): void {
+  run(_world: World, _time: number, _delta: number): void {
     this.cb(this.id);
   }
 }
@@ -33,7 +33,7 @@ class TestEntitySystem extends EntitySystem {
   }
 
   runEntity(
-    _level: Level,
+    _world: World,
     entity: Entity,
     _time: number,
     _delta: number

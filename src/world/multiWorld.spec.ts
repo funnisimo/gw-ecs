@@ -8,24 +8,24 @@ class C {}
 
 describe("multiWorld", () => {
   test("add levels", () => {
-    const world = new MultiWorld();
-    world.registerComponent(A);
-    world.registerQueue(B);
+    const world = new MultiWorld()
+      .registerComponent(A)
+      .registerQueue(B)
+      .createLevel("a", (level) => {
+        level.registerComponent(C); // This is in 'a', but not 'b'
+      })
+      .addLevel(new Level("b"))
+      .activateLevel("a")
+      .start();
 
-    world.createLevel("a", (level) => {
-      level.registerComponent(C); // This is in 'a', but not 'b'
-      level.create(new A());
-    });
-    world.addLevel(new Level("b"));
-
-    // world.start();
+    world.create(new A());
 
     const level = world.getLevel("a")!;
     expect(level.getStore(C)).toBeObject();
     const reader = level.getReader(B);
 
     expect(reader.hasMore()).toBeFalse();
-    level!.push(new B());
+    level!.pushQueue(new B());
     expect(reader.hasMore()).toBeTrue();
 
     // TODO - Is throwing right?

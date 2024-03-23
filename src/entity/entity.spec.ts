@@ -12,17 +12,17 @@ class CompA {
 describe("Entity", () => {
   let setComponent: jest.Mock;
   let removeComponent: jest.Mock;
-  let currentTick: jest.Mock;
+  let tick: number;
   let entities: Entities;
   let source: ComponentSource;
 
   beforeEach(() => {
-    currentTick = jest.fn().mockReturnValue(1);
+    tick = 1;
     setComponent = jest.fn().mockImplementation((e, v, c) => e._setComp(c, v));
     removeComponent = jest.fn().mockImplementation((e, c) => e._removeComp(c));
 
     source = {
-      currentTick,
+      tick,
       setComponent,
       removeComponent,
     };

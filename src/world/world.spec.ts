@@ -45,7 +45,7 @@ describe("World", function () {
       world.start();
       let idA = world.create();
       let idB = world.create();
-      world.queueDestroy(idA);
+      world.destroyLater(idA);
       world.maintain();
       let idC = world.create();
       let idD = world.create();
@@ -70,8 +70,8 @@ describe("World", function () {
 
       // entity is not deleted until sytem 'process' completes...
       callback.mockClear();
-      world.queueDestroy(entity);
-      world.queueDestroy(entity); // Can remove multiple times
+      world.destroyLater(entity);
+      world.destroyLater(entity); // Can remove multiple times
       world.addTime(0).runSystems();
 
       expect(callback).toHaveBeenCalledTimes(1);
@@ -127,7 +127,7 @@ describe("World", function () {
 
     class DeleteSystem extends EntitySystem {
       runEntity(world: World, entity: Entity): void {
-        world.queueDestroy(entity);
+        world.destroyLater(entity);
       }
     }
 

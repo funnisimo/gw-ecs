@@ -45,6 +45,7 @@ export class SetStore<T> implements CompStore<T> {
   }
 
   notify(watcher: StoreWatcher<T>) {
+    // TODO - make sure we don't have duplicates
     let index = this._watchers.indexOf(null);
     if (index >= 0) {
       this._watchers[index] = watcher;
@@ -138,42 +139,13 @@ export class SetStore<T> implements CompStore<T> {
     return this.entities().map((e) => [e, e.fetch(this._comp)!]);
   }
 
-  // *added(sinceTick): Iterable<[Entity,T]> {}
-  // *updated(sinceTick): Iterable<[Entity,T]> {}
+  entityCreated(entity: Entity): void {
+    if (entity.has(this._comp)) {
+      this._data.add(entity);
+    }
+  }
 
   entityDestroyed(entity: Entity): void {
     this._data.delete(entity);
   }
 }
-
-/*
-class Person {
-    name = 'John';
-    age = 23;
-}
-
-class Actor extends Person {
-    troup = 'Cats';
-}
-
-const actor = new Actor();
-const person = new Person();
-
-const mgr = new Map();
-mgr.set(Person, 'person');
-
-function getEntry(mgr, proto) {
-    do {
-        // console.log(proto);
-        // console.log(mgr.get(proto));
-        if (mgr.has(proto)) return mgr.get(proto);
-        proto = Object.getPrototypeOf(proto);
-    } while (proto && !proto.isPrototypeOf(Object));
-}
-
-console.log('person entry = ' + getEntry(mgr, person.constructor));
-console.log('actor entry = ' + getEntry(mgr, actor.constructor));
-
-const obj = { a: 1 };
-console.log('obj entry = ' + getEntry(mgr, obj.constructor));
-*/

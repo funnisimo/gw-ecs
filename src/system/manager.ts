@@ -1,4 +1,4 @@
-import { Level } from "../world/level.js";
+import { World } from "../world/world.js";
 import { EntitySystem, EntitySystemFn } from "./entitySystem.js";
 import { System, SystemFn } from "./system.js";
 import {
@@ -37,6 +37,10 @@ export class SystemManager {
 
   getSet(name: string = "default"): SystemSet | EntitySystemSet | undefined {
     return this._sets.get(name);
+  }
+
+  has(name: string): boolean {
+    return this._sets.has(name);
   }
 
   addStep(
@@ -130,21 +134,21 @@ export class SystemManager {
     return this;
   }
 
-  start(level: Level) {
+  start(world: World) {
     for (let set of this._sets.values()) {
-      set.start(level);
+      set.start(world);
     }
   }
 
-  run(level: Level, time: number, delta: number): void {
-    this.runSet("default", level, time, delta);
+  run(world: World, time: number, delta: number): void {
+    this.runSet("default", world, time, delta);
   }
 
-  runSet(set: string, level: Level, time: number, delta: number): void {
+  runSet(set: string, world: World, time: number, delta: number): void {
     const systems = this._sets.get(set);
     if (!systems) throw new Error("Missing System Set: " + set);
 
-    systems.run(level, time, delta);
+    systems.run(world, time, delta);
   }
 
   rebase(zeroTime: number) {

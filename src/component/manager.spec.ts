@@ -21,7 +21,7 @@ describe("component manager", () => {
     expect(entity.has(A)).toBeTrue();
     expect(entity.has(B)).toBeTrue();
 
-    world.queueDestroy(entity);
+    world.destroyLater(entity);
     expect(entity.has(A)).toBeTrue();
     expect(entity.has(B)).toBeTrue();
     expect(entity.isAlive()).toBeTrue();

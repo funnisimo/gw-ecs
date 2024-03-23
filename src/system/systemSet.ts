@@ -1,5 +1,5 @@
 import { Entity } from "../entity";
-import { Level } from "../world";
+import { World } from "../world";
 import { System, SystemFn } from "./system";
 import { SystemOrder, SystemStep, EntitySystemStep } from "./systemStep";
 
@@ -131,13 +131,13 @@ export class SystemSet extends System {
     return this.steps.find((s) => s.name == name);
   }
 
-  start(level: Level) {
-    super.start(level);
-    this.steps.forEach((s) => s.start(level));
+  start(world: World) {
+    super.start(world);
+    this.steps.forEach((s) => s.start(world));
   }
 
-  run(level: Level, time: number, delta: number): void {
-    this.steps.forEach((step) => step.run(level, time, delta));
+  run(world: World, time: number, delta: number): void {
+    this.steps.forEach((step) => step.run(world, time, delta));
   }
 
   rebase(zeroTime: number) {
@@ -165,13 +165,13 @@ export class EntitySystemSet extends SystemSet {
     super.addStep(name as unknown as SystemStep, opts);
   }
 
-  run(level: Level, time: number, delta: number): void {
-    for (let e of level.entities()) {
-      this.runEntity(level, e, time, delta);
+  run(world: World, time: number, delta: number): void {
+    for (let e of world.entities()) {
+      this.runEntity(world, e, time, delta);
     }
   }
 
-  runEntity(level: Level, entity: Entity, time: number, delta: number): void {
-    this.steps.forEach((step) => step.runEntity(level, entity, time, delta));
+  runEntity(world: World, entity: Entity, time: number, delta: number): void {
+    this.steps.forEach((step) => step.runEntity(world, entity, time, delta));
   }
 }

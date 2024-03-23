@@ -1,5 +1,5 @@
 import { Entity } from "../entity";
-import { Level } from "../world";
+import { World } from "../world";
 import { FunctionSystem, System, SystemFn } from "./system";
 import {
   EntityFunctionSystem,
@@ -11,8 +11,8 @@ export type SystemOrder = "pre" | "normal" | "post";
 
 export interface SystemStep {
   name: string;
-  start(level: Level): void;
-  run(level: Level, time: number, delta: number): void;
+  start(world: World): void;
+  run(world: World, time: number, delta: number): void;
   rebase(zeroTime: number): void;
   addSystem(
     sys: System | SystemFn,
@@ -55,28 +55,28 @@ export class SystemStep extends System {
     }
   }
 
-  start(level: Level) {
-    super.start(level);
-    this._preSystems.forEach((s) => s.start(level));
-    this._systems.forEach((s) => s.start(level));
-    this._postSystems.forEach((s) => s.start(level));
+  start(world: World) {
+    super.start(world);
+    this._preSystems.forEach((s) => s.start(world));
+    this._systems.forEach((s) => s.start(world));
+    this._postSystems.forEach((s) => s.start(world));
   }
 
-  run(level: Level, time: number, delta: number): void {
-    this._preSystems.forEach((sys) => this._runSystem(level, sys, time, delta));
-    this._systems.forEach((sys) => this._runSystem(level, sys, time, delta));
+  run(world: World, time: number, delta: number): void {
+    this._preSystems.forEach((sys) => this._runSystem(world, sys, time, delta));
+    this._systems.forEach((sys) => this._runSystem(world, sys, time, delta));
     this._postSystems.forEach((sys) =>
-      this._runSystem(level, sys, time, delta)
+      this._runSystem(world, sys, time, delta)
     );
   }
 
-  _runSystem(level: Level, sys: System, time: number, delta: number): boolean {
-    if (!sys.shouldRun(level, time, delta)) {
+  _runSystem(world: World, sys: System, time: number, delta: number): boolean {
+    if (!sys.shouldRun(world, time, delta)) {
       return false;
     }
-    sys.run(level, time, delta);
-    sys.lastTick = level.currentTick();
-    level.maintain();
+    sys.run(world, time, delta);
+    sys.lastTick = world.tick;
+    world.maintain();
     return true;
   }
 
@@ -115,38 +115,38 @@ export class EntitySystemStep extends SystemStep {
     super.addSystem(sys, order, enabled);
   }
 
-  run(level: Level, time: number, delta: number): void {
-    for (let e of level.entities()) {
-      this.runEntity(level, e, time, delta);
+  run(world: World, time: number, delta: number): void {
+    for (let e of world.entities()) {
+      this.runEntity(world, e, time, delta);
     }
   }
 
-  runEntity(level: Level, entity: Entity, time: number, delta: number): void {
+  runEntity(world: World, entity: Entity, time: number, delta: number): void {
     this._preSystems.forEach((sys) =>
-      this._runEntitySystem(level, sys, entity, time, delta)
+      this._runEntitySystem(world, sys, entity, time, delta)
     );
     this._systems.forEach((sys) =>
-      this._runEntitySystem(level, sys, entity, time, delta)
+      this._runEntitySystem(world, sys, entity, time, delta)
     );
     this._postSystems.forEach((sys) =>
-      this._runEntitySystem(level, sys, entity, time, delta)
+      this._runEntitySystem(world, sys, entity, time, delta)
     );
   }
 
   _runEntitySystem(
-    level: Level,
+    world: World,
     sys: EntitySystem,
     entity: Entity,
     time: number,
     delta: number
   ): boolean {
-    if (!sys.shouldRun(level, time, delta)) {
+    if (!sys.shouldRun(world, time, delta)) {
       return false;
     }
     if (!sys.accept(entity)) return false;
-    sys.runEntity(level, entity, time, delta);
-    sys.lastTick = level.currentTick();
-    level.maintain();
+    sys.runEntity(world, entity, time, delta);
+    sys.lastTick = world.tick;
+    world.maintain();
     return true;
   }
 

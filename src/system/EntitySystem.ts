@@ -1,7 +1,7 @@
 import { Aspect } from "../world/aspect.js";
 import { RunIfFn, System } from "./system.js";
 import { Entity } from "../entity/entity.js";
-import { Level } from "../world/level.js";
+import { World } from "../world/world.js";
 
 export class EntitySystem extends System {
   _aspect: Aspect;
@@ -15,17 +15,17 @@ export class EntitySystem extends System {
     return this._aspect.match(entity, this.lastTick);
   }
 
-  run(level: Level, time: number, delta: number): void {
-    for (let e of this._aspect.all(level, this.lastTick)) {
-      this.runEntity(level, e, time, delta);
+  run(world: World, time: number, delta: number): void {
+    for (let e of this._aspect.all(world, this.lastTick)) {
+      this.runEntity(world, e, time, delta);
     }
   }
 
-  runEntity(level: Level, entity: Entity, time: number, delta: number): void {}
+  runEntity(world: World, entity: Entity, time: number, delta: number): void {}
 }
 
 export type EntitySystemFn = (
-  level: Level,
+  world: World,
   entity: Entity,
   time: number,
   delta: number
@@ -39,7 +39,7 @@ export class EntityFunctionSystem extends EntitySystem {
     this._fn = fn;
   }
 
-  runEntity(level: Level, entity: Entity, time: number, delta: number): void {
-    this._fn(level, entity, time, delta);
+  runEntity(world: World, entity: Entity, time: number, delta: number): void {
+    this._fn(world, entity, time, delta);
   }
 }

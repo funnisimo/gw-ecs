@@ -1,5 +1,7 @@
 import { AnyComponent, Component } from "../component/component.js";
 
+export type AnyResourceCtr = AnyComponent;
+
 export class Resources {
   _data: Map<AnyComponent, any> = new Map();
 

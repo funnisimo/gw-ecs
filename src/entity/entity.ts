@@ -1,7 +1,7 @@
 import type { Component, AnyComponent } from "../component/component.js";
 
 export interface ComponentSource {
-  currentTick(): number;
+  readonly tick: number;
 
   setComponent<T>(entity: Entity, val: T, comp?: Component<T>): void; // TODO - Return replaced value?
   removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined;
@@ -75,6 +75,15 @@ export class Entity {
     return data.data;
   }
 
+  fetchOr<T>(comp: Component<T>, fn: () => T): T {
+    let t = this.fetch(comp);
+    if (t === undefined) {
+      t = fn();
+      this.set(t, comp);
+    }
+    return t;
+  }
+
   set<T>(val: T, comp?: Component<T>): void {
     // @ts-ignore
     comp = comp || val.constructor;
@@ -92,10 +101,10 @@ export class Entity {
     if (!data) {
       this._comps.set(
         comp,
-        new CompData(val, this._source ? this._source.currentTick() : 0)
+        new CompData(val, this._source ? this._source.tick : 0)
       );
     } else {
-      data.added = data.updated = this._source ? this._source.currentTick() : 0;
+      data.added = data.updated = this._source ? this._source.tick : 0;
       data.removed = -1;
       data.data = val;
     }
@@ -115,7 +124,7 @@ export class Entity {
   _removeComp<T>(comp: AnyComponent): T | undefined {
     const data = this._comps.get(comp);
     if (data && data.removed < 0) {
-      data.removed = this._source ? this._source.currentTick() : 0;
+      data.removed = this._source ? this._source.tick : 0;
       return data.data;
     }
     return undefined;
@@ -141,10 +150,19 @@ export class Entity {
     return data.data;
   }
 
+  updateOr<T>(comp: Component<T>, fn: () => T): T {
+    let t = this.update(comp);
+    if (t === undefined) {
+      t = fn();
+      this.set(t, comp);
+    }
+    return t;
+  }
+
   _updateComp(comp: AnyComponent): void {
     const data = this._comps.get(comp);
     if (data) {
-      data.updated = this._source ? this._source.currentTick() : 0;
+      data.updated = this._source ? this._source.tick : 0;
     }
   }
 

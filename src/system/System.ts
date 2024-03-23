@@ -1,6 +1,6 @@
-import { Level } from "../world/level.js";
+import { World } from "../world/world.js";
 
-export type RunIfFn = (level: Level, time: number, delta: number) => boolean;
+export type RunIfFn = (world: World, time: number, delta: number) => boolean;
 
 export class System {
   private _enabled: boolean = true;
@@ -12,7 +12,7 @@ export class System {
     this._runIf = runIf || (() => true);
   }
 
-  start(_level: Level) {}
+  start(world: World) {}
 
   rebase(zeroTime: number) {
     this.lastTick = Math.max(0, this.lastTick - zeroTime);
@@ -32,14 +32,14 @@ export class System {
     return this;
   }
 
-  shouldRun(level: Level, time: number, delta: number): boolean {
-    return this._enabled && this._runIf(level, time, delta);
+  shouldRun(world: World, time: number, delta: number): boolean {
+    return this._enabled && this._runIf(world, time, delta);
   }
 
-  run(_level: Level, _time: number, _delta: number): void {}
+  run(world: World, time: number, delta: number): void {}
 }
 
-export type SystemFn = (level: Level, time: number, delta: number) => void;
+export type SystemFn = (world: World, time: number, delta: number) => void;
 
 export class FunctionSystem extends System {
   _fn: SystemFn;
@@ -49,7 +49,7 @@ export class FunctionSystem extends System {
     this._fn = fn;
   }
 
-  run(level: Level, time: number, delta: number): void {
-    this._fn(level, time, delta);
+  run(world: World, time: number, delta: number): void {
+    this._fn(world, time, delta);
   }
 }

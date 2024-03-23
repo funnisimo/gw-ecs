@@ -1,4 +1,5 @@
 // import { Entity } from "../entity/entity.js";
+import { Entity } from "../entity/entity.js";
 import { AnyComponent, Component } from "./component.js";
 import { AnyStore, SetStore, CompStore } from "./store.js";
 
@@ -26,15 +27,15 @@ export class ComponentManager {
     } while (comp && !comp.isPrototypeOf(Object));
   }
 
-  // destroyEntity(entity: Entity): void {
-  //   for (let store of this.stores.values()) {
-  //     store.destroyEntity(entity);
-  //   }
-  // }
+  entityCreated(entity: Entity) {
+    for (let store of this.stores.values()) {
+      store.entityCreated && store.entityCreated(entity);
+    }
+  }
 
-  // destroyEntities(entities: Entity[]): void {
-  //   for (let store of this.stores.values()) {
-  //     store.destroyEntities(entities);
-  //   }
-  // }
+  entityDestroyed(entity: Entity) {
+    for (let store of this.stores.values()) {
+      store.entityDestroyed && store.entityDestroyed(entity);
+    }
+  }
 }
