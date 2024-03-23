@@ -14,7 +14,7 @@ import {
 import { nextLevel } from "./map/nextLevel";
 import { addLog } from "./ui/log";
 import { CollisionManager } from "gw-ecs/common/collisions";
-import { MoveSystem } from "./systems";
+import { MoveSystem, PickupSystem } from "./systems";
 import { Game } from "./uniques";
 import { GameEvent } from "./queues";
 import { EventSystem } from "./systems/events";
@@ -51,6 +51,7 @@ export const world = new World()
   .registerQueue(GameEvent)
   .addSystem(new TimerSystem())
   .addSystem(new MoveSystem())
+  .addSystem(new PickupSystem())
   .addSystem(new EventSystem())
   .setUnique(new Game())
   .setUnique(new Timers())

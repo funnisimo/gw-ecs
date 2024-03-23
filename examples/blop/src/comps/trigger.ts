@@ -8,7 +8,7 @@ import { PATCH_TILES, TILE_ASPECT, Tile } from "./tile";
 import { capitalize } from "gw-utils/text";
 import { TriggerSprite } from "./sprite";
 import { Pickup } from "./pickup";
-import { Aspect, type Level } from "gw-ecs/world";
+import { Aspect, type World } from "gw-ecs/world";
 import { Hero } from "./hero";
 import { App } from "gw-utils/app";
 

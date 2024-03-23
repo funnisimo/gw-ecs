@@ -16,9 +16,11 @@ export class EntitySystem extends System {
   }
 
   run(world: World, time: number, delta: number): void {
-    for (let e of this._aspect.active(world, this.lastTick)) {
-      this.runEntity(world, e, time, delta);
-    }
+    world.level.entities().forEach((e) => {
+      if (this.accept(e)) {
+        this.runEntity(world, e, time, delta);
+      }
+    });
   }
 
   runEntity(world: World, entity: Entity, time: number, delta: number): void {}

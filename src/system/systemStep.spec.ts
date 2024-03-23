@@ -1,7 +1,7 @@
 import "jest-extended";
-import { System } from "./system";
+import { FunctionSystem, System } from "./system";
 import { Queue, World } from "../world";
-import { EntitySystem } from "./entitySystem";
+import { EntityFunctionSystem, EntitySystem } from "./entitySystem";
 import { EntitySystemStep, QueueSystemStep, SystemStep } from "./systemStep";
 import { Entity } from "../entity";
 import { QueueSystem } from "./queueSystem";
@@ -169,9 +169,12 @@ describe("SystemStep", () => {
     const b = jest.fn();
     const c = jest.fn();
 
-    const sysA = step.addSystem(a);
-    const sysB = step.addSystem(b, "normal");
-    const sysC = step.addSystem(c);
+    const sysA = new FunctionSystem(a);
+    step.addSystem(sysA, "normal");
+    const sysB = new FunctionSystem(b);
+    step.addSystem(sysB);
+    const sysC = new FunctionSystem(c);
+    step.addSystem(sysC);
 
     expect(step.name).toEqual("update");
     let all: [System, string][] = [];
@@ -188,9 +191,12 @@ describe("SystemStep", () => {
     const b = jest.fn();
     const c = jest.fn();
 
-    const sysA = step.addSystem(a, "normal");
-    const sysB = step.addSystem(b, "post");
-    const sysC = step.addSystem(c, "pre");
+    const sysA = new FunctionSystem(a);
+    step.addSystem(sysA, "normal");
+    const sysB = new FunctionSystem(b);
+    step.addSystem(sysB, "post");
+    const sysC = new FunctionSystem(c);
+    step.addSystem(sysC, "pre");
 
     expect(step.name).toEqual("update");
     let all: [System, string][] = [];
@@ -266,9 +272,12 @@ describe("EntitySystemStep", () => {
     const b = jest.fn();
     const c = jest.fn();
 
-    const sysA = step.addSystem(a);
-    const sysB = step.addSystem(b, "normal");
-    const sysC = step.addSystem(c);
+    const sysA = new EntityFunctionSystem(a);
+    step.addSystem(sysA);
+    const sysB = new EntityFunctionSystem(b);
+    step.addSystem(sysB);
+    const sysC = new EntityFunctionSystem(c);
+    step.addSystem(sysC);
 
     expect(step.name).toEqual("update");
     let all: [System, string][] = [];
@@ -286,9 +295,12 @@ describe("EntitySystemStep", () => {
     const b = jest.fn();
     const c = jest.fn();
 
-    const sysA = step.addSystem(a, "normal");
-    const sysB = step.addSystem(b, "post");
-    const sysC = step.addSystem(c, "pre");
+    const sysA = new EntityFunctionSystem(a);
+    step.addSystem(sysA, "normal");
+    const sysB = new EntityFunctionSystem(b);
+    step.addSystem(sysB, "post");
+    const sysC = new EntityFunctionSystem(c);
+    step.addSystem(sysC, "pre");
 
     expect(step.name).toEqual("update");
     let all: [System, string][] = [];

@@ -2,10 +2,11 @@ import type { GameEvent } from "../queues";
 import type { Entity } from "gw-ecs/entity";
 import { PosManager } from "gw-ecs/common/positions";
 import { findEmptyTileForSpawn } from "../map/utils";
-import { Blop, EffectSprite, Pickup } from "./index";
+import { Blop, EffectSprite, Hero, Pickup } from "./index";
 import { addLog, coloredName } from "../ui/log";
 import { Aspect, type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
+import { App } from "gw-utils/app";
 
 export class Effect {
   name: string;
@@ -91,5 +92,14 @@ export function createRandomEffect(world: World, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(effectClasses);
   const effect = new cls();
-  return world.create(EffectSprite, effect, new Pickup(() => {}));
+  return world.create(EffectSprite, effect, new Pickup(pickupEffect));
+}
+
+export function pickupEffect(world: World, actor: Entity, item: Entity) {
+  if (!item.has(Effect)) return;
+  if (!actor.has(Hero)) return;
+
+  const app = world.getUnique(App);
+  app.show("add_dna", { world, entity: actor, chromosome: item });
+  // TODO - run 'add_to_dna' scene
 }

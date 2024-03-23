@@ -1,12 +1,12 @@
 import { type Buffer } from "gw-utils/buffer";
-import { drawLines, drawLog, drawMap, drawMapHeader, drawStatus } from "./main";
 import * as Constants from "../constants";
 import type { Scene, Event, SceneCreateOpts } from "gw-utils/app";
-import type { Level } from "gw-ecs/world";
+import type { World } from "gw-ecs/world";
 import type { Entity } from "gw-ecs/entity";
 import { Trigger, Effect, Blop } from "../comps";
 import { DNA } from "../comps/dna";
 import { coloredName } from "../ui/log";
+import { drawLines, drawLog, drawMap, drawMapHeader } from "./main";
 
 interface MyData {
   world: World;
@@ -36,6 +36,7 @@ export const addDna: SceneCreateOpts = {
       : dna.effects.indexOf(null);
   },
   keypress(this: Scene, ev: Event) {
+    this.needsDraw = true;
     if (ev.key === "Escape") {
       this.stop();
     } else if (ev.key === "Enter") {
@@ -66,27 +67,27 @@ export const addDna: SceneCreateOpts = {
     }
   },
   draw(buffer: Buffer) {
-    // buffer.blackOut();
+    buffer.blackOut();
 
-    drawDnaHelp(buffer);
+    drawDnaHelp(buffer, this.data as MyData);
 
-    // drawLines(buffer);
+    drawLines(buffer);
 
-    // drawMapHeader(
-    //   buffer,
-    //   Constants.MAP_LEFT,
-    //   Constants.MAP_HEADER_TOP,
-    //   Constants.MAP_WIDTH,
-    //   1
-    // );
-    // drawMap(buffer, Constants.MAP_LEFT, Constants.MAP_TOP);
-    // drawLog(
-    //   buffer,
-    //   Constants.LOG_LEFT,
-    //   Constants.LOG_TOP,
-    //   Constants.LOG_WIDTH,
-    //   Constants.LOG_HEIGHT
-    // );
+    drawMapHeader(
+      buffer,
+      Constants.MAP_LEFT,
+      Constants.MAP_HEADER_TOP,
+      Constants.MAP_WIDTH,
+      1
+    );
+    drawMap(buffer, Constants.MAP_LEFT, Constants.MAP_TOP);
+    drawLog(
+      buffer,
+      Constants.LOG_LEFT,
+      Constants.LOG_TOP,
+      Constants.LOG_WIDTH,
+      Constants.LOG_HEIGHT
+    );
 
     drawAddDnaStatus(buffer, this.data as MyData);
     //   Constants.SIDEBAR_LEFT,
@@ -97,7 +98,7 @@ export const addDna: SceneCreateOpts = {
   },
 };
 
-function drawDnaHelp(buffer: Buffer) {
+function drawDnaHelp(buffer: Buffer, data: MyData) {
   buffer.fillRect(
     0,
     0,
@@ -115,6 +116,22 @@ function drawDnaHelp(buffer: Buffer) {
     "Choose the slot to place the new chromosome into.",
     "yellow"
   );
+
+  if (data.trigger) {
+    buffer.wrapText(
+      0,
+      2,
+      Constants.SCREEN_WIDTH,
+      `#{green ${data.trigger.name}} - Fires ${data.trigger.description}`
+    );
+  } else if (data.effect) {
+    buffer.wrapText(
+      0,
+      2,
+      Constants.SCREEN_WIDTH,
+      `#{teal ${data.effect.name}} - ${data.effect.description}`
+    );
+  }
 }
 
 export function drawAddDnaStatus(buffer: Buffer, data: MyData) {
@@ -122,6 +139,8 @@ export function drawAddDnaStatus(buffer: Buffer, data: MyData) {
   const y0 = Constants.SIDEBAR_TOP;
   const w = Constants.SIDEBAR_WIDTH;
   const h = Constants.SIDEBAR_HEIGHT;
+
+  buffer.fillRect(x0, y0, w, h, " ", "white", "black");
 
   const blop = data.entity.fetch(Blop)!;
   buffer.drawText(x0, y0, coloredName(data.entity));

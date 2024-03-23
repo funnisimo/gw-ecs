@@ -54,7 +54,7 @@ export class SystemSet extends System {
     system: System | SystemFn,
     enabled?: boolean
   ): this;
-  addSystem(...args: any[]) {
+  addSystem(...args: any[]): this {
     let stepName = "update";
     if (typeof args[0] === "string") {
       stepName = args.shift();

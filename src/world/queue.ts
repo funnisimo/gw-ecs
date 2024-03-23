@@ -18,6 +18,15 @@ export class QueueReader<T> {
   }
 
   next(): T | undefined {
+    if (this._nextIndex < this._store.firstIndex) {
+      console.warn(
+        "Reader for queue [" +
+          this._store._queue.name +
+          "] skipping missed queue items: " +
+          (this._store.firstIndex - this._nextIndex)
+      );
+      this._nextIndex = this._store.firstIndex;
+    }
     const item = this._store.get(this._nextIndex);
     if (item) {
       this._nextIndex += 1;
@@ -25,6 +34,11 @@ export class QueueReader<T> {
     return item;
   }
 
+  /**
+   * Iterates over all items in the queue.
+   * Note: This will include any items added to the queue by the `fn` call.
+   * @param fn - function to process queue item
+   */
   forEach(fn: (t: T) => void) {
     let next = this.next();
     while (next) {

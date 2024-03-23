@@ -1,5 +1,5 @@
 import type { Entity } from "gw-ecs/entity";
-import type { Level } from "gw-ecs/world";
+import { Aspect, type World } from "gw-ecs/world";
 
 export type PickupFn = (world: World, actor: Entity, item: Entity) => void;
 
@@ -10,3 +10,5 @@ export class Pickup {
     this.fn = fn;
   }
 }
+
+export const PICKUP_ASPECT = new Aspect(Pickup);

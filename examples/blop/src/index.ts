@@ -1,6 +1,6 @@
 import * as GWU from "gw-utils";
 import * as Constants from "./constants";
-import { mainScene } from "./scenes";
+import { mainScene, addDna } from "./scenes";
 import { world } from "./world";
 
 console.log("Hello, search for the " + Constants.BLOPULET_NAME);
@@ -12,7 +12,7 @@ const gw = GWU.app.start({
   tileWidth: 15,
   scenes: {
     main: mainScene,
-    add_dna: {},
+    add_dna: addDna,
   },
 });
 

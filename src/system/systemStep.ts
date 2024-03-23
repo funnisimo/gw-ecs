@@ -42,11 +42,7 @@ export class SystemStep extends System {
     );
   }
 
-  addSystem(
-    sys: System | SystemFn,
-    order?: SystemOrder,
-    enabled = true
-  ): System {
+  addSystem(sys: System | SystemFn, order?: SystemOrder, enabled = true): this {
     if (typeof sys === "function") {
       sys = new FunctionSystem(sys);
     }
@@ -58,7 +54,7 @@ export class SystemStep extends System {
     } else {
       this._systems.push(sys);
     }
-    return sys;
+    return this;
   }
 
   start(world: World) {
@@ -111,7 +107,7 @@ export class EntitySystemStep extends SystemStep {
     sys: EntitySystem | EntitySystemFn,
     order?: SystemOrder,
     enabled = true
-  ): EntitySystem {
+  ): this {
     if (typeof sys === "function") {
       sys = new EntityFunctionSystem(sys);
     }
@@ -119,7 +115,7 @@ export class EntitySystemStep extends SystemStep {
       throw new Error("Must be EntitySystem");
     }
     super.addSystem(sys, order, enabled);
-    return sys;
+    return this;
   }
 
   run(world: World, time: number, delta: number): void {
@@ -185,7 +181,7 @@ export class QueueSystemStep<T> extends SystemStep {
     sys: QueueSystem<T> | QueueSystemFn<T>,
     order?: SystemOrder,
     enabled = true
-  ): QueueSystem<T> {
+  ): this {
     if (typeof sys === "function") {
       sys = new QueueFunctionSystem<T>(this._comp, sys);
     } else if (this._comp !== sys._comp) {
@@ -195,7 +191,7 @@ export class QueueSystemStep<T> extends SystemStep {
       throw new Error("Must be QueueSystem");
     }
     super.addSystem(sys, order, enabled);
-    return sys;
+    return this;
   }
 
   run(world: World, time: number, delta: number): void {

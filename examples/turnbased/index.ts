@@ -125,8 +125,7 @@ class GameTurnSystem extends System {
   }
 
   start(world: World) {
-    // @ts-ignore
-    this.systems = world.getSystemSet(this.setName);
+    this.systems = world.getSystemSet(this.setName) as EntitySystemSet;
     if (!this.systems) {
       throw new Error(
         "Could not find configured EntitySytemSet: " + this.setName
