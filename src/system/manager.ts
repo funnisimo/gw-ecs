@@ -4,18 +4,12 @@ import { QueueSystem, QueueSystemFn } from "./queueSystem.js";
 import { System, SystemFn } from "./system.js";
 import {
   AddStepOpts,
-  EntitySystemSet,
-  QueueSystemSet,
+  AnySystemSet,
   SystemSet,
   isAddStepOpts,
 } from "./systemSet.js";
-import { SystemStep, EntitySystemStep, QueueSystemStep } from "./systemStep.js";
+import { AnySystemStep } from "./systemStep.js";
 
-export type AnySystemSet = SystemSet | EntitySystemSet | QueueSystemSet<any>;
-export type AnySystemStep =
-  | SystemStep
-  | EntitySystemStep
-  | QueueSystemStep<any>;
 export type AnySystem =
   | System
   | SystemFn

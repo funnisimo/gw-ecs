@@ -6,6 +6,7 @@ import {
   SystemStep,
   EntitySystemStep,
   QueueSystemStep,
+  AnySystemStep,
 } from "./systemStep";
 
 export interface AddStepOpts {
@@ -18,14 +19,22 @@ export function isAddStepOpts(x: any): x is AddStepOpts {
   return ["before", "after"].some((n) => n in x);
 }
 
+export type AnySystemSet = SystemSet | EntitySystemSet | QueueSystemSet<any>;
+
 export class SystemSet extends System {
   name: string;
-  steps: (SystemStep | EntitySystemStep)[];
+  steps: AnySystemStep[];
 
-  constructor(name: string = "default", steps: string[] = ["update"]) {
+  constructor(
+    name: string = "default",
+    steps: (string | AnySystemStep)[] = ["update"]
+  ) {
     super();
     this.name = name;
-    this.steps = steps.map((n) => this._createStep(n));
+    this.steps = steps.map((n) => {
+      if (typeof n === "string") return this._createStep(n);
+      return n;
+    });
   }
 
   get length(): number {
@@ -81,11 +90,8 @@ export class SystemSet extends System {
     return this;
   }
 
-  addStep(
-    name: string | SystemStep | EntitySystemStep,
-    opts: AddStepOpts = {}
-  ): this {
-    let step: SystemStep | EntitySystemStep;
+  addStep(name: string | AnySystemStep, opts: AddStepOpts = {}): this {
+    let step: AnySystemStep;
     if (typeof name === "string") {
       if (name.includes("-")) throw new Error('step names cannot include "-".');
       step = this._createStep(name);
@@ -132,7 +138,7 @@ export class SystemSet extends System {
     return this;
   }
 
-  getStep(name: string): SystemStep | EntitySystemStep | undefined {
+  getStep(name: string): AnySystemStep | undefined {
     return this.steps.find((s) => s.name == name);
   }
 

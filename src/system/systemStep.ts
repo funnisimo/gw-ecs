@@ -9,6 +9,10 @@ import {
 import { QueueFunctionSystem, QueueSystem, QueueSystemFn } from "./queueSystem";
 
 export type SystemOrder = "pre" | "normal" | "post";
+export type AnySystemStep =
+  | SystemStep
+  | EntitySystemStep
+  | QueueSystemStep<any>;
 
 export interface SystemStep {
   name: string;
