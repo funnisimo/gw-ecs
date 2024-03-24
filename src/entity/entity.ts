@@ -1,8 +1,7 @@
 import type { Component, AnyComponent } from "../component/component.js";
 
 export interface ComponentSource {
-  readonly tick: number;
-
+  getTick(): number;
   setComponent<T>(entity: Entity, val: T, comp?: Component<T>): void; // TODO - Return replaced value?
   removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined;
 }
@@ -101,10 +100,10 @@ export class Entity {
     if (!data) {
       this._comps.set(
         comp,
-        new CompData(val, this._source ? this._source.tick : 0)
+        new CompData(val, this._source ? this._source.getTick() : 0)
       );
     } else {
-      data.added = data.updated = this._source ? this._source.tick : 0;
+      data.added = data.updated = this._source ? this._source.getTick() : 0;
       data.removed = -1;
       data.data = val;
     }
@@ -124,7 +123,7 @@ export class Entity {
   _removeComp<T>(comp: AnyComponent): T | undefined {
     const data = this._comps.get(comp);
     if (data && data.removed < 0) {
-      data.removed = this._source ? this._source.tick : 0;
+      data.removed = this._source ? this._source.getTick() : 0;
       return data.data;
     }
     return undefined;
@@ -162,7 +161,7 @@ export class Entity {
   _updateComp(comp: AnyComponent): void {
     const data = this._comps.get(comp);
     if (data) {
-      data.updated = this._source ? this._source.tick : 0;
+      data.updated = this._source ? this._source.getTick() : 0;
     }
   }
 

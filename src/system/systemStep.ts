@@ -77,8 +77,8 @@ export class SystemStep extends System {
       return false;
     }
     sys.run(world, time, delta);
-    sys.lastTick = world.tick;
-    world.maintain();
+    sys.lastTick = world.tick();
+    // world.maintain();
     return true;
   }
 
@@ -148,8 +148,8 @@ export class EntitySystemStep extends SystemStep {
     }
     if (!sys.accept(entity)) return false;
     sys.runEntity(world, entity, time, delta);
-    sys.lastTick = world.tick;
-    world.maintain();
+    sys.lastTick = world.tick();
+    // world.maintain();
     return true;
   }
 
@@ -224,8 +224,8 @@ export class QueueSystemStep<T> extends SystemStep {
       return false;
     }
     sys.runQueueItem(world, item, time, delta);
-    sys.lastTick = world.tick;
-    world.maintain();
+    sys.lastTick = world.tick();
+    // world.maintain();
     return true;
   }
 

@@ -38,6 +38,10 @@ export class Level {
   //   this.time += delta;
   // }
 
+  maintain() {
+    this._queues.maintain();
+  }
+
   // maintain(): number {
   //   let tick = this._currentTick;
   //   this._currentTick += 1; // Tick for each system (must be after)

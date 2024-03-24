@@ -24,6 +24,7 @@ import { TimerSystem } from "./systems/timers";
 import { flash } from "./fx/flash";
 import type { Entity } from "gw-ecs/entity";
 import { Pos } from "gw-ecs/common/positions";
+import { MaintainWorld } from "gw-ecs/common";
 
 function blockedMove(actor: Entity, target: Entity, world: World) {
   addLog("#{red}Blocked#{}");
@@ -54,6 +55,7 @@ export const world = new World()
   .addSystem(new MoveSystem())
   .addSystem(new PickupSystem())
   .addSystem("events", new EventSystem())
+  .addSystem(new MaintainWorld())
   .setUnique(new Game())
   .setUnique(new Timers())
   .setUnique(new CollisionManager(), (col) => {

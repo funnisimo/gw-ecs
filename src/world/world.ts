@@ -21,6 +21,8 @@ export interface WorldInit {
   worldInit?(world: World): void;
 }
 
+const ZERO_TICK = 100000;
+
 class WorldEntityWatcher implements EntityWatcher {
   world: World;
 
@@ -43,8 +45,9 @@ class WorldComponentSource implements ComponentSource {
   constructor(world: World) {
     this.world = world;
   }
-  get tick(): number {
-    return this.world.tick;
+
+  getTick(): number {
+    return this.world._currentTick;
   }
 
   setComponent<T>(
@@ -103,9 +106,6 @@ export class World {
   get delta(): number {
     return this._delta;
   }
-  get tick(): number {
-    return this._currentTick;
-  }
 
   addTime(delta: number): this {
     this._delta = delta;
@@ -113,9 +113,16 @@ export class World {
     return this;
   }
 
-  maintain(): number {
+  tick(): number {
     let tick = this._currentTick;
     this._currentTick += 1; // Tick for each system (must be after)
+    return tick;
+  }
+
+  maintain() {
+    this._level.maintain();
+
+    // TODO - allow delayed events for most things (add/remove entity,component, queue, emit)
     if (this._toDestroy.length) {
       //   this._toDestroy.forEach((entity) => {
       //     this.notify.forEach((n) => n.destroyEntity(entity));
@@ -129,15 +136,6 @@ export class World {
 
       this._currentTick += 1; // Tick for destroy
     }
-
-    const zeroTick = 100000;
-    if (tick >= zeroTick) {
-      this._currentTick -= zeroTick;
-      this._entities.rebase(zeroTick);
-      this._systems.rebase(zeroTick);
-      tick -= zeroTick;
-    }
-    return tick;
   }
 
   init(fn: (world: World) => void): this {
@@ -237,6 +235,13 @@ export class World {
     }
     this._systems.runSet(set, this, time, delta);
     // this.maintain();
+
+    if (this._currentTick >= ZERO_TICK) {
+      this._currentTick -= ZERO_TICK;
+      this._entities.rebase(ZERO_TICK);
+      this._systems.rebase(ZERO_TICK);
+      this._currentTick -= ZERO_TICK;
+    }
   }
 
   getSystemSet(name: string): AnySystemSet | undefined {
