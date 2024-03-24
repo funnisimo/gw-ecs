@@ -2,7 +2,15 @@ import type { GameEvent } from "../queues";
 import type { Entity } from "gw-ecs/entity";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { findEmptyTileForSpawn } from "../map/utils";
-import { Blop, EffectSprite, HealEffectSprite, Hero, Pickup } from "./index";
+import {
+  Blop,
+  EffectSprite,
+  HealEffectSprite,
+  Hero,
+  Pickup,
+  TeleportSprite,
+  DamageSprite,
+} from "./index";
 import { addLog, coloredName } from "../ui/log";
 import { Aspect, type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
@@ -35,6 +43,7 @@ export class TeleportEffect extends Effect {
 
     const newXY = findEmptyTileForSpawn(world);
     posMgr.set(owner, newXY.x, newXY.y);
+    flash(world, newXY, TeleportSprite);
 
     // TODO - emit teleport event?
     addLog(`${coloredName(owner)} teleports.`);
@@ -72,6 +81,7 @@ export class HurtSelfEffect extends Effect {
       return false;
     }
     blop.health -= 1;
+    flash(world, owner.fetch(Pos)!, DamageSprite);
     // TODO - add damage amount to event?
     // TODO - emit hurt event? (for onLoseLife?)
     addLog(`${coloredName(owner)} is hurt for 1 HP.`);

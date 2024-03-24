@@ -38,4 +38,10 @@ export class ComponentManager {
       store.entityDestroyed && store.entityDestroyed(entity);
     }
   }
+
+  // removeAll() {
+  //   for (let store of this.stores.values()) {
+  //     store.removeAll();
+  //   }
+  // }
 }

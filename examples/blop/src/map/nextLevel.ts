@@ -8,7 +8,12 @@ import {
   findSpawnTileFarFrom,
   setTileType,
 } from "./utils";
-import { STAIRS, createRandomEffect, createRandomTrigger } from "../comps";
+import {
+  Hero,
+  STAIRS,
+  createRandomEffect,
+  createRandomTrigger,
+} from "../comps";
 import { makeRandomWorld } from "./randomWorld";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Game } from "../uniques";
@@ -17,6 +22,7 @@ export function nextLevel(world: World) {
   const game = world.getUnique(Game);
 
   // Clean the world
+  world.destroyEntities((e) => !e.has(Hero));
   // - all entities other than Hero
   // - detachEntity(hero) + destroyAllEntities() + attachEntity(hero) ?
 

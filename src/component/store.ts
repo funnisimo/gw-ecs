@@ -23,6 +23,7 @@ export interface CompStore<T> extends EntityWatcher {
   entities(): Entity[];
   values(): T[];
   entries(): [Entity, T][];
+  // removeAll(): void;
 }
 
 export type AnyStore = CompStore<any>;
@@ -97,6 +98,12 @@ export class SetStore<T> implements CompStore<T> {
     }
     return v;
   }
+
+  // removeAll() {
+  //   this._data.forEach((e) => {
+  //     this.remove(e);
+  //   });
+  // }
 
   has(entity: Entity): boolean {
     if (!entity.isAlive()) return false;

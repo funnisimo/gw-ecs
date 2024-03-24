@@ -1,8 +1,10 @@
-[] Teleport flash
+[X] Teleport flash
+[X] Hurt self flash
 [] Show items in Sidebar (above tile)
 [] FOV
 [] Schedule
 [] ScheduleService
+[] Teleport loop protection
 
 Observation Mode:
     [] Hit 'Tab' to go into Observation mode

@@ -9,19 +9,64 @@ import {
   EFFECT_ASPECT,
   FX_ASPECT,
   HERO_ASPECT,
+  Hero,
   Move,
   Sprite,
   TILE_ASPECT,
   TRIGGER_ASPECT,
+  Tile,
 } from "../comps";
 import { type Buffer } from "gw-utils/buffer";
-import { Aspect, type Level } from "gw-ecs/world";
+import { Aspect, World, type Level } from "gw-ecs/world";
 import { world } from "../world";
 import { getBlopEntityAt, getTileType } from "../map/utils";
 import { DNA } from "../comps/dna";
 import type { Entity } from "gw-ecs/entity";
 import { Mixer, type SpriteData } from "gw-utils/sprite";
 import { GameEvent } from "../queues";
+import type { XY } from "gw-utils";
+import { distanceFromTo, equals } from "gw-utils/xy";
+
+class FocusEntities {
+  entities: Entity[];
+  index = 0;
+
+  constructor(world: World) {
+    this.entities = [];
+    world.level.entities().forEach((e) => {
+      if (e.has(Tile)) return;
+      if (!e.has(Pos)) return;
+      this.entities.push(e);
+    });
+    const game = world.getUnique(Game);
+    const pos = game.focus || game.hero!.fetch(Pos)!;
+    this.entities.sort(
+      (a, b) =>
+        distanceFromTo(a.fetch(Pos)!, pos) - distanceFromTo(b.fetch(Pos)!, pos)
+    );
+    this.index = equals(this.entities[0].fetch(Pos)!, pos) ? 0 : -1; // So next will get to correct spot
+  }
+
+  next(): Entity {
+    this.index += 1;
+    if (this.index >= this.entities.length) {
+      this.index = 0;
+    }
+    return this.entities[this.index];
+  }
+
+  prev(): Entity {
+    this.index -= 1;
+    if (this.index < 0) {
+      this.index = this.entities.length - 1;
+    }
+    return this.entities[this.index];
+  }
+
+  current(): Entity {
+    return this.entities[this.index];
+  }
+}
 
 export const mainScene = {
   start() {
@@ -42,6 +87,7 @@ export const mainScene = {
     console.log("click", ev.x, ev.y);
   },
   mousemove(ev: Event) {
+    world.removeUnique(FocusEntities);
     const game = world.getUnique(Game);
     if (ev.x < Constants.MAP_WIDTH) {
       if (ev.y >= Constants.MAP_TOP && ev.y < Constants.LOG_TOP - 1) {
@@ -59,6 +105,7 @@ export const mainScene = {
     const game = world.getUnique(Game);
     if (ev.dir) {
       makeLogsOld();
+      world.removeUnique(FocusEntities);
       game.focus = null;
       const hero = game.hero;
       if (hero) {
@@ -68,6 +115,7 @@ export const mainScene = {
       }
     } else if (ev.key === " ") {
       makeLogsOld();
+      world.removeUnique(FocusEntities);
       game.focus = null;
       const hero = game.hero;
       if (hero) {
@@ -76,7 +124,28 @@ export const mainScene = {
         world.pushQueue(new GameEvent(hero, "turn", { time: 0 }));
         game.ready = true;
       }
-    } else if (ev.key == "Tab") {
+    } else if (ev.key === "Escape") {
+      makeLogsOld();
+      world.removeUnique(FocusEntities);
+      game.focus = null;
+      game.changed = true;
+    } else if (ev.key === "Tab") {
+      const focusEntities = world.getUniqueOr(
+        FocusEntities,
+        () => new FocusEntities(world)
+      );
+      const entity = focusEntities.next();
+      game.focus = entity.fetch(Pos)!;
+      game.changed = true;
+    } else if (ev.key === "TAB") {
+      const focusEntities = world.getUniqueOr(
+        FocusEntities,
+        () => new FocusEntities(world)
+      );
+      const entity = focusEntities.prev();
+      game.focus = entity.fetch(Pos)!;
+      game.changed = true;
+    } else if (ev.key == "Backspace") {
       makeLogsOld();
       game.focus = null;
       nextLevel(world);

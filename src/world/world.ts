@@ -301,6 +301,15 @@ export class World {
     // entity._destroy();
   }
 
+  destroyEntities(filter?: (entity: Entity) => boolean) {
+    filter = filter || (() => true);
+    this._level._entities.forEach((e) => {
+      if (filter!(e)) {
+        this.destroyNow(e);
+      }
+    });
+  }
+
   /// Resources
 
   setUnique<T>(
