@@ -147,7 +147,7 @@ class GameTurnSystem extends ScheduleSystem {
     if (!actor) {
       // TODO - Log?
       term("No Actor.\n");
-      return true; // This entity should not be scheduled
+      return true; // This entity should not be rescheduled
     }
 
     if (

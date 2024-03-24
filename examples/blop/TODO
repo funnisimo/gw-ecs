@@ -1,19 +1,16 @@
 [] Teleport flash
 [] Show items in Sidebar (above tile)
 [] FOV
-[] Scheduler
+[] Schedule
+[] ScheduleService
 
 Observation Mode:
-    [] Hit 'Enter' to go into Observation mode
-        - Maybe Escape?  
-        - Maybe just Tab?
-    [] Tab moves to next entity
+    [] Hit 'Tab' to go into Observation mode
+    [] Tab moves to next entity (non-tile)
         - How to do this?
     [] Arrows move focus
-    [] Mouse moves focus? 
-        - Or leaves mode
-    [] Escape leaves observation mode
-    [] Right Click leaves observation mode?
+    [] Mouse move/click moves focus + leaves mode
+    [] 'Escape' leaves observation mode
 
 Path Following:
     [] Show path to mouse
@@ -24,5 +21,16 @@ Path Following:
         - Take damage
         - See Blop - only new?
 
+Blops:
+    [] Add blops
+    [] Blop AI
+    [] Combat
+
 MultiWorld:
     [] Allow up+down stairs
+
+Effects:
+    [] Add more Effects
+
+Triggers:
+    [] Add more Triggers
