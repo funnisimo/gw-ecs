@@ -1,9 +1,9 @@
 import * as XY from "gw-utils/xy";
-import { BLOP_ASPECT, FLOOR, TILE_ASPECT, Tile } from "../comps";
+import { BLOP_ASPECT, FLOOR, PICKUP_ASPECT, TILE_ASPECT, Tile } from "../comps";
 import { PosManager } from "gw-ecs/common/positions";
 import { Random, random } from "gw-utils/rng";
 import { Collider } from "gw-ecs/common/collisions";
-import type { Level } from "gw-ecs/world";
+import type { World } from "gw-ecs/world";
 import type { Entity } from "gw-ecs/entity";
 
 class RandomXY {
@@ -110,5 +110,11 @@ export function getTileType(world: World, xy: XY.XY): Tile {
 export function getBlopEntityAt(world: World, xy: XY.XY): Entity | undefined {
   const mgr = world.getUnique(PosManager);
   const entity = mgr.firstAt(xy.x, xy.y, BLOP_ASPECT);
+  return entity;
+}
+
+export function getPickupEntityAt(world: World, xy: XY.XY): Entity | undefined {
+  const mgr = world.getUnique(PosManager);
+  const entity = mgr.firstAt(xy.x, xy.y, PICKUP_ASPECT);
   return entity;
 }

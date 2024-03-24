@@ -15,11 +15,12 @@ import {
   TILE_ASPECT,
   TRIGGER_ASPECT,
   Tile,
+  Trigger,
 } from "../comps";
 import { type Buffer } from "gw-utils/buffer";
 import { Aspect, World, type Level } from "gw-ecs/world";
 import { world } from "../world";
-import { getBlopEntityAt, getTileType } from "../map/utils";
+import { getBlopEntityAt, getPickupEntityAt, getTileType } from "../map/utils";
 import { DNA } from "../comps/dna";
 import type { Entity } from "gw-ecs/entity";
 import { Mixer, type SpriteData } from "gw-utils/sprite";
@@ -66,6 +67,18 @@ class FocusEntities {
   current(): Entity {
     return this.entities[this.index];
   }
+
+  // selectClosestTo(pos: XY) : Entity {
+  //   let bestDist = 9999;
+  //   this.entities.forEach((e, i) => {
+  //     const dist = distanceFromTo(e.fetch(Pos)!, pos);
+  //     if (dist < bestDist) {
+  //       bestDist = dist;
+  //       this.index = i;
+  //     }
+  //   });
+  //   return this.current;
+  // }
 }
 
 export const mainScene = {
@@ -282,6 +295,16 @@ export function drawStatus(
     drawBlopStatus(entity, buffer, x0, y0, w, h);
   }
 
+  //
+  const item = getPickupEntityAt(world, xy);
+  if (item) {
+    let name = coloredName(item);
+    buffer.drawText(x0, y0 + h - 4, "On Ground:");
+    const sprite = item.fetch(Sprite)!;
+    buffer.drawSprite(x0, y0 + h - 3, sprite);
+    buffer.drawText(x0 + 2, y0 + h - 3, coloredName(item));
+  }
+
   // Show current tile
   const tile = getTileType(world, xy);
   buffer.drawText(x0, y0 + h - 1, tile.name);
@@ -296,7 +319,9 @@ export function drawBlopStatus(
   h: number
 ) {
   const blop = entity.fetch(Blop)!;
-  buffer.drawText(x0, y0, coloredName(entity));
+  const sprite = entity.fetch(Sprite)!;
+  buffer.drawSprite(x0, y0, sprite);
+  buffer.drawText(x0 + 2, y0, coloredName(entity));
   buffer.drawProgress(
     x0,
     y0 + 1,

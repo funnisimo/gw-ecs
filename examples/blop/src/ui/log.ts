@@ -1,6 +1,6 @@
 import type { Entity } from "gw-ecs/entity/entity";
 import * as Constants from "../constants";
-import { Blop, Sprite } from "../comps";
+import { Blop, Effect, Sprite, Trigger } from "../comps";
 import { removeColors, splitIntoLines } from "gw-utils/text";
 
 export interface LogEntry {
@@ -71,8 +71,20 @@ export function makeLogsOld() {
 }
 
 export function coloredName(entity: Entity): string {
-  let blop = entity.fetch(Blop)!;
   let sprite = entity.fetch(Sprite)!;
 
-  return "#{" + sprite.fg.css() + "}" + blop.name + "#{}";
+  let blop = entity.fetch(Blop);
+  if (blop) {
+    return "#{" + sprite.fg.css() + " " + blop.name + "}";
+  }
+  let trigger = entity.fetch(Trigger);
+  if (trigger) {
+    return "#{" + sprite.fg.css() + " " + trigger.name + "}";
+  }
+  let effect = entity.fetch(Effect);
+  if (effect) {
+    return "#{" + sprite.fg.css() + " " + effect.name + "}";
+  }
+  // other items: powerup + heal + add dna slot + ...
+  return "Entity";
 }
