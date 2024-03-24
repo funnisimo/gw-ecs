@@ -8,6 +8,7 @@ export interface GameEventOpts {
   dir?: Loc;
   pos?: Pos;
   target?: Entity;
+  time?: number;
 }
 
 export class GameEvent {
@@ -16,6 +17,7 @@ export class GameEvent {
   dir?: Loc;
   pos?: Pos;
   target?: Entity;
+  time: number;
 
   constructor(entity: Entity, type: GameEventType, opts: GameEventOpts = {}) {
     this.entity = entity;
@@ -23,5 +25,6 @@ export class GameEvent {
     this.dir = opts.dir;
     this.target = opts.target;
     this.pos = opts.pos;
+    this.time = opts.time || 0;
   }
 }

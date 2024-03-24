@@ -13,6 +13,7 @@ export const TriggerSprite = new Sprite("§", "green");
 export const EffectSprite = new Sprite("§", "cyan");
 
 export const BumpSprite = new Sprite(null, null, "red");
+export const HealEffectSprite = new Sprite(null, null, "blue");
 
 export const HealSprite = new Sprite("♥", "pink");
 export const PowerupSprite = new Sprite("↑", "pink");

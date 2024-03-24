@@ -139,7 +139,7 @@ class GameTurnSystem extends System {
 
     const actors = world.getStore(Actor)!;
     actors.forEach((e, a) => {
-      gameTurn.schedule.add(e, a.actTime); // - add to schedule
+      gameTurn.schedule.add(e, a.actTime); // TODO - Randomize a little
     });
 
     actors.notify({

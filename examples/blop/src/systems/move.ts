@@ -36,7 +36,7 @@ export class MoveSystem extends EntitySystem {
       if (others.length > 0) {
         if (world.getUnique(CollisionManager).collide(entity, others)) {
           game.changed = true; // Force redraw
-          return;
+          break;
         }
       }
 
@@ -59,5 +59,6 @@ export class MoveSystem extends EntitySystem {
       // trigger move (Move...)
       // trigger tile change (StepOn...)
     } while (slide);
+    world.pushQueue(new GameEvent(entity, "turn", { time: 0 }));
   }
 }

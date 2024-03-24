@@ -1,31 +1,37 @@
-import { System } from "gw-ecs/system/system";
+import { System, type RunIfFn } from "gw-ecs/system/system";
 import type { QueueReader } from "gw-ecs/world/queue";
 import type { World } from "gw-ecs/world/world";
 import { GameEvent } from "../queues";
 import { DNA } from "../comps/dna";
 import { addLog, coloredName } from "../ui/log";
 import type { Entity } from "gw-ecs/entity";
+import { QueueSystem } from "gw-ecs/system";
 
-export class EventSystem extends System {
-  reader!: QueueReader<GameEvent>;
-
-  start(world: World): void {
-    this.reader = world.getReader(GameEvent);
+export class EventSystem extends QueueSystem<GameEvent> {
+  constructor(runIf?: RunIfFn) {
+    super(GameEvent, runIf);
   }
 
-  run(world: World, time: number, delta: number): void {
-    this.reader.forEach((e) => {
-      console.log("- event: " + e.type);
-      if (e.entity && e.entity.has(DNA)) {
-        this.tryFire(world, e, e.entity);
-      }
-      if (e.target && e.target !== e.entity && e.target.has(DNA)) {
-        this.tryFire(world, e, e.target);
-      }
-    });
+  runQueueItem(
+    world: World,
+    event: GameEvent,
+    time: number,
+    delta: number
+  ): void {
+    if (event.entity && event.entity.has(DNA)) {
+      this.tryFire(world, event, event.entity);
+    }
+    if (
+      event.target &&
+      event.target !== event.entity &&
+      event.target.has(DNA)
+    ) {
+      this.tryFire(world, event, event.target);
+    }
   }
 
   tryFire(world: World, event: GameEvent, entity: Entity) {
+    console.log("- event: " + event.type);
     let dna = event.entity.fetch(DNA)!;
     for (let i = 0; i < dna.length; ++i) {
       const trigger = dna.triggers[i];

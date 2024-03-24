@@ -1,12 +1,13 @@
 import type { GameEvent } from "../queues";
 import type { Entity } from "gw-ecs/entity";
-import { PosManager } from "gw-ecs/common/positions";
+import { Pos, PosManager } from "gw-ecs/common/positions";
 import { findEmptyTileForSpawn } from "../map/utils";
-import { Blop, EffectSprite, Hero, Pickup } from "./index";
+import { Blop, EffectSprite, HealEffectSprite, Hero, Pickup } from "./index";
 import { addLog, coloredName } from "../ui/log";
 import { Aspect, type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
+import { flash } from "../fx/flash";
 
 export class Effect {
   name: string;
@@ -54,6 +55,7 @@ export class HealEffect extends Effect {
     blop.health += 1;
     // TODO - add heal amount to event?
     // TODO - emit heal event?
+    flash(world, owner.fetch(Pos)!, HealEffectSprite);
     addLog(`${coloredName(owner)} is healed for 1 HP.`);
     return true;
   }

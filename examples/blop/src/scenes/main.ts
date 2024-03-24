@@ -21,6 +21,7 @@ import { getBlopEntityAt, getTileType } from "../map/utils";
 import { DNA } from "../comps/dna";
 import type { Entity } from "gw-ecs/entity";
 import { Mixer, type SpriteData } from "gw-utils/sprite";
+import { GameEvent } from "../queues";
 
 export const mainScene = {
   start() {
@@ -64,7 +65,16 @@ export const mainScene = {
         console.log("keypress - move", ev.dir);
         hero.set(new Move(ev.dir));
       }
-    } else if (ev.key == " ") {
+    } else if (ev.key === " ") {
+      makeLogsOld();
+      game.focus = null;
+      const hero = game.hero;
+      if (hero) {
+        console.log("keypress - wait");
+        world.pushQueue(new GameEvent(hero, "wait"));
+        world.pushQueue(new GameEvent(hero, "turn", { time: 0 }));
+      }
+    } else if (ev.key == "Tab") {
       makeLogsOld();
       game.focus = null;
       nextLevel(world);
