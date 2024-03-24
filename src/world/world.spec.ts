@@ -77,6 +77,7 @@ describe("World", function () {
       expect(callback).toHaveBeenCalledTimes(1);
 
       callback.mockClear();
+      world.maintain(); // maintain does delayed deletes
       world.addTime(0).runSystems();
       expect(callback).not.toHaveBeenCalled();
     });
@@ -125,7 +126,7 @@ describe("World", function () {
       }
     }
 
-    class DeleteSystem extends EntitySystem {
+    class DeleteLaterSystem extends EntitySystem {
       runEntity(world: World, entity: Entity): void {
         world.destroyLater(entity);
       }
@@ -139,7 +140,7 @@ describe("World", function () {
 
     test("queueDelete", () => {
       const sysCreate = new CreateSystem();
-      const sysDelete = new DeleteSystem(new Aspect().with(A, B));
+      const sysDelete = new DeleteLaterSystem(new Aspect().with(A, B));
       const world = new World();
       world
         .registerComponents(A, B, C)
@@ -155,10 +156,14 @@ describe("World", function () {
       sysCreate.setEnabled(false);
       sysDelete.setEnabled(true);
       world.runSystems();
+      // Deletes are queued, but not committed
+      expect(world.entities().count()).toEqual(3);
+      // This does the commit
+      world.maintain();
       expect(world.entities().count()).toEqual(0);
     });
 
-    test("queueDelete", () => {
+    test("deleteNow", () => {
       const sysCreate = new CreateSystem();
       const sysDelete = new DeleteNowSystem(new Aspect().with(A, B));
       const world = new World();

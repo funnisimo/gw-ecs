@@ -65,6 +65,7 @@ export class SystemStep extends System {
   }
 
   run(world: World, time: number, delta: number): void {
+    if (!this._runIf(world, time, delta)) return;
     this._preSystems.forEach((sys) => this._runSystem(world, sys, time, delta));
     this._systems.forEach((sys) => this._runSystem(world, sys, time, delta));
     this._postSystems.forEach((sys) =>
@@ -119,6 +120,7 @@ export class EntitySystemStep extends SystemStep {
   }
 
   run(world: World, time: number, delta: number): void {
+    if (!this._runIf(world, time, delta)) return;
     world.level.entities().forEach((entity) => {
       this.runEntity(world, entity, time, delta);
     });
@@ -195,6 +197,7 @@ export class QueueSystemStep<T> extends SystemStep {
   }
 
   run(world: World, time: number, delta: number): void {
+    if (!this._runIf(world, time, delta)) return;
     // TODO - prefilter systems with 'shouldRun' check?
     this._reader.forEach((item) => {
       this.runQueueItem(world, item, time, delta);

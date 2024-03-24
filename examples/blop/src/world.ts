@@ -24,7 +24,8 @@ import { TimerSystem } from "./systems/timers";
 import { flash } from "./fx/flash";
 import type { Entity } from "gw-ecs/entity";
 import { Pos } from "gw-ecs/common/positions";
-import { MaintainWorld } from "gw-ecs/common";
+import { MaintainWorld, RunSystemSet } from "gw-ecs/common";
+import { SystemSet } from "gw-ecs/system";
 
 function blockedMove(actor: Entity, target: Entity, world: World) {
   addLog("#{red}Blocked#{}");
@@ -36,6 +37,12 @@ function blockedMove(actor: Entity, target: Entity, world: World) {
 function gotoNextLevel() {
   nextLevel(world);
   return true; // We handled the collision
+}
+
+function gameReady(world: World) {
+  const timersReady = world.getUnique(Timers)!.length == 0;
+  const userReady = world.getUnique(Game)!.ready;
+  return timersReady && userReady;
 }
 
 export const world = new World()
@@ -50,12 +57,13 @@ export const world = new World()
   .registerComponent(Effect)
   .registerComponent(Pickup)
   .registerQueue(GameEvent)
-  .addSystemStep("events", { after: "update" })
+  .addSystemSet(new SystemSet("game", ["start", "act", "events", "finish"]))
+  .addSystem("game", "act", new MoveSystem())
+  .addSystem("game", "act", new PickupSystem())
+  .addSystem("game", "events", new EventSystem())
+  .addSystem("game", "finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish')
   .addSystem(new TimerSystem())
-  .addSystem(new MoveSystem())
-  .addSystem(new PickupSystem())
-  .addSystem("events", new EventSystem())
-  .addSystem(new MaintainWorld())
+  .addSystem(new RunSystemSet("game").runIf(gameReady)) // TODO - addRunSystemSet('game', gameReady)
   .setUnique(new Game())
   .setUnique(new Timers())
   .setUnique(new CollisionManager(), (col) => {

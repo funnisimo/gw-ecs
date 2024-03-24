@@ -1,7 +1,7 @@
 import { RunIfFn, System } from "../system";
 import { World } from "../world";
 
-export class RunSetSystem extends System {
+export class RunSystemSet extends System {
   set: string;
 
   constructor(set: string, runIf?: RunIfFn) {

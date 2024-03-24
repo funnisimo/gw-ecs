@@ -11,8 +11,5 @@ export class TimerSystem extends System {
   run(world: World, time: number, delta: number): void {
     const timers = world.getUnique(Timers);
     timers.update(delta);
-
-    const game = world.getUnique(Game);
-    game.ready = timers.length == 0;
   }
 }

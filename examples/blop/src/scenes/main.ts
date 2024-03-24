@@ -64,6 +64,7 @@ export const mainScene = {
       if (hero) {
         console.log("keypress - move", ev.dir);
         hero.set(new Move(ev.dir));
+        game.ready = true;
       }
     } else if (ev.key === " ") {
       makeLogsOld();
@@ -73,6 +74,7 @@ export const mainScene = {
         console.log("keypress - wait");
         world.pushQueue(new GameEvent(hero, "wait"));
         world.pushQueue(new GameEvent(hero, "turn", { time: 0 }));
+        game.ready = true;
       }
     } else if (ev.key == "Tab") {
       makeLogsOld();

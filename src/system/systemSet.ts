@@ -142,6 +142,7 @@ export class SystemSet extends System {
   }
 
   run(world: World, time: number, delta: number): void {
+    if (!this._runIf(world, time, delta)) return;
     this.steps.forEach((step) => step.run(world, time, delta));
   }
 
