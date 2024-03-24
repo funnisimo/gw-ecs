@@ -3,9 +3,10 @@ import type { QueueReader } from "gw-ecs/world/queue";
 import type { World } from "gw-ecs/world/world";
 import { GameEvent } from "../queues";
 import { DNA } from "../comps/dna";
-import { addLog, coloredName } from "../ui/log";
+import { addLog } from "../ui/log";
 import type { Entity } from "gw-ecs/entity";
 import { QueueSystem } from "gw-ecs/system";
+import { coloredName } from "../comps/name";
 
 export class EventSystem extends QueueSystem<GameEvent> {
   constructor(runIf?: RunIfFn) {

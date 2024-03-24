@@ -6,6 +6,7 @@ import { Blop } from "./blop";
 import { DNA } from "./dna";
 import { MoveDirTrigger } from ".";
 import { HealEffect } from "./effect";
+import { Name } from "./name";
 
 export class Hero {}
 
@@ -21,6 +22,7 @@ export function createHero(world: World): Entity {
     HeroSprite,
     new Collider("hero", "actor"),
     new Blop("Hero", 20),
-    dna
+    dna,
+    new Name("Hero")
   );
 }

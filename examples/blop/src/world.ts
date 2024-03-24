@@ -6,6 +6,7 @@ import {
   FX,
   Hero,
   Move,
+  Name,
   Pickup,
   Sprite,
   Tile,
@@ -53,6 +54,7 @@ export const world = new World()
   .registerComponent(Blop)
   .registerComponent(DNA)
   .registerComponent(FX)
+  .registerComponent(Name)
   .registerComponent(Trigger)
   .registerComponent(Effect)
   .registerComponent(Pickup)

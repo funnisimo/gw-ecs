@@ -11,11 +11,12 @@ import {
   TeleportSprite,
   DamageSprite,
 } from "./index";
-import { addLog, coloredName } from "../ui/log";
+import { addLog } from "../ui/log";
 import { Aspect, type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
 import { flash } from "../fx/flash";
+import { Name, coloredName } from "./name";
 
 export class Effect {
   name: string;
@@ -104,7 +105,12 @@ export function createRandomEffect(world: World, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(effectClasses);
   const effect = new cls();
-  return world.create(EffectSprite, effect, new Pickup(pickupEffect));
+  return world.create(
+    EffectSprite,
+    effect,
+    new Pickup(pickupEffect),
+    new Name(effect.name)
+  );
 }
 
 export function pickupEffect(world: World, actor: Entity, item: Entity) {

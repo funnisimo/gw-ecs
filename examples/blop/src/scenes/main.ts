@@ -3,7 +3,7 @@ import * as Constants from "../constants";
 import { nextLevel } from "../map/nextLevel";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Game } from "../uniques";
-import { coloredName, logs, makeLogsOld } from "../ui/log";
+import { logs, makeLogsOld } from "../ui/log";
 import {
   Blop,
   EFFECT_ASPECT,
@@ -20,13 +20,19 @@ import {
 import { type Buffer } from "gw-utils/buffer";
 import { Aspect, World, type Level } from "gw-ecs/world";
 import { world } from "../world";
-import { getBlopEntityAt, getPickupEntityAt, getTileType } from "../map/utils";
+import {
+  getBlopEntityAt,
+  getPickupEntityAt,
+  getTileEntityAt,
+  getTileType,
+} from "../map/utils";
 import { DNA } from "../comps/dna";
 import type { Entity } from "gw-ecs/entity";
 import { Mixer, type SpriteData } from "gw-utils/sprite";
 import { GameEvent } from "../queues";
-import type { XY } from "gw-utils";
+import { color, type XY } from "gw-utils";
 import { distanceFromTo, equals } from "gw-utils/xy";
+import { coloredName } from "../comps/name";
 
 class FocusEntities {
   entities: Entity[];
@@ -306,8 +312,9 @@ export function drawStatus(
   }
 
   // Show current tile
-  const tile = getTileType(world, xy);
-  buffer.drawText(x0, y0 + h - 1, tile.name);
+  const tile = getTileEntityAt(world, xy)!;
+  buffer.drawSprite(x0, y0 + h - 1, tile.fetch(Sprite)!);
+  buffer.drawText(x0, y0 + h - 1, coloredName(tile));
 }
 
 export function drawBlopStatus(

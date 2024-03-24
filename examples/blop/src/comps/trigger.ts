@@ -11,6 +11,7 @@ import { Pickup } from "./pickup";
 import { Aspect, type World } from "gw-ecs/world";
 import { Hero } from "./hero";
 import { App } from "gw-utils/app";
+import { Name } from "./name";
 
 export type TriggerFn = (event: GameEvent, owner: Entity) => boolean;
 
@@ -159,7 +160,12 @@ export function createRandomTrigger(world: World, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(triggerClasses);
   const trigger = new cls();
-  return world.create(TriggerSprite, trigger, new Pickup(pickupTrigger));
+  return world.create(
+    TriggerSprite,
+    trigger,
+    new Pickup(pickupTrigger),
+    new Name(trigger.name)
+  );
 }
 
 export function pickupTrigger(world: World, actor: Entity, item: Entity) {

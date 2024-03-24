@@ -5,6 +5,7 @@ import { Random, random } from "gw-utils/rng";
 import { Collider } from "gw-ecs/common/collisions";
 import type { World } from "gw-ecs/world";
 import type { Entity } from "gw-ecs/entity";
+import { Name } from "../comps/name";
 
 class RandomXY {
   _indexes: number[];
@@ -93,7 +94,7 @@ export function setTileType(world: World, xy: XY.XY, tile: Tile) {
   const entity = mgr.firstAt(xy.x, xy.y, TILE_ASPECT);
   if (!entity)
     throw new Error("Failed to find tile at pos: " + xy.x + "," + xy.y);
-  entity.setAll(tile, tile.sprite);
+  entity.setAll(tile, tile.sprite, new Name(tile.name));
   if (tile.collider) {
     entity.set(tile.collider);
   } else {
@@ -105,6 +106,12 @@ export function getTileType(world: World, xy: XY.XY): Tile {
   const mgr = world.getUnique(PosManager);
   const entity = mgr.firstAt(xy.x, xy.y, TILE_ASPECT)!;
   return entity.fetch(Tile)!;
+}
+
+export function getTileEntityAt(world: World, xy: XY.XY): Entity | undefined {
+  const mgr = world.getUnique(PosManager);
+  const entity = mgr.firstAt(xy.x, xy.y, TILE_ASPECT);
+  return entity;
 }
 
 export function getBlopEntityAt(world: World, xy: XY.XY): Entity | undefined {

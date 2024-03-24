@@ -69,22 +69,3 @@ export function makeLogsOld() {
   oldLogsIndex = 0;
   logs.length = Math.min(logs.length, Constants.LOG_HEIGHT);
 }
-
-export function coloredName(entity: Entity): string {
-  let sprite = entity.fetch(Sprite)!;
-
-  let blop = entity.fetch(Blop);
-  if (blop) {
-    return "#{" + sprite.fg.css() + " " + blop.name + "}";
-  }
-  let trigger = entity.fetch(Trigger);
-  if (trigger) {
-    return "#{" + sprite.fg.css() + " " + trigger.name + "}";
-  }
-  let effect = entity.fetch(Effect);
-  if (effect) {
-    return "#{" + sprite.fg.css() + " " + effect.name + "}";
-  }
-  // other items: powerup + heal + add dna slot + ...
-  return "Entity";
-}
