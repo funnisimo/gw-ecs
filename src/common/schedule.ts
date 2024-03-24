@@ -1,5 +1,7 @@
 import { Entity } from "../entity/entity.js";
-import { SystemFn } from "../system/system.js";
+import { RunIfFn, System, SystemFn } from "../system/system.js";
+import { EntitySystemSet } from "../system/systemSet.js";
+import { World } from "../world/world.js";
 
 export type TaskType = Entity | SystemFn;
 
@@ -95,5 +97,65 @@ export class Schedule {
     if (current && current.item === item) {
       prev.nextItem = current.nextItem;
     }
+  }
+}
+
+export class ScheduleSystem extends System {
+  setName: string;
+  systems!: EntitySystemSet;
+
+  constructor(setName: string, runIf?: RunIfFn) {
+    super(runIf);
+    this.setName = setName;
+  }
+
+  start(world: World) {
+    this.systems = world.getSystemSet(this.setName) as EntitySystemSet;
+    if (!this.systems) {
+      throw new Error(
+        "Could not find configured EntitySytemSet: " + this.setName
+      );
+    } else if (!(this.systems instanceof EntitySystemSet)) {
+      throw new Error(
+        "Configured system set is not an EntitySytemSet: " + this.setName
+      );
+    }
+  }
+
+  shouldRun(world: World, time: number, delta: number): boolean {
+    const schedule = world.getUnique(Schedule);
+    return super.shouldRun(world, schedule.time, 0);
+  }
+
+  run(world: World, time: number, delta: number) {
+    const schedule = world.getUnique(Schedule);
+
+    let entity = schedule.pop();
+    while (entity) {
+      if (entity instanceof Entity) {
+        // TODO - what to do with delta in gameTurn mode?
+        if (!this.runEntity(world, entity, schedule.time, 0)) {
+          schedule.restore(entity);
+          return;
+        }
+      } else {
+        const fn: SystemFn = entity;
+        fn(world, schedule.time, 0);
+      }
+
+      // Using RunIf to check to see if we should break out because of FX or animation or something else that is going on in
+      if (!super.shouldRun(world, schedule.time, 0)) return;
+      entity = schedule.pop();
+    }
+  }
+
+  runEntity(
+    world: World,
+    entity: Entity,
+    time: number,
+    delta: number
+  ): boolean {
+    this.systems.runEntity(world, entity, time, delta);
+    return true;
   }
 }

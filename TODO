@@ -1,0 +1,42 @@
+Delayed:
+    world.delay:
+        [] createEntity(...comps)
+        [] destroyEntity(entity)
+        [] set(entity, ...comps)
+        [] remove(entity, ...comps)
+        [] queueItem(item)
+        [] emitEvent(event)
+        [] fn(fn)?
+    [] world.maintain() - commits
+
+Events:
+    [] registerEvent(comp extends Event)
+    [] AddEventSystem(comp extends Event, sys)
+    [] emitEvent(c)
+    [] class Event
+        - stopPropagation()
+    [] World Events
+        - WorldStartup
+        - WorldShutdown
+        - ActivateLevel
+        - DeactivateLevel
+        - StartScene?
+        - StopScene?
+
+System:
+    [] System implements WorldInit
+    [] Change 'start' to 'worldInit'
+
+Bundles:
+    [] How to do this?
+    [] class Bundle {}?
+        - create(world) -> Entity
+        - name? id?
+    [] createBundle(...args: x[]) -> Bundle
+        - AnyComponent
+        - ComponentObj: { [id:string]: AnyComponent }
+        - ComponentFn: (world) => T
+    [] World.create(...args)
+        - AnyComponent[] - current
+        - AnyBundle
+

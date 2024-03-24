@@ -5,7 +5,7 @@ import { EntitySystemSet } from "gw-ecs/system/systemSet";
 import { System } from "gw-ecs/system";
 import { Entity } from "gw-ecs/entity";
 import { Aspect } from "gw-ecs/world/aspect";
-import { Schedule } from "gw-ecs/common/schedule";
+import { Schedule, ScheduleSystem } from "gw-ecs/common/schedule";
 
 class Messages {
   data: string[] = [];
@@ -48,15 +48,15 @@ class LogSystem extends EntitySystem {
   }
 }
 
-class ScheduleEntitySystem extends EntitySystem {
+class EntityRescheduleSystem extends EntitySystem {
   constructor() {
     super(new Aspect());
   }
 
   runEntity(world: World, entity: Entity, time: number, delta: number): void {
-    const gameTurn = world.getUnique(GameTurn);
+    const schedule = world.getUnique(Schedule);
     const actor = entity.fetch(Actor)!;
-    gameTurn.schedule.add(entity, actor.actTime);
+    schedule.add(entity, actor.actTime);
 
     const name = entity.fetch(Name);
     const nameText = name ? name.name : "unknown";
@@ -67,12 +67,12 @@ class ScheduleEntitySystem extends EntitySystem {
 class DrawSystem extends System {
   run(world: World, time: number) {
     const msgs = world.getUnique(Messages).popAll();
-    const gameTurn = world.getUnique(GameTurn);
+    const schedule = world.getUnique(Schedule);
     if (msgs.length) {
       msgs.forEach((msg) => {
         term(msg)("\n");
       });
-      term.blue(`World: ${time}, Game: ${gameTurn.schedule.time}\n`);
+      term.blue(`World: ${time}, Game: ${schedule.time}\n`);
     }
   }
 }
@@ -107,73 +107,38 @@ class Actor {
 }
 
 class GameTurn {
-  schedule: Schedule;
   paused = false;
-
-  constructor() {
-    this.schedule = new Schedule();
-  }
 }
 
-class GameTurnSystem extends System {
-  setName: string;
-  systems!: EntitySystemSet;
-
+class GameTurnSystem extends ScheduleSystem {
   constructor(setName: string) {
-    super();
-    this.setName = setName;
+    super(setName, (world) => {
+      const gameTurn = world.getUnique(GameTurn);
+      return !gameTurn.paused;
+    });
   }
 
   start(world: World) {
-    this.systems = world.getSystemSet(this.setName) as EntitySystemSet;
-    if (!this.systems) {
-      throw new Error(
-        "Could not find configured EntitySytemSet: " + this.setName
-      );
-    } else if (!(this.systems instanceof EntitySystemSet)) {
-      throw new Error(
-        "Configured system set is not an EntitySytemSet: " + this.setName
-      );
-    }
-    const gameTurn = world.getUnique(GameTurn);
+    super.start(world);
+    const schedule = world.getUnique(Schedule);
 
     const actors = world.getStore(Actor)!;
-    actors.forEach((e, a) => {
-      gameTurn.schedule.add(e, a.actTime); // TODO - Randomize a little
+    actors.forEach((entity, comp) => {
+      schedule.add(entity, comp.actTime); // TODO - Randomize a little
     });
 
     actors.notify({
-      compSet(entity, comp) {
-        gameTurn.schedule.add(entity, comp.actTime);
+      compSet: (entity, comp) => {
+        schedule.add(entity, comp.actTime); // TODO - Randomize a little
       },
       compRemoved(entity, _comp) {
-        gameTurn.schedule.remove(entity);
+        schedule.remove(entity);
       },
     });
-  }
-
-  run(world: World, time: number, delta: number) {
-    const gameTurn = world.getUnique(GameTurn);
-    if (gameTurn.paused) return;
-
-    let entity = gameTurn.schedule.pop() as Entity | null;
-    while (entity) {
-      // Check to see if we should break out because of FX or animation or something else that is going on
-
-      // TODO - what to do with delta in gameTurn mode?
-      if (!this.runEntity(world, gameTurn, entity, gameTurn.schedule.time, 0)) {
-        gameTurn.schedule.restore(entity);
-        return;
-      }
-
-      if (gameTurn.paused) return;
-      entity = gameTurn.schedule.pop() as Entity | null;
-    }
   }
 
   runEntity(
     world: World,
-    gameTurn: GameTurn,
     entity: Entity,
     time: number,
     delta: number
@@ -191,12 +156,9 @@ class GameTurnSystem extends System {
     ) {
       return false;
     }
-    world
-      .getUnique(Messages)
-      .add(`^gRun entity^ - ${entity.index} @ ${gameTurn.schedule.time}`);
+    world.getUnique(Messages).add(`^gRun entity^ - ${entity.index} @ ${time}`);
     actor.ready = false;
-    this.systems.runEntity(world, entity, time, delta);
-    return true;
+    return super.runEntity(world, entity, time, delta);
   }
 }
 
@@ -213,6 +175,7 @@ const world = new World()
   .registerComponent(Actor)
   .setUnique(new Messages())
   .setUnique(new GameTurn())
+  .setUnique(new Schedule())
   .addSystemSet(
     // Lots of ways to add systems to the gameturn system set
     new EntitySystemSet("gameturn", ["start", "move", "act", "finish"])
@@ -224,7 +187,7 @@ const world = new World()
         .addSystem("finish", new LogSystem("finish"));
     }
   )
-  .addSystem("gameturn", "finish", new ScheduleEntitySystem())
+  .addSystem("gameturn", "finish", new EntityRescheduleSystem())
   .addSystem(new GameTurnSystem("gameturn"))
   .addSystem(new DrawSystem())
   .init((w) => {

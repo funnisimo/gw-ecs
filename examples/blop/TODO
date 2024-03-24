@@ -1,1 +1,28 @@
 [] Teleport flash
+[] Show items in Sidebar (above tile)
+[] FOV
+[] Scheduler
+
+Observation Mode:
+    [] Hit 'Enter' to go into Observation mode
+        - Maybe Escape?  
+        - Maybe just Tab?
+    [] Tab moves to next entity
+        - How to do this?
+    [] Arrows move focus
+    [] Mouse moves focus? 
+        - Or leaves mode
+    [] Escape leaves observation mode
+    [] Right Click leaves observation mode?
+
+Path Following:
+    [] Show path to mouse
+    [] Allow Click to make Hero follow path
+    [] Also Enter?
+    [] Stop following automatically
+        - Pickup something
+        - Take damage
+        - See Blop - only new?
+
+MultiWorld:
+    [] Allow up+down stairs
