@@ -9,9 +9,9 @@
 Observation Mode:
     [X] Hit 'Tab' to go into Observation mode
     [X] Tab moves to next entity (non-tile)
-        - How to do this?
+        > How to do this?
     [-] Arrows move focus
-        - Arrows exit mode and move Hero
+        > Arrows exit mode and move Hero
     [X] Mouse move moves leaves mode
     [X] 'Escape' leaves observation mode
 
