@@ -7,12 +7,13 @@
 [] Teleport loop protection
 
 Observation Mode:
-    [] Hit 'Tab' to go into Observation mode
-    [] Tab moves to next entity (non-tile)
+    [X] Hit 'Tab' to go into Observation mode
+    [X] Tab moves to next entity (non-tile)
         - How to do this?
-    [] Arrows move focus
-    [] Mouse move/click moves focus + leaves mode
-    [] 'Escape' leaves observation mode
+    [-] Arrows move focus
+        - Arrows exit mode and move Hero
+    [X] Mouse move moves leaves mode
+    [X] 'Escape' leaves observation mode
 
 Path Following:
     [] Show path to mouse
