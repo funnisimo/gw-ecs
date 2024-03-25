@@ -1,4 +1,4 @@
-import type { Level } from "gw-ecs/world";
+import type { World } from "gw-ecs/world";
 import type { XY } from "gw-utils";
 import { FX, Sprite } from "../comps";
 import { PosManager } from "gw-ecs/common/positions";

@@ -27,6 +27,7 @@ import type { Entity } from "gw-ecs/entity";
 import { Pos } from "gw-ecs/common/positions";
 import { MaintainWorld, RunSystemSet } from "gw-ecs/common";
 import { SystemSet } from "gw-ecs/system";
+import { FocusHelper } from "./scenes";
 
 function blockedMove(actor: Entity, target: Entity, world: World) {
   addLog("#{red}Blocked#{}");
@@ -35,8 +36,11 @@ function blockedMove(actor: Entity, target: Entity, world: World) {
   return true; // We handled the collision
 }
 
-function gotoNextLevel() {
+export function gotoNextLevel() {
   nextLevel(world);
+  const focus = world.getUnique(FocusHelper);
+  const game = world.getUnique(Game);
+  focus.reset(world, game.hero!.fetch(Pos)!);
   return true; // We handled the collision
 }
 

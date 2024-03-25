@@ -1,10 +1,11 @@
 [X] Teleport flash
 [X] Hurt self flash
 [X] Show items in Sidebar (above tile)
-[] FOV
 [] Schedule
 [] ScheduleService
-[] Teleport loop protection
+[X] Teleport loop protection
+    [X] Must teleport to spot that cannot cause trigger (empty floor?)
+    [X] Ensure no changeTileType activation on teleport
 
 Observation Mode:
     [X] Hit 'Tab' to go into Observation mode
@@ -14,6 +15,11 @@ Observation Mode:
         > Arrows exit mode and move Hero
     [X] Mouse move moves leaves mode
     [X] 'Escape' leaves observation mode
+    [X] Move to FocusHelper class
+    [] Include special tiles
+        [] Stairs
+    [] Include Blops
+    [] Limit to FOV -or- Use Memory -or- Everything
 
 Path Following:
     [] Show path to mouse
@@ -37,3 +43,11 @@ Effects:
 
 Triggers:
     [] Add more Triggers
+
+FOV:
+    [] Keep FOV for Hero
+    [] Recalc on every move/teleport
+    [] Keep memory of map as it is exposed
+    [] Only items and tiles
+        X Not Blops (Too hard because of dissappear, reappear logic)
+    [] Use Memory for Draw
