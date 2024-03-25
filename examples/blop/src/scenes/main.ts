@@ -3,126 +3,32 @@ import * as Constants from "../constants";
 import { nextLevel } from "../map/nextLevel";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Game } from "../uniques";
-import { logs, makeLogsOld } from "../ui/log";
 import {
   Blop,
   EFFECT_ASPECT,
   FX_ASPECT,
   HERO_ASPECT,
-  Hero,
   Move,
   Sprite,
   TILE_ASPECT,
   TRIGGER_ASPECT,
   Tile,
-  Trigger,
 } from "../comps";
 import { type Buffer } from "gw-utils/buffer";
 import { Aspect, World } from "gw-ecs/world";
-import { gotoNextLevel, world } from "../world";
+import { world } from "../world";
 import {
   getBlopEntityAt,
   getPickupEntityAt,
   getTileEntityAt,
-  getTileType,
 } from "../map/utils";
 import { DNA } from "../comps/dna";
 import type { Entity } from "gw-ecs/entity";
 import { Mixer, type SpriteData } from "gw-utils/sprite";
 import { GameEvent } from "../queues";
-import { color, type XY } from "gw-utils";
-import { distanceFromTo, equals } from "gw-utils/xy";
+import { Log } from "../uniques";
 import { coloredName } from "../comps/name";
-
-export class FocusHelper {
-  entities: Entity[];
-  entityIndex = 0;
-  pos: XY | null;
-
-  constructor() {
-    this.entities = [];
-    this.entityIndex = -1;
-    this.pos = null;
-  }
-
-  reset(world: World, pos: XY) {
-    this.entities = [];
-    this.pos = { x: pos.x, y: pos.y };
-    world.level.entities().forEach((e) => {
-      if (e.has(Tile)) return;
-      if (!e.has(Pos)) return;
-      this.entities.push(e);
-    });
-    // const game = world.getUnique(Game);
-    // const pos = game.focus || game.hero!.fetch(Pos)!;
-    this.entities.sort(
-      (a, b) =>
-        distanceFromTo(a.fetch(Pos)!, pos) - distanceFromTo(b.fetch(Pos)!, pos)
-    );
-  }
-
-  focusAt(pos: XY) {
-    this.pos = { x: pos.x, y: pos.y };
-    this.entities.sort(
-      (a, b) =>
-        distanceFromTo(a.fetch(Pos)!, pos) - distanceFromTo(b.fetch(Pos)!, pos)
-    );
-    if (this.entities.length > 0) {
-      this.entityIndex = equals(this.entities[0].fetch(Pos)!, pos) ? 0 : -1; // So next will get to correct spot
-    } else {
-      this.entityIndex = -1;
-    }
-  }
-
-  clearFocus() {
-    this.entityIndex = -1;
-    this.pos = null;
-  }
-
-  next(): Entity | undefined {
-    if (this.entities.length == 0) {
-      this.pos = null;
-      return undefined;
-    }
-    this.entityIndex += 1;
-    if (this.entityIndex >= this.entities.length) {
-      this.entityIndex = 0;
-    }
-    const e = this.entities[this.entityIndex]!;
-    this.pos = e.fetch(Pos)!;
-    return e;
-  }
-
-  prev(): Entity | undefined {
-    if (this.entities.length == 0) {
-      this.pos = null;
-      return undefined;
-    }
-    this.entityIndex -= 1;
-    if (this.entityIndex < 0) {
-      this.entityIndex = this.entities.length - 1;
-    }
-    const e = this.entities[this.entityIndex]!;
-    this.pos = e.fetch(Pos)!;
-    return e;
-  }
-
-  current(): Entity | undefined {
-    return this.entities[this.entityIndex];
-  }
-
-  // selectClosestTo(pos: XY) : Entity {
-  //   let bestDist = 9999;
-  //   this.entities.forEach((e, i) => {
-  //     const dist = distanceFromTo(e.fetch(Pos)!, pos);
-  //     if (dist < bestDist) {
-  //       bestDist = dist;
-  //       this.index = i;
-  //     }
-  //   });
-  //   return this.current;
-  // }
-}
+import { FocusHelper } from "../uniques/focusHelper";
 
 export const mainScene = {
   start() {
@@ -163,8 +69,9 @@ export const mainScene = {
   keypress(this: Scene, ev: Event) {
     const game = world.getUnique(Game);
     const focus = world.getUnique(FocusHelper);
+    const logs = world.getUnique(Log);
     if (ev.dir) {
-      makeLogsOld();
+      logs.makeLogsOld();
       focus.clearFocus();
       const hero = game.hero;
       if (hero) {
@@ -173,7 +80,7 @@ export const mainScene = {
         game.ready = true;
       }
     } else if (ev.key === " ") {
-      makeLogsOld();
+      logs.makeLogsOld();
       focus.clearFocus();
       const hero = game.hero;
       if (hero) {
@@ -183,7 +90,7 @@ export const mainScene = {
         game.ready = true;
       }
     } else if (ev.key === "Escape") {
-      makeLogsOld();
+      logs.makeLogsOld();
       focus.clearFocus();
       game.changed = true;
     } else if (ev.key === "Tab") {
@@ -193,7 +100,7 @@ export const mainScene = {
       focus.prev();
       game.changed = true;
     } else if (ev.key == "Backspace") {
-      makeLogsOld();
+      logs.makeLogsOld();
       focus.clearFocus();
       nextLevel(world);
       game.changed = true;
@@ -223,6 +130,7 @@ export const mainScene = {
     drawMap(buffer, Constants.MAP_LEFT, Constants.MAP_TOP);
     drawLog(
       buffer,
+      world.getUnique(Log),
       Constants.LOG_LEFT,
       Constants.LOG_TOP,
       Constants.LOG_WIDTH,
@@ -291,6 +199,7 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
 
 export function drawLog(
   buffer: Buffer,
+  logs: Log,
   x0: number,
   y0: number,
   _w: number,
@@ -298,7 +207,7 @@ export function drawLog(
 ) {
   for (let i = 0; i < h; ++i) {
     let y = y0 + h - i - 1;
-    const log = logs[i];
+    const log = logs.get(i);
     let msg = "";
 
     if (log) {

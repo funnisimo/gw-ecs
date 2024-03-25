@@ -7,6 +7,7 @@ import { Trigger, Effect, Blop } from "../comps";
 import { DNA } from "../comps/dna";
 import { coloredName } from "../comps/name";
 import { drawLines, drawLog, drawMap, drawMapHeader } from "./main";
+import { Log } from "../uniques";
 
 interface MyData {
   world: World;
@@ -83,6 +84,7 @@ export const addDna: SceneCreateOpts = {
     drawMap(buffer, Constants.MAP_LEFT, Constants.MAP_TOP);
     drawLog(
       buffer,
+      this.data.world.getUnique(Log),
       Constants.LOG_LEFT,
       Constants.LOG_TOP,
       Constants.LOG_WIDTH,
@@ -193,8 +195,8 @@ export function drawAddDnaStatus(buffer: Buffer, data: MyData) {
     } else {
       name = `#{pink ${data.effect.name}}`;
     }
-    buffer.drawText(x0, y0 + 4 + dna.length + 2, "Discard: " + name);
+    buffer.drawText(x0, y0 + 4 + dna.length + 2, "Ignore: " + name);
   } else {
-    buffer.drawText(x0, y0 + 4 + dna.length + 2, "Discard: ...");
+    buffer.drawText(x0, y0 + 4 + dna.length + 2, "Ignore: ...");
   }
 }

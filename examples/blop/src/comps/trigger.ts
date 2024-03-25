@@ -121,7 +121,7 @@ export class EveryXTrigger extends Trigger {
 
   constructor() {
     const x = 7;
-    super(`OnEvery${x}Turns`, `every ${x} turns.`);
+    super(`Every${x}Turns`, `every ${x} turns.`);
     this.x = x;
     this.count = 0;
   }

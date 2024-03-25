@@ -3,7 +3,7 @@ import type { QueueReader } from "gw-ecs/world/queue";
 import type { World } from "gw-ecs/world/world";
 import { GameEvent } from "../queues";
 import { DNA } from "../comps/dna";
-import { addLog } from "../ui/log";
+import { Log } from "../uniques";
 import type { Entity } from "gw-ecs/entity";
 import { QueueSystem } from "gw-ecs/system";
 import { coloredName } from "../comps/name";
@@ -39,11 +39,13 @@ export class EventSystem extends QueueSystem<GameEvent> {
       if (trigger && trigger.matches(world, event, entity)) {
         const effect = dna.effects[i];
         if (effect) {
-          addLog(
-            `#{teal}${trigger.name}#{}:#{green}${
-              effect.name
-            }#{} of ${coloredName(entity)} is triggered.`
-          );
+          world
+            .getUnique(Log)
+            .add(
+              `#{teal}${trigger.name}#{}:#{green}${
+                effect.name
+              }#{} of ${coloredName(entity)} is triggered.`
+            );
           effect.apply(world, event, entity);
         }
       }

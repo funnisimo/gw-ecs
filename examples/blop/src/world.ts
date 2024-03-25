@@ -13,7 +13,6 @@ import {
   Trigger,
 } from "./comps";
 import { nextLevel } from "./map/nextLevel";
-import { addLog } from "./ui/log";
 import { CollisionManager } from "gw-ecs/common/collisions";
 import { MoveSystem, PickupSystem } from "./systems";
 import { Game } from "./uniques";
@@ -27,10 +26,12 @@ import type { Entity } from "gw-ecs/entity";
 import { Pos } from "gw-ecs/common/positions";
 import { MaintainWorld, RunSystemSet } from "gw-ecs/common";
 import { SystemSet } from "gw-ecs/system";
-import { FocusHelper } from "./scenes";
+import { FocusHelper } from "./uniques";
+import * as Constants from "./constants";
+import { Log } from "./uniques/log";
 
 function blockedMove(actor: Entity, target: Entity, world: World) {
-  addLog("#{red}Blocked#{}");
+  world.getUnique(Log).add("#{red}Blocked#{}");
   flash(world, target.fetch(Pos)!, BumpSprite, 150);
   // Does not count as turn for actor (esp hero)
   return true; // We handled the collision
@@ -63,13 +64,16 @@ export const world = new World()
   .registerComponent(Effect)
   .registerComponent(Pickup)
   .registerQueue(GameEvent)
-  .addSystemSet(new SystemSet("game", ["start", "act", "events", "finish"]))
-  .addSystem("game", "act", new MoveSystem())
-  .addSystem("game", "act", new PickupSystem())
+  .addSystemSet(
+    new SystemSet("game", ["start", "move", "act", "events", "finish"])
+  )
+  .addSystem("game", "move", new MoveSystem())
+  .addSystem("game", "post-move", new PickupSystem())
   .addSystem("game", "events", new EventSystem())
   .addSystem("game", "finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish')
   .addSystem(new TimerSystem())
   .addSystem(new RunSystemSet("game").runIf(gameReady)) // TODO - addRunSystemSet('game', gameReady)
+  .setUnique(new Log(Constants.LOG_HEIGHT, Constants.LOG_WIDTH))
   .setUnique(new Game())
   .setUnique(new Timers())
   .setUnique(new CollisionManager(), (col) => {

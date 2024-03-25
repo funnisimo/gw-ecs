@@ -11,12 +11,12 @@ import {
   TeleportSprite,
   DamageSprite,
 } from "./index";
-import { addLog } from "../ui/log";
 import { Aspect, type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
 import { flash } from "../fx/flash";
 import { Name, coloredName } from "./name";
+import { Log } from "../uniques";
 
 export class Effect {
   name: string;
@@ -47,7 +47,7 @@ export class TeleportEffect extends Effect {
     flash(world, newXY, TeleportSprite);
 
     // TODO - emit teleport event?
-    addLog(`${coloredName(owner)} teleports.`);
+    world.getUnique(Log).add(`${coloredName(owner)} teleports.`);
     return true;
   }
 }
@@ -66,7 +66,7 @@ export class HealEffect extends Effect {
     // TODO - add heal amount to event?
     // TODO - emit heal event?
     flash(world, owner.fetch(Pos)!, HealEffectSprite);
-    addLog(`${coloredName(owner)} is healed for 1 HP.`);
+    world.getUnique(Log).add(`${coloredName(owner)} is healed for 1 HP.`);
     return true;
   }
 }
@@ -85,7 +85,7 @@ export class HurtSelfEffect extends Effect {
     flash(world, owner.fetch(Pos)!, DamageSprite);
     // TODO - add damage amount to event?
     // TODO - emit hurt event? (for onLoseLife?)
-    addLog(`${coloredName(owner)} is hurt for 1 HP.`);
+    world.getUnique(Log).add(`${coloredName(owner)} is hurt for 1 HP.`);
     return true;
   }
 }

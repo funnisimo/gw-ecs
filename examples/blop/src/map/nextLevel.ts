@@ -2,7 +2,7 @@ import { Entity } from "gw-ecs/entity";
 import { World } from "gw-ecs/world";
 import { createHero } from "../comps/hero";
 import * as Constants from "../constants";
-import { addLog } from "../ui/log";
+import { Log } from "../uniques";
 import {
   findClosestEmptyFloor as findClosestSpawnTile,
   findSpawnTileFarFrom,
@@ -35,8 +35,8 @@ export function nextLevel(world: World) {
   makeNormalLevel(world, game.depth);
   // }
 
-  addLog("");
-  addLog("=== LEVEL " + game.depth + " ===");
+  world.getUnique(Log).add("");
+  world.getUnique(Log).add("=== LEVEL " + game.depth + " ===");
 
   //   return {
   //     depth: depth,
