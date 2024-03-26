@@ -2,17 +2,24 @@ Delayed:
     world.delay:
         [] createEntity(...comps)
         [] destroyEntity(entity)
-        [] set(entity, ...comps)
-        [] remove(entity, ...comps)
+        [] setComponent(entity, ...comps)
+        [] updateComponent(entity, ...comps)?
+        [] removeComponent(entity, ...comps)
+        [] set/update/remove Unique?
+        [] set/update/remove Global?
         [] queueItem(item)
         [] emitEvent(event)
-        [] fn(fn)?
+        [] runSystem(fn: SystemFn)?
+        [] runSystemSet(set, time?, delta?)?
     [] world.maintain() - commits
+        * Or world.commit();
 
 Events:
-    [] registerEvent(comp extends Event)
-    [] AddEventSystem(comp extends Event, sys)
+    [] registerEvent(comp extends Event, steps=['emit'])
+    [] addEventStep(comp, step, opts={})
+    [] addEventSystem(comp extends Event, step?, sys)
     [] emitEvent(c)
+        * Fires all registered systems synchronously
     [] class Event
         - stopPropagation()
     [] World Events
@@ -21,7 +28,12 @@ Events:
         - ActivateLevel
         - DeactivateLevel
         - StartScene?
+            * Or ShowScene
         - StopScene?
+    [] EventSystem extends System
+        [] runEventItem
+    [] EventSystemStep
+    [] EventSystemSet
 
 System:
     [] System implements WorldInit
@@ -30,13 +42,31 @@ System:
 Bundles:
     [] How to do this?
     [] class Bundle {}?
-        - create(world) -> Entity
-        - name? id?
+        [] create(world) -> Entity
+        [] name? id?
     [] createBundle(...args: x[]) -> Bundle
-        - AnyComponent
-        - ComponentObj: { [id:string]: AnyComponent }
-        - ComponentFn: (world) => T
+        [] AnyComponent
+        [] ComponentFn: (world) => T
+        [] ComponentObj: { [id:string]: AnyComponent | ComponentFn }
     [] World.create(...args)
-        - AnyComponent[] - current
-        - AnyBundle
+        [X] AnyComponent[] - current
+        [] AnyBundle
 
+World:
+    [] init -> onstartup(sys: System | SystemFn)
+        * this.addEventSystem(WorldStartup, sys)
+    [] onshutdown(sys: System | SystemFn)
+        * this.addEventSystem(WorldShutdown, sys)
+
+SystemSet:
+    [] What is default step if you supply custom steps?
+        * First?
+        * Marker in text?
+    [] Can you change default step in: addSystemStep(set, step)?
+        * AddStepOpts: { default?: true }
+    [] By default commits at the end of last step
+    [] How to turn off auto commit at end of last step
+
+SystemStep:
+    [] Allow marking step as doing commit after it finishes
+        * AddStepOpts: { commit?: true }

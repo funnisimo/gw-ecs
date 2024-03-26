@@ -1,21 +1,7 @@
-[X] Teleport flash
-[X] Hurt self flash
-[X] Show items in Sidebar (above tile)
 [] Schedule
 [] ScheduleService
-[X] Teleport loop protection
-    [X] Must teleport to spot that cannot cause trigger (empty floor?)
-    [X] Ensure no changeTileType activation on teleport
 
 Observation Mode:
-    [X] Hit 'Tab' to go into Observation mode
-    [X] Tab moves to next entity (non-tile)
-        > How to do this?
-    [-] Arrows move focus
-        > Arrows exit mode and move Hero
-    [X] Mouse move moves leaves mode
-    [X] 'Escape' leaves observation mode
-    [X] Move to FocusHelper class
     [] Include special tiles
         [] Stairs
     [] Include Blops
