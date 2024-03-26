@@ -9,7 +9,7 @@ Delayed:
         [] set/update/remove Global?
         [] queueItem(item)
         [] emitEvent(event)
-        [] runSystem(fn: SystemFn)?
+        [] runSystem(fn: System | SystemFn)?
         [] runSystemSet(set, time?, delta?)?
     [] world.maintain() - commits
         * Or world.commit();
