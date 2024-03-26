@@ -38,6 +38,10 @@ Events:
 System:
     [] System implements WorldInit
     [] Change 'start' to 'worldInit'
+    [] Track own delta?
+        [] lastTime
+        [] this.delta
+        [] System.run -> remove delta
 
 Bundles:
     [] How to do this?
@@ -53,10 +57,19 @@ Bundles:
         [] AnyBundle
 
 World:
-    [] init -> onstartup(sys: System | SystemFn)
+    [] init -> onStartup(sys: System | SystemFn)
         * this.addEventSystem(WorldStartup, sys)
-    [] onshutdown(sys: System | SystemFn)
+    [] onShutdown(sys: System | SystemFn)
         * this.addEventSystem(WorldShutdown, sys)
+    [] addStoreWatcher(comp, fn)
+        * fn: (world: World, store: CompStore<C>) -> StoreWatcher<C>
+    [] expectUnique
+    [] ensureUnique
+    [] expectGlobal
+    [] ensureGlobal
+    [] world.entities() -vs- world.level.entities()
+        * The accessing of level should not be required
+        * world.allEntities() vs world.entities()?
 
 SystemSet:
     [] What is default step if you supply custom steps?
@@ -66,7 +79,23 @@ SystemSet:
         * AddStepOpts: { default?: true }
     [] By default commits at the end of last step
     [] How to turn off auto commit at end of last step
+    [] lastTick - update this on run
+    [] Should **NOT** be a System
+        Just system-like
+    [] Track own delta?
+        [] lastTime
 
 SystemStep:
     [] Allow marking step as doing commit after it finishes
         * AddStepOpts: { commit?: true }
+    [] lastTick - upate this on run
+    [] Should **NOT** be a System
+        Just system-like
+    [] Track own delta?
+        [] lastTime
+
+
+MultiWorld:
+    [] Store `notify` in a MultiWorld needs to be tested/updated
+        * One one register should be required
+    

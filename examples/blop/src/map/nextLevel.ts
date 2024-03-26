@@ -2,7 +2,7 @@ import { Entity } from "gw-ecs/entity";
 import { World } from "gw-ecs/world";
 import { createHero } from "../comps/hero";
 import * as Constants from "../constants";
-import { Log } from "../uniques";
+import { FOV, Log } from "../uniques";
 import {
   findClosestEmptyFloor as findClosestSpawnTile,
   findSpawnTileFarFrom,
@@ -11,6 +11,7 @@ import {
 import {
   Hero,
   STAIRS,
+  Tile,
   createRandomEffect,
   createRandomTrigger,
 } from "../comps";
@@ -29,11 +30,20 @@ export function nextLevel(world: World) {
   game.depth += 1;
   // var newLevel;
 
+  const fov = world.getUnique(FOV);
+  fov.reset();
+
   // if (depth >= Constants.END_DEPTH) {
   //   makeBlopuletWorld(world);
   // } else {
   makeNormalLevel(world, game.depth);
   // }
+
+  const posMgr = world.getUnique(PosManager);
+  posMgr.everyXY((x, y, entities) => {
+    const blocksVisibility = entities[0].fetch(Tile)!.blocksVision;
+    fov.setBlocksVisibility(x, y, blocksVisibility);
+  });
 
   world.getUnique(Log).add("");
   world.getUnique(Log).add("=== LEVEL " + game.depth + " ===");

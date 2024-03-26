@@ -2,7 +2,7 @@ import { Event, Scene } from "gw-utils/app";
 import * as Constants from "../constants";
 import { nextLevel } from "../map/nextLevel";
 import { Pos, PosManager } from "gw-ecs/common/positions";
-import { Game } from "../uniques";
+import { FOV, Game } from "../uniques";
 import {
   Blop,
   EFFECT_ASPECT,
@@ -16,7 +16,7 @@ import {
 } from "../comps";
 import { type Buffer } from "gw-utils/buffer";
 import { Aspect, World } from "gw-ecs/world";
-import { world } from "../world";
+import { gotoNextLevel, world } from "../world";
 import {
   getBlopEntityAt,
   getPickupEntityAt,
@@ -29,6 +29,7 @@ import { GameEvent } from "../queues";
 import { Log } from "../uniques";
 import { coloredName } from "../comps/name";
 import { FocusHelper } from "../uniques/focusHelper";
+import { BLACK } from "gw-utils/color";
 
 export const mainScene = {
   start() {
@@ -101,9 +102,7 @@ export const mainScene = {
       game.changed = true;
     } else if (ev.key == "Backspace") {
       logs.makeLogsOld();
-      focus.clearFocus();
-      nextLevel(world);
-      game.changed = true;
+      gotoNextLevel(world);
     } else {
       console.log("key", ev.key);
     }
@@ -169,6 +168,7 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
   const mgr = world.getUnique(PosManager);
   const game = world.getUnique(Game);
   const focus = world.getUnique(FocusHelper);
+  const fov = world.getUnique(FOV);
 
   mgr.everyXY((x, y, entities) => {
     if (entities.length == 0) {
@@ -180,11 +180,19 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
         EFFECT_ASPECT.first(entities) ||
         TILE_ASPECT.first(entities)!;
 
-      let sprite: SpriteData = entity.fetch(Sprite)!;
+      let sprite: Mixer = new Mixer(entity.fetch(Sprite)!);
 
       const fx = FX_ASPECT.first(entities);
       if (fx) {
-        sprite = new Mixer(sprite).drawSprite(fx.fetch(Sprite)!).bake();
+        sprite.drawSprite(fx.fetch(Sprite)!);
+      }
+
+      if (!fov.isVisible(x, y)) {
+        if (fov.isRevealed(x, y)) {
+          sprite.mix(BLACK, 50, 50);
+        } else {
+          sprite.mix(BLACK, 100, 100);
+        }
       }
 
       const isFocus = focus.pos && focus.pos.x == x && focus.pos.y == y;
@@ -233,6 +241,9 @@ export function drawStatus(
   const focus = world.getUnique(FocusHelper);
   const hero = game.hero!;
   const xy = focus.pos || hero.fetch(Pos)!;
+  const fov = world.getUnique(FOV);
+
+  if (!fov.isRevealed(xy.x, xy.y)) return;
 
   const entity = focus.pos ? getBlopEntityAt(world, xy) : game.hero;
   if (entity) {

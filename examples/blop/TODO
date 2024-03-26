@@ -31,9 +31,19 @@ Triggers:
     [] Add more Triggers
 
 FOV:
-    [] Keep FOV for Hero
-    [] Recalc on every move/teleport
+    [X] Keep FOV for Hero
+    [X] Recalc on every move
+    [X] Recalc on teleport
     [] Keep memory of map as it is exposed
-    [] Only items and tiles
+        [] Only items and tiles
         X Not Blops (Too hard because of dissappear, reappear logic)
-    [] Use Memory for Draw
+    [] Use Memory for Draw of revealed
+    [] FocusHelper needs to be FOV aware
+        * Only keep tiles+items that are revealed
+        * Only keep actors that are visible
+        * Make sure FOV is updated - not as easy as check in reset
+
+Pickup:
+    [X] Need to update FocusHelper
+        * Remove picked up entity
+        * store.notify?

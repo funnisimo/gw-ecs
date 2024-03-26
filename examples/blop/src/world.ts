@@ -14,8 +14,14 @@ import {
 } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { CollisionManager } from "gw-ecs/common/collisions";
-import { MoveSystem, PickupSystem } from "./systems";
-import { Game } from "./uniques";
+import {
+  FovSystem,
+  MoveSystem,
+  PickupSystem,
+  heroMoved,
+  heroTeleported,
+} from "./systems";
+import { FOV, Game, notifyFovWhenTilesChange } from "./uniques";
 import { GameEvent } from "./queues";
 import { EventSystem } from "./systems/events";
 import { DNA } from "./comps/dna";
@@ -33,15 +39,16 @@ import { Log } from "./uniques/log";
 function blockedMove(actor: Entity, target: Entity, world: World) {
   world.getUnique(Log).add("#{red}Blocked#{}");
   flash(world, target.fetch(Pos)!, BumpSprite, 150);
-  // Does not count as turn for actor (esp hero)
+  // Does it count as turn for actor (esp hero)?  Check move system.
   return true; // We handled the collision
 }
 
-export function gotoNextLevel() {
+export function gotoNextLevel(world: World) {
   nextLevel(world);
   const focus = world.getUnique(FocusHelper);
   const game = world.getUnique(Game);
   focus.reset(world, game.hero!.fetch(Pos)!);
+  game.changed = true;
   return true; // We handled the collision
 }
 
@@ -69,19 +76,25 @@ export const world = new World()
   )
   .addSystem("game", "move", new MoveSystem())
   .addSystem("game", "post-move", new PickupSystem())
+  .addSystem("game", "post-move", new FovSystem().runIf(heroMoved)) // So that FOV is accurate for act, events
   .addSystem("game", "events", new EventSystem())
-  .addSystem("game", "finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish')
+  .addSystem("game", "post-events", new FovSystem().runIf(heroTeleported)) // So that teleport updates before net loop
+  .addSystem("game", "finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish') -or- addCommit('game', 'world')
   .addSystem(new TimerSystem())
   .addSystem(new RunSystemSet("game").runIf(gameReady)) // TODO - addRunSystemSet('game', gameReady)
   .setUnique(new Log(Constants.LOG_HEIGHT, Constants.LOG_WIDTH))
   .setUnique(new Game())
   .setUnique(new Timers())
+  .setUnique(
+    new FOV(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT),
+    notifyFovWhenTilesChange
+  )
   .setUnique(new CollisionManager(), (col) => {
     col
       // .register(["hero"], ["blop"], attack)
       // .register(["blop"], ["hero"], attack)
       .register("actor", "wall", blockedMove)
-      .register("hero", "stairs", gotoNextLevel);
+      .register("hero", "stairs", (a, t, w) => gotoNextLevel(w));
   })
   .start();
 

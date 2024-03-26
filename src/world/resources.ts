@@ -14,15 +14,15 @@ export class Resources {
     return this._data.get(comp);
   }
 
-  getOr<T>(comp: Component<T>, fn: () => T): T {
-    const v = this._data.get(comp);
-    if (v !== undefined) {
-      return v;
-    }
-    const newV = fn();
-    this.set(newV);
-    return newV;
-  }
+  // getOr<T>(comp: Component<T>, fn: () => T): T {
+  //   const v = this._data.get(comp);
+  //   if (v !== undefined) {
+  //     return v;
+  //   }
+  //   const newV = fn();
+  //   this.set(newV);
+  //   return newV;
+  // }
 
   delete<T>(comp: Component<T>) {
     this._data.delete(comp);

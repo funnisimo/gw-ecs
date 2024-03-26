@@ -1,10 +1,11 @@
 import type { Entity } from "gw-ecs/entity";
-import type { World } from "gw-ecs/world";
+import type { World, WorldInit } from "gw-ecs/world";
 import { distanceFromTo, equals, type XY } from "gw-utils/xy";
 import { Tile } from "../comps";
 import { Pos } from "gw-ecs/common";
+import { FOV } from "./fov";
 
-export class FocusHelper {
+export class FocusHelper implements WorldInit {
   entities: Entity[];
   entityIndex = 0;
   pos: XY | null;
@@ -15,12 +16,22 @@ export class FocusHelper {
     this.pos = null;
   }
 
+  worldInit(world: World): void {
+    const entities = world.entities();
+    entities.notify({
+      entityDestroyed: (entity) => {
+        this.entities = this.entities.filter((e) => e !== entity);
+      },
+    });
+  }
+
   reset(world: World, pos: XY) {
     this.entities = [];
-    this.pos = { x: pos.x, y: pos.y };
+    this.pos = null; // { x: pos.x, y: pos.y };
     world.level.entities().forEach((e) => {
       if (e.has(Tile)) return;
-      if (!e.has(Pos)) return;
+      const pos = e.fetch(Pos);
+      if (!pos) return;
       this.entities.push(e);
     });
     // const game = world.getUnique(Game);

@@ -170,6 +170,16 @@ export class World {
     return this._globals.get(comp);
   }
 
+  getGlobalOr<T>(comp: Component<T>, fn: () => T & WorldInit): T {
+    const v = this.getGlobal(comp);
+    if (v !== undefined) {
+      return v;
+    }
+    const newV = fn();
+    this.setGlobal(newV);
+    return newV;
+  }
+
   removeGlobal<T>(comp: Component<T>) {
     this._globals.delete(comp);
   }
@@ -335,8 +345,14 @@ export class World {
     return this._level.getUnique(comp);
   }
 
-  getUniqueOr<T>(comp: Component<T>, fn: () => T): T {
-    return this._level.getUniqueOr(comp, fn);
+  getUniqueOr<T>(comp: Component<T>, fn: () => T & WorldInit): T {
+    const v = this.getUnique(comp);
+    if (v !== undefined) {
+      return v;
+    }
+    const newV = fn();
+    this.setUnique(newV);
+    return newV;
   }
 
   removeUnique<T>(comp: Component<T>) {

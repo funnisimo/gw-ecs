@@ -1,6 +1,11 @@
 import { World } from "../world/world.js";
 
-export type RunIfFn = (world: World, time: number, delta: number) => boolean;
+export type RunIfFn = (
+  world: World,
+  time: number,
+  delta: number,
+  lastTick: number
+) => boolean;
 
 export class System {
   private _enabled: boolean = true;
@@ -33,7 +38,7 @@ export class System {
   }
 
   shouldRun(world: World, time: number, delta: number): boolean {
-    return this._enabled && this._runIf(world, time, delta);
+    return this._enabled && this._runIf(world, time, delta, this.lastTick);
   }
 
   run(world: World, time: number, delta: number): void {}
