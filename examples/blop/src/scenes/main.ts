@@ -181,12 +181,19 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
     if (entities.length == 0) {
       buffer.draw(x + x0, y + y0, "?", "red");
     } else {
-      const entity =
-        HERO_ASPECT.first(entities) ||
-        BLOP_ASPECT.first(entities) ||
-        TRIGGER_ASPECT.first(entities) ||
-        EFFECT_ASPECT.first(entities) ||
-        TILE_ASPECT.first(entities)!;
+      let entity = HERO_ASPECT.first(entities);
+
+      // Blops have to be visible
+      if (!entity && fov.isVisible(x, y)) {
+        entity = BLOP_ASPECT.first(entities);
+      }
+
+      if (!entity) {
+        entity =
+          TRIGGER_ASPECT.first(entities) ||
+          EFFECT_ASPECT.first(entities) ||
+          TILE_ASPECT.first(entities)!;
+      }
 
       let sprite: Mixer = new Mixer(entity.fetch(Sprite)!);
 

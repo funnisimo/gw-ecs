@@ -1,7 +1,7 @@
 import type { Entity } from "gw-ecs/entity";
 import type { World, WorldInit } from "gw-ecs/world";
 import { distanceFromTo, equals, type XY } from "gw-utils/xy";
-import { Tile } from "../comps";
+import { BLOP_ASPECT, Tile } from "../comps";
 import { Pos } from "gw-ecs/common";
 import { FOV } from "./fov";
 
@@ -75,8 +75,11 @@ export class FocusHelper implements WorldInit {
       const e = this.entities[this.entityIndex]!;
       const pos = e.fetch(Pos)!;
       if (fov.isRevealed(pos.x, pos.y)) {
-        this.pos = pos.xy();
-        return e;
+        // blops have to be visible to be seen
+        if (!BLOP_ASPECT.match(e) || fov.isVisible(pos.x, pos.y)) {
+          this.pos = pos.xy();
+          return e;
+        }
       }
       tries += 1;
     } while (tries <= this.entities.length);
@@ -97,8 +100,11 @@ export class FocusHelper implements WorldInit {
       const e = this.entities[this.entityIndex]!;
       const pos = e.fetch(Pos)!;
       if (fov.isRevealed(pos.x, pos.y)) {
-        this.pos = pos.xy();
-        return e;
+        // blops have to be visible to be seen
+        if (!BLOP_ASPECT.match(e) || fov.isVisible(pos.x, pos.y)) {
+          this.pos = pos.xy();
+          return e;
+        }
       }
       tries += 1;
     } while (tries <= this.entities.length);

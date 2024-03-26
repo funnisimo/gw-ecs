@@ -17,9 +17,12 @@ Path Following:
         - See Blop - only new?
 
 Blops:
-    [] Add blops
+    [X] Add blops
+    Hero -> Blop collisions:
+        [] Start with "Hello"
+        [] Attack
     [] Blop AI
-    [] Combat
+    [] Drops
 
 MultiWorld:
     [] Allow up+down stairs
