@@ -4,6 +4,12 @@ export interface Component<T> extends Function {
 
 export type AnyComponent = Component<any>;
 
+export interface SimpleComponent<T> extends Function {
+  new (): T;
+}
+
+export type AnySimpleComponent = SimpleComponent<any>;
+
 // class Item {
 //   kind: string;
 

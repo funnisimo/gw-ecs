@@ -9,15 +9,22 @@ import {
   setTileType,
 } from "./utils";
 import {
+  COMPLEX_BLOP_BUNDLE,
+  FAT_BLOP_BUNDLE,
   Hero,
+  SMALL_BLOP_BUNDLE,
   STAIRS,
+  STAIRS_BUNDLE,
+  TILE_ASPECT,
   Tile,
+  WARRIOR_BLOP_BUNDLE,
   createRandomEffect,
   createRandomTrigger,
 } from "../comps";
 import { makeRandomWorld } from "./randomWorld";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Game } from "../uniques";
+import { random, type XY } from "gw-utils";
 
 export function nextLevel(world: World) {
   const game = world.getUnique(Game);
@@ -43,7 +50,7 @@ export function nextLevel(world: World) {
   posMgr.everyXY((x, y, entities) => {
     const blocksVisibility = entities[0].fetch(Tile)!.blocksVision;
     fov.setBlocksVisibility(x, y, blocksVisibility);
-  });
+  }, TILE_ASPECT);
 
   world.getUnique(Log).add("");
   world.getUnique(Log).add("=== LEVEL " + game.depth + " ===");
@@ -82,19 +89,18 @@ function makeNormalLevel(world: World, depth: number) {
     startingHeroXY = { x: pos.x, y: pos.y };
   }
 
-  console.log("hero xy - before", startingHeroXY);
+  // console.log("hero xy - before", startingHeroXY);
   const heroXY = findClosestSpawnTile(world, startingHeroXY);
   const mgr = world.getUnique(PosManager);
   mgr.set(hero, heroXY.x, heroXY.y);
-  console.log("hero starting xy", heroXY);
+  // console.log("hero starting xy", heroXY);
 
-  //
   var stairsXY = findSpawnTileFarFrom(
     world,
     heroXY,
     Constants.STAIRS_MIN_DISTANCE
   );
-  setTileType(world, stairsXY, STAIRS);
+  setTileType(world, stairsXY, STAIRS_BUNDLE);
 
   const triggerXY = findClosestSpawnTile(world, startingHeroXY);
   console.log("trigger @", triggerXY);
@@ -106,7 +112,7 @@ function makeNormalLevel(world: World, depth: number) {
   const effect = createRandomEffect(world);
   mgr.set(effect, effectXY.x, effectXY.y);
 
-  // var blops = makeBlops(world, playerPos, depth);
+  makeBlops(world, heroXY, depth);
   // var items = makeItems(world, playerPos, depth);
 
   return {
@@ -117,48 +123,21 @@ function makeNormalLevel(world: World, depth: number) {
   };
 }
 
-// function makeBlops(world, playerPos, depth) {
-//   var blops = [];
-//   var numberOfBlops =
-//     2 +
-//     Math.max(
-//       0,
-//       rot_js__WEBPACK_IMPORTED_MODULE_0__.RNG.getNormal(
-//         depth / 2,
-//         Constants.BLOP_NUMBER_STDDEV
-//       )
-//     );
+function makeBlops(world: World, playerPos: XY, depth: number) {
+  const mgr = world.getUnique(PosManager);
+  var numberOfBlops =
+    2 + Math.max(0, random.normal(depth / 2, Constants.BLOP_NUMBER_STDDEV));
 
-//   for (var i = 0; i < numberOfBlops; i++) {
-//     var blop = (0, _entities_Spawner__WEBPACK_IMPORTED_MODULE_2__.generateBlop)(
-//       depth
-//     );
-//     blop.position = findTileToSpawnBlop(world, blops, playerPos);
-//     blops.push(blop);
-//   }
-
-//   return blops;
-// }
-
-// function findTileToSpawnBlop(world, blops, playerPos) {
-//   // eslint-disable-next-line no-constant-condition
-//   while (true) {
-//     var position = (0,
-//     _State__WEBPACK_IMPORTED_MODULE_7__.findEmptyTileForSpawn)({
-//       world: world,
-//       blops: blops,
-//     });
-
-//     if (
-//       (0, _utils_Vec2__WEBPACK_IMPORTED_MODULE_4__.euclidianDistance)(
-//         position,
-//         playerPos
-//       ) >= Constants.MIN_BLOP_DISTANCE_AT_START
-//     ) {
-//       return position;
-//     }
-//   }
-// }
+  for (var i = 0; i < numberOfBlops; i++) {
+    const blop = generateBlop(world, depth);
+    const blopPos = findSpawnTileFarFrom(
+      world,
+      playerPos,
+      Constants.MIN_BLOP_DISTANCE_AT_START
+    );
+    mgr.set(blop, blopPos.x, blopPos.y);
+  }
+}
 
 // function makeItems(world, playerPos, depth) {
 //   var otherForbiddenPos = [playerPos];
@@ -237,3 +216,54 @@ function makeNormalLevel(world: World, depth: number) {
 // }
 
 //# sourceURL=webpack://7drl-2021-blob-genes/./src/state/world/nextLevel.ts?
+
+const spawnProbabilities: { [key: string]: any } = {
+  smallBlop: {
+    bundle: SMALL_BLOP_BUNDLE,
+    average: 1,
+    deviation: 5,
+    weight: 5,
+  },
+  fatBlop: {
+    bundle: FAT_BLOP_BUNDLE,
+    average: 6,
+    deviation: 2,
+    weight: 3,
+  },
+  warriorBlop: {
+    bundle: WARRIOR_BLOP_BUNDLE,
+    average: 8,
+    deviation: 2,
+    weight: 3,
+  },
+  complexBlop: {
+    bundle: COMPLEX_BLOP_BUNDLE,
+    average: 10,
+    deviation: 1,
+    weight: 3,
+  },
+};
+
+const SQRT_2_PI = Math.sqrt(2 * Math.PI);
+// https://www.math.net/gaussian-distribution
+function gaussian(mu: number, stddev: number, x: number) {
+  return (
+    (1 / (stddev * SQRT_2_PI)) *
+    Math.exp(-Math.pow(x - mu, 2) / (2 * stddev * stddev))
+  );
+}
+
+function generateBlop(world: World, depth: number): Entity {
+  const spawnProbabilityForLevel: Record<string, number> = {};
+
+  for (let key in spawnProbabilities) {
+    const spawnProbablity = spawnProbabilities[key];
+    spawnProbabilityForLevel[key] =
+      spawnProbablity.weight *
+      gaussian(spawnProbablity.average, spawnProbablity.deviation, depth);
+  }
+
+  const selectedSpawnType = random.weighted(spawnProbabilityForLevel);
+  const bundle = spawnProbabilities[selectedSpawnType].bundle;
+  return bundle.create(world);
+}

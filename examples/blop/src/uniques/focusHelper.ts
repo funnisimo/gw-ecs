@@ -60,32 +60,48 @@ export class FocusHelper implements WorldInit {
     this.pos = null;
   }
 
-  next(): Entity | undefined {
+  next(world: World): Entity | undefined {
     if (this.entities.length == 0) {
       this.pos = null;
       return undefined;
     }
-    this.entityIndex += 1;
-    if (this.entityIndex >= this.entities.length) {
-      this.entityIndex = 0;
-    }
-    const e = this.entities[this.entityIndex]!;
-    this.pos = e.fetch(Pos)!;
-    return e;
+    let tries = 0;
+    const fov = world.getUnique(FOV);
+    do {
+      this.entityIndex += 1;
+      if (this.entityIndex >= this.entities.length) {
+        this.entityIndex = 0;
+      }
+      const e = this.entities[this.entityIndex]!;
+      const pos = e.fetch(Pos)!;
+      if (fov.isRevealed(pos.x, pos.y)) {
+        this.pos = pos.xy();
+        return e;
+      }
+      tries += 1;
+    } while (tries <= this.entities.length);
   }
 
-  prev(): Entity | undefined {
+  prev(world: World): Entity | undefined {
     if (this.entities.length == 0) {
       this.pos = null;
       return undefined;
     }
-    this.entityIndex -= 1;
-    if (this.entityIndex < 0) {
-      this.entityIndex = this.entities.length - 1;
-    }
-    const e = this.entities[this.entityIndex]!;
-    this.pos = e.fetch(Pos)!;
-    return e;
+    let tries = 0;
+    const fov = world.getUnique(FOV);
+    do {
+      this.entityIndex -= 1;
+      if (this.entityIndex < 0) {
+        this.entityIndex = this.entities.length - 1;
+      }
+      const e = this.entities[this.entityIndex]!;
+      const pos = e.fetch(Pos)!;
+      if (fov.isRevealed(pos.x, pos.y)) {
+        this.pos = pos.xy();
+        return e;
+      }
+      tries += 1;
+    } while (tries <= this.entities.length);
   }
 
   current(): Entity | undefined {

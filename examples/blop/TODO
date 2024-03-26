@@ -38,9 +38,10 @@ FOV:
         [] Only items and tiles
         X Not Blops (Too hard because of dissappear, reappear logic)
     [] Use Memory for Draw of revealed
+        * Or draw without checking BLOP_ASPECT
     [] FocusHelper needs to be FOV aware
-        * Only keep tiles+items that are revealed
-        * Only keep actors that are visible
+        [X] show tiles+items that are revealed
+        [] show actors that are visible only (not revealed)
         * Make sure FOV is updated - not as easy as check in reset
 
 Pickup:

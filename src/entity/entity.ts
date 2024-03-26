@@ -92,7 +92,9 @@ export class Entity {
   }
 
   setAll(...val: any[]): void {
-    val.forEach((v) => this.set(v));
+    val.forEach((v) => {
+      this.set(v);
+    });
   }
 
   _setComp(comp: AnyComponent, val: any): void {

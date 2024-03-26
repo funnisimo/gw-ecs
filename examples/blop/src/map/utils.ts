@@ -4,7 +4,7 @@ import { PosManager } from "gw-ecs/common/positions";
 import { Random, random } from "gw-utils/rng";
 import { Collider } from "gw-ecs/common/collisions";
 import type { World } from "gw-ecs/world";
-import type { Entity } from "gw-ecs/entity";
+import type { Bundle, Entity } from "gw-ecs/entity";
 import { Name } from "../comps/name";
 
 class RandomXY {
@@ -50,8 +50,8 @@ export function findClosestEmptyFloor(world: World, pos: XY.XY): XY.XY {
   const locs = XY.closestMatchingLocs(pos.x, pos.y, (x, y) => {
     const entities = mgr.getAt(x, y);
     if (entities.length != 1) return false;
-    const tileEntity = entities[0];
-    return tileEntity.fetch(Tile) === FLOOR;
+    const tileEntity = TILE_ASPECT.first(entities);
+    return !!tileEntity && tileEntity.fetch(Tile) === FLOOR;
   });
   if (!locs || !locs.length) throw new Error("Failed to find open floor tile.");
   const rng = world.getUnique(Random) || random;
@@ -71,8 +71,8 @@ export function findEmptyTileForSpawn(
   const loc = locs.find((xy) => {
     const entities = mgr.getAt(xy.x, xy.y);
     if (entities.length != 1) return false;
-    const tileEntity = entities[0];
-    if (tileEntity.fetch(Tile) !== FLOOR) return false;
+    const tileEntity = TILE_ASPECT.first(entities);
+    if (!tileEntity || tileEntity.fetch(Tile) !== FLOOR) return false;
     if (matchFn) return matchFn(xy);
     return true;
   });
@@ -89,17 +89,12 @@ export function findSpawnTileFarFrom(world: World, farLoc: XY.XY, dist = 10) {
   return pos;
 }
 
-export function setTileType(world: World, xy: XY.XY, tile: Tile) {
+export function setTileType(world: World, xy: XY.XY, bundle: Bundle) {
   const mgr = world.getUnique(PosManager);
   const entity = mgr.firstAt(xy.x, xy.y, TILE_ASPECT);
   if (!entity)
     throw new Error("Failed to find tile at pos: " + xy.x + "," + xy.y);
-  entity.setAll(tile, tile.sprite, new Name(tile.name));
-  if (tile.collider) {
-    entity.set(tile.collider);
-  } else {
-    entity.remove(Collider);
-  }
+  bundle.applyTo(entity, world);
 }
 
 export function getTileType(world: World, xy: XY.XY): Tile {

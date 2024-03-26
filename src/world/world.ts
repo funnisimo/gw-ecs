@@ -16,6 +16,7 @@ import { Queue, QueueReader, QueueStore } from "./queue.js";
 import { Resources } from "./resources.js";
 import { AnyComponent, Component } from "../component/component.js";
 import { AnyCompStoreCtr, CompStore } from "../component/store.js";
+import { AnyComponentArg, Bundle } from "../entity/bundle.js";
 
 export interface WorldInit {
   worldInit?(world: World): void;
@@ -291,12 +292,30 @@ export class World {
   entities(): Entities {
     return this._entities;
   }
+  create(bundle: Bundle, ...extraComps: AnyComponentArg[]): Entity;
+  create(...withComps: AnyComponentArg[]): Entity;
+  create(...withComps: AnyComponentArg[]): Entity {
+    let entity: Entity;
+    if (withComps[0] instanceof Bundle) {
+      const bundle: Bundle = withComps.shift();
+      entity = bundle.create(this);
+    } else {
+      entity = this._entities.create();
+    }
 
-  create(...withComps: any[]): Entity {
-    const entity = this._entities.create();
-    withComps.forEach((c) => {
-      entity.set(c);
-    });
+    for (let c of withComps) {
+      if (typeof c === "function") {
+        if (this.hasStore(c)) {
+          const comp = new c();
+          entity.set(comp);
+        } else {
+          const comp = c(this);
+          entity.set(comp);
+        }
+      } else {
+        entity.set(c);
+      }
+    }
     return entity;
   }
 
@@ -375,6 +394,10 @@ export class World {
 
   getStore<T>(comp: Component<T>): CompStore<T> {
     return this._level.getStore(comp);
+  }
+
+  hasStore<T>(comp: Component<T>): boolean {
+    return this._level.hasStore(comp);
   }
 
   ///////////////////////////

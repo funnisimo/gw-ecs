@@ -101,6 +101,14 @@ describe("World", function () {
       world.addTime(1).runSystems();
       expect(callback).toHaveBeenCalledWith(entity);
     });
+
+    it("can create from a component class", () => {
+      const world = new World().registerComponents(A, B, C);
+      const entity = world.create(A, new B(), () => new C());
+      expect(entity.has(A)).toBeTrue();
+      expect(entity.has(B)).toBeTrue();
+      expect(entity.has(C)).toBeTrue();
+    });
   });
 
   describe("globals", () => {

@@ -4,6 +4,7 @@ import { nextLevel } from "../map/nextLevel";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { FOV, Game } from "../uniques";
 import {
+  BLOP_ASPECT,
   Blop,
   EFFECT_ASPECT,
   FX_ASPECT,
@@ -95,10 +96,16 @@ export const mainScene = {
       focus.clearFocus();
       game.changed = true;
     } else if (ev.key === "Tab") {
-      focus.next();
+      if (!focus.pos) {
+        focus.focusAt(game.hero!.fetch(Pos)!);
+      }
+      focus.next(world);
       game.changed = true;
     } else if (ev.key === "TAB") {
-      focus.prev();
+      if (!focus.pos) {
+        focus.focusAt(game.hero!.fetch(Pos)!);
+      }
+      focus.prev(world);
       game.changed = true;
     } else if (ev.key == "Backspace") {
       logs.makeLogsOld();
@@ -176,6 +183,7 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
     } else {
       const entity =
         HERO_ASPECT.first(entities) ||
+        BLOP_ASPECT.first(entities) ||
         TRIGGER_ASPECT.first(entities) ||
         EFFECT_ASPECT.first(entities) ||
         TILE_ASPECT.first(entities)!;
@@ -301,17 +309,19 @@ export function drawBlopStatus(
 
   // dna
   buffer.drawText(x0, y0 + 4, "DNA:");
-  const dna = entity.fetch(DNA)!;
-  for (let i = 0; i < dna.length; ++i) {
-    const trigger = dna.triggers[i];
-    const triggerText = trigger ? trigger.name : "...";
-    const effect = dna.effects[i];
-    const effectText = effect ? effect.name : "...";
-    buffer.drawText(
-      x0,
-      y0 + 5 + i,
-      `§ #{green ${triggerText}} : #{teal ${effectText}}`
-    );
+  const dna = entity.fetch(DNA);
+  if (dna) {
+    for (let i = 0; i < dna.length; ++i) {
+      const trigger = dna.triggers[i];
+      const triggerText = trigger ? trigger.name : "...";
+      const effect = dna.effects[i];
+      const effectText = effect ? effect.name : "...";
+      buffer.drawText(
+        x0,
+        y0 + 5 + i,
+        `§ #{green ${triggerText}} : #{teal ${effectText}}`
+      );
+    }
   }
 }
 

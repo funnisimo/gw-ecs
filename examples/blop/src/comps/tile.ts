@@ -1,8 +1,10 @@
-import { Aspect } from "gw-ecs/world";
+import { Aspect, World } from "gw-ecs/world";
 import { Sprite, type SpriteConfig } from "./sprite";
 import { Collider } from "gw-ecs/common/collisions";
+import { Bundle, Entity } from "gw-ecs/entity";
+import { Name } from "./name";
 
-export interface TileConfig extends SpriteConfig {
+export interface TileConfig {
   name: string;
   blocksVision?: boolean;
   blocksMove?: boolean;
@@ -20,10 +22,8 @@ export class Tile {
   shock: boolean;
   hurt: number;
   stairs: boolean;
-  sprite: Sprite;
-  collider: Collider | null;
 
-  constructor(name: string, opts: Omit<TileConfig, "name"> = { ch: "!" }) {
+  constructor(name: string, opts: Omit<TileConfig, "name"> = {}) {
     this.name = name;
     this.blocksVision = opts.blocksVision || false;
     this.blocksMove = opts.blocksMove || false;
@@ -31,38 +31,84 @@ export class Tile {
     this.shock = opts.shock || false;
     this.hurt = opts.hurt || 0;
     this.stairs = opts.stairs || false;
-    this.sprite = new Sprite(opts.ch, opts.fg, opts.bg);
-    this.collider = null;
-    if (this.blocksMove) {
-      this.collider = new Collider("wall");
-    } else if (this.stairs) {
-      this.collider = new Collider("stairs");
-    }
   }
 }
 
-export const FLOOR = new Tile("Ground", { ch: ".", fg: "grey" });
-export const GRASS = new Tile("Grass", { ch: ",", fg: "green" });
+export interface TileBundleConfig
+  extends Omit<TileConfig, "name">,
+    SpriteConfig {}
+
+export function tileBundle(
+  tile: Tile,
+  opts: TileBundleConfig = { ch: "!" }
+): Bundle {
+  const bundle = new Bundle();
+  bundle
+    .with(new Name(tile.name))
+    .with(tile)
+    .with(new Sprite(opts.ch, opts.fg, opts.bg));
+
+  if (tile.blocksMove) {
+    bundle.with(new Collider("wall"));
+  } else if (tile.stairs) {
+    bundle.with(new Collider("stairs"));
+  } else {
+    bundle.with((w: World, e: Entity) => {
+      e.remove(Collider);
+    });
+  }
+
+  return bundle;
+}
+
+// TODO - move name to just bundle
+export const FLOOR = new Tile("Ground");
+export const FLOOR_BUNDLE = tileBundle(FLOOR, { ch: ".", fg: "grey" });
+
+export const GRASS = new Tile("Grass");
+export const GRASS_BUNDLE = tileBundle(GRASS, { ch: ",", fg: "green" });
+
 export const WALL = new Tile("Wall", {
   blocksVision: true,
   blocksMove: true,
+});
+export const WALL_BUNDLE = tileBundle(WALL, {
   ch: "#",
   fg: "grey",
 });
+
 export const FOG = new Tile("Fog", {
   blocksVision: true,
+});
+export const FOG_BUNDLE = tileBundle(FOG, {
   ch: "~",
   fg: "white",
 });
-export const WATER = new Tile("Water", { shock: true, ch: "~", fg: "blue" });
-export const EMBER = new Tile("Embers", { hurt: 1, ch: "!", fg: "crimson" });
-export const ICE = new Tile("Ice", { slide: true, ch: "-", fg: "white" });
+
+export const WATER = new Tile("Water", { shock: true });
+export const WATER_BUNDLE = tileBundle(WATER, { ch: "~", fg: "blue" });
+
+export const EMBER = new Tile("Embers", { hurt: 1 });
+export const EMBER_BUNDLE = tileBundle(EMBER, { ch: "!", fg: "crimson" });
+
+export const ICE = new Tile("Ice", { slide: true });
+export const ICE_BUNDLE = tileBundle(ICE, { ch: "-", fg: "white" });
+
 export const STAIRS = new Tile("Stairs", {
   stairs: true,
+});
+export const STAIRS_BUNDLE = tileBundle(STAIRS, {
   ch: ">",
   fg: "white",
 });
 
 export const PATCH_TILES = [GRASS, FOG, WATER, EMBER, ICE];
+export const PATCH_BUNDLES = [
+  GRASS_BUNDLE,
+  FOG_BUNDLE,
+  WATER_BUNDLE,
+  EMBER_BUNDLE,
+  ICE_BUNDLE,
+];
 
 export const TILE_ASPECT = new Aspect(Tile);

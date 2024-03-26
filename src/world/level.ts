@@ -133,6 +133,10 @@ export class Level {
     return store;
   }
 
+  hasStore<T>(comp: Component<T>): boolean {
+    return this._components.hasStore(comp);
+  }
+
   // fetchComponent<T>(entity: Entity, comp: Component<T>): T | undefined {
   //   const mgr = this._components.getStore(comp);
   //   if (!mgr) return undefined;

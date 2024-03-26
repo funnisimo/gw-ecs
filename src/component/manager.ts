@@ -27,6 +27,16 @@ export class ComponentManager {
     } while (comp && !comp.isPrototypeOf(Object));
   }
 
+  hasStore<T>(comp: Component<T>): boolean {
+    do {
+      // Look for base class if we don't have this class
+      const store = this.stores.get(comp);
+      if (store) return true;
+      comp = Object.getPrototypeOf(comp);
+    } while (comp && !comp.isPrototypeOf(Object));
+    return false;
+  }
+
   entityCreated(entity: Entity) {
     for (let store of this.stores.values()) {
       store.entityCreated && store.entityCreated(entity);
