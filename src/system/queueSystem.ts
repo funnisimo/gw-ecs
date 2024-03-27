@@ -1,3 +1,4 @@
+import { Entity } from "../entity/entity.js";
 import { Queue, QueueReader } from "../world/queue.js";
 import { World } from "../world/world.js";
 import { RunIfFn, System } from "./system.js";
@@ -23,6 +24,10 @@ export class QueueSystem<T> extends System {
   }
 
   runQueueItem(world: World, item: T, time: number, delta: number) {}
+
+  runEntity(world: World, entity: Entity, time: number, delta: number): void {
+    return this.run(world, time, delta);
+  }
 }
 
 export type QueueSystemFn<T> = (
