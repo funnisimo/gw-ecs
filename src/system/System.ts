@@ -1,3 +1,4 @@
+import { Entity } from "../entity/entity.js";
 import { World } from "../world/world.js";
 
 export type RunIfFn = (
@@ -42,6 +43,12 @@ export class System {
   }
 
   run(world: World, time: number, delta: number): void {}
+  runEntity(world: World, entity: Entity, time: number, delta: number): void {
+    return this.run(world, time, delta);
+  }
+  runQueueItem(world: World, item: any, time: number, delta: number): void {
+    return this.run(world, time, delta);
+  }
 }
 
 export type SystemFn = (world: World, time: number, delta: number) => void;
