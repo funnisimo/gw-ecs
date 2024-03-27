@@ -9,15 +9,10 @@ import {
   setTileType,
 } from "./utils";
 import {
-  COMPLEX_BLOP_BUNDLE,
-  FAT_BLOP_BUNDLE,
   Hero,
-  SMALL_BLOP_BUNDLE,
-  STAIRS,
   STAIRS_BUNDLE,
   TILE_ASPECT,
   Tile,
-  WARRIOR_BLOP_BUNDLE,
   createRandomEffect,
   createRandomTrigger,
 } from "../comps";
@@ -25,6 +20,8 @@ import { makeRandomWorld } from "./randomWorld";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Game } from "../uniques";
 import { random, type XY } from "gw-utils";
+import { gaussian } from "../utils";
+import { SPAWN_TABLE } from "../blops";
 
 export function nextLevel(world: World) {
   const game = world.getUnique(Game);
@@ -128,22 +125,15 @@ function makeBlops(world: World, playerPos: XY, depth: number) {
   var numberOfBlops =
     2 + Math.max(0, random.normal(depth / 2, Constants.BLOP_NUMBER_STDDEV));
 
-  const spawnProbabilityForLevel: Record<string, number> = {};
+  const weights = SPAWN_TABLE.map((t) =>
+    Math.round(1000 * t.weight * gaussian(t.average, t.deviation, depth))
+  );
 
-  for (let key in spawnProbabilities) {
-    const spawnProbablity = spawnProbabilities[key];
-    spawnProbabilityForLevel[key] = Math.round(
-      1000 *
-        spawnProbablity.weight *
-        gaussian(spawnProbablity.average, spawnProbablity.deviation, depth)
-    );
-  }
-
-  console.log("spawn probabilities", spawnProbabilityForLevel);
+  console.log("spawn probabilities", weights);
 
   for (var i = 0; i < numberOfBlops; i++) {
-    const selectedSpawnType = random.weighted(spawnProbabilityForLevel);
-    const bundle = spawnProbabilities[selectedSpawnType].bundle;
+    const index = random.weighted(weights);
+    const bundle = SPAWN_TABLE[index].bundle;
     const blop = bundle.create(world);
 
     const blopPos = findSpawnTileFarFrom(
@@ -232,39 +222,3 @@ function makeBlops(world: World, playerPos: XY, depth: number) {
 // }
 
 //# sourceURL=webpack://7drl-2021-blob-genes/./src/state/world/nextLevel.ts?
-
-const spawnProbabilities: { [key: string]: any } = {
-  smallBlop: {
-    bundle: SMALL_BLOP_BUNDLE,
-    average: 1,
-    deviation: 5,
-    weight: 5,
-  },
-  fatBlop: {
-    bundle: FAT_BLOP_BUNDLE,
-    average: 6,
-    deviation: 2,
-    weight: 3,
-  },
-  warriorBlop: {
-    bundle: WARRIOR_BLOP_BUNDLE,
-    average: 8,
-    deviation: 2,
-    weight: 3,
-  },
-  complexBlop: {
-    bundle: COMPLEX_BLOP_BUNDLE,
-    average: 10,
-    deviation: 1,
-    weight: 3,
-  },
-};
-
-const SQRT_2_PI = Math.sqrt(2 * Math.PI);
-// https://www.math.net/gaussian-distribution
-function gaussian(mu: number, stddev: number, x: number): number {
-  return (
-    (1 / (stddev * SQRT_2_PI)) *
-    Math.exp(-Math.pow(x - mu, 2) / (2 * stddev * stddev))
-  );
-}

@@ -21,7 +21,7 @@ export function createHero(world: World): Entity {
     new Hero(),
     HeroSprite,
     new Collider("hero", "actor"),
-    new Blop("Hero", 20),
+    new Blop("Hero", 20, 2),
     dna,
     new Name("Hero")
   );

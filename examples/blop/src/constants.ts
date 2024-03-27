@@ -23,7 +23,7 @@ export const STARTING_PLAYER_DNA_SIZE = 2;
 export const STARTING_PLAYER_ATTACK_DAMAGE = 2;
 export const PLAYER_VISIBILITY_RADIUS = 6;
 export const STAIRS_MIN_DISTANCE = 15;
-export const MIN_BLOP_DISTANCE_AT_START = 4; // Per-world probability
+export const MIN_BLOP_DISTANCE_AT_START = 7; // Per-world probability
 
 export const ADD_CHROMOSOME_ITEM_PROBABILITY = 30;
 export const LOCK_CHROMOSOME_ITEM_PROBABILITY = 10;
