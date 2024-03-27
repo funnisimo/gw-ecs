@@ -4,8 +4,12 @@
 Observation Mode:
     [] Include special tiles
         [] Stairs
-    [] Include Blops
-    [] Limit to FOV -or- Use Memory -or- Everything
+    [X] Include Blops
+    [X] Limit to FOV 
+    [] Use Memory
+        * You can remember an item that may or may not still be there
+        * will require cloning an item in some fashion
+            * How to track Pos?
 
 Path Following:
     [] Show path to mouse
@@ -18,8 +22,10 @@ Path Following:
 
 Blops:
     [X] Add blops
+    [X] Need to tune generation algo - too many small blops
+        * Return 1000 x from gaussian
     Hero -> Blop collisions:
-        [] Start with "Hello"
+        [X] Start with "Hello"
         [] Attack
     [] Blop AI
     [] Drops
@@ -37,14 +43,15 @@ FOV:
     [X] Keep FOV for Hero
     [X] Recalc on every move
     [X] Recalc on teleport
+    [X] Do not draw blops that are not in current FOV
     [] Keep memory of map as it is exposed
         [] Only items and tiles
         X Not Blops (Too hard because of dissappear, reappear logic)
     [] Use Memory for Draw of revealed
-        * Or draw without checking BLOP_ASPECT
-    [] FocusHelper needs to be FOV aware
+        * Allow you to remember an item that was picked up by a blop after you moved away
+    [X] FocusHelper needs to be FOV aware
         [X] show tiles+items that are revealed
-        [] show actors that are visible only (not revealed)
+        [X] show actors that are visible only (not revealed)
         * Make sure FOV is updated - not as easy as check in reset
 
 Pickup:

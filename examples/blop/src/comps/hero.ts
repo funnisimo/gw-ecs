@@ -4,7 +4,7 @@ import { HeroSprite } from "./sprite";
 import { Collider } from "gw-ecs/common/collisions";
 import { Blop } from "./blop";
 import { DNA } from "./dna";
-import { MoveDirTrigger } from ".";
+import { WaitTrigger } from ".";
 import { HealEffect } from "./effect";
 import { Name } from "./name";
 
@@ -14,7 +14,7 @@ export const HERO_ASPECT = new Aspect(Hero);
 
 export function createHero(world: World): Entity {
   const dna = new DNA(2);
-  dna.triggers[0] = new MoveDirTrigger();
+  dna.triggers[0] = new WaitTrigger();
   dna.effects[0] = new HealEffect();
 
   return world.create(

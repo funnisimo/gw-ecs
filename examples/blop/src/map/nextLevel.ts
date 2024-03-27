@@ -128,8 +128,24 @@ function makeBlops(world: World, playerPos: XY, depth: number) {
   var numberOfBlops =
     2 + Math.max(0, random.normal(depth / 2, Constants.BLOP_NUMBER_STDDEV));
 
+  const spawnProbabilityForLevel: Record<string, number> = {};
+
+  for (let key in spawnProbabilities) {
+    const spawnProbablity = spawnProbabilities[key];
+    spawnProbabilityForLevel[key] = Math.round(
+      1000 *
+        spawnProbablity.weight *
+        gaussian(spawnProbablity.average, spawnProbablity.deviation, depth)
+    );
+  }
+
+  console.log("spawn probabilities", spawnProbabilityForLevel);
+
   for (var i = 0; i < numberOfBlops; i++) {
-    const blop = generateBlop(world, depth);
+    const selectedSpawnType = random.weighted(spawnProbabilityForLevel);
+    const bundle = spawnProbabilities[selectedSpawnType].bundle;
+    const blop = bundle.create(world);
+
     const blopPos = findSpawnTileFarFrom(
       world,
       playerPos,
@@ -246,24 +262,9 @@ const spawnProbabilities: { [key: string]: any } = {
 
 const SQRT_2_PI = Math.sqrt(2 * Math.PI);
 // https://www.math.net/gaussian-distribution
-function gaussian(mu: number, stddev: number, x: number) {
+function gaussian(mu: number, stddev: number, x: number): number {
   return (
     (1 / (stddev * SQRT_2_PI)) *
     Math.exp(-Math.pow(x - mu, 2) / (2 * stddev * stddev))
   );
-}
-
-function generateBlop(world: World, depth: number): Entity {
-  const spawnProbabilityForLevel: Record<string, number> = {};
-
-  for (let key in spawnProbabilities) {
-    const spawnProbablity = spawnProbabilities[key];
-    spawnProbabilityForLevel[key] =
-      spawnProbablity.weight *
-      gaussian(spawnProbablity.average, spawnProbablity.deviation, depth);
-  }
-
-  const selectedSpawnType = random.weighted(spawnProbabilityForLevel);
-  const bundle = spawnProbabilities[selectedSpawnType].bundle;
-  return bundle.create(world);
 }

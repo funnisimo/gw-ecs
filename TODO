@@ -13,6 +13,7 @@ Delayed:
         [] runSystemSet(set, time?, delta?)?
     [] world.maintain() - commits
         * Or world.commit();
+        * addMaintain(set?, step?) -or- addCommit(set?, step?);
 
 Events:
     [] registerEvent(comp extends Event, steps=['emit'])
@@ -44,17 +45,19 @@ System:
         [] System.run -> remove delta
 
 Bundles:
-    [] How to do this?
-    [] class Bundle {}?
-        [] create(world) -> Entity
-        [] name? id?
-    [] createBundle(...args: x[]) -> Bundle
-        [] AnyComponent
-        [] ComponentFn: (world) => T
-        [] ComponentObj: { [id:string]: AnyComponent | ComponentFn }
-    [] World.create(...args)
+    [X] How to do this?
+    [X] class Bundle {}?
+        [X] create(world) -> Entity
+        [-] name? id?
+    [X] createBundle(...args: x[]) -> Bundle
+        [X] AnyComponent
+        [X] ComponentFn: (world) => T
+        [X] ComponentObj: { [id:string]: AnyComponent | ComponentFn }
+    [X] World.create(...args)
         [X] AnyComponent[] - current
-        [] AnyBundle
+        [X] AnyBundle
+    [] Bundles that use other bundles
+    [] world.create that uses any combo of components and/or bundles
 
 World:
     [] init -> onStartup(sys: System | SystemFn)

@@ -11,6 +11,7 @@ import {
   Sprite,
   Tile,
   Trigger,
+  coloredName,
 } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { CollisionManager } from "gw-ecs/common/collisions";
@@ -58,6 +59,11 @@ function gameReady(world: World) {
   return timersReady && userReady;
 }
 
+function sayHello(actor: Entity, target: Entity, world: World) {
+  world.getUnique(Log).add("Hello " + coloredName(target));
+  return true; // We handled it
+}
+
 export const world = new World()
   .registerComponent(Hero)
   .registerComponent(Tile)
@@ -91,7 +97,7 @@ export const world = new World()
   )
   .setUnique(new CollisionManager(), (col) => {
     col
-      // .register(["hero"], ["blop"], attack)
+      .register(["hero"], ["blop"], sayHello)
       // .register(["blop"], ["hero"], attack)
       .register("actor", "wall", blockedMove)
       .register("hero", "stairs", (a, t, w) => gotoNextLevel(w));
