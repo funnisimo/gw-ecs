@@ -27,27 +27,46 @@ Blops:
     Hero -> Blop collisions:
         [X] Start with "Hello"
         [] Attack
-            [] Player damages blop
-                [] Event: attack - with damage
-            [] Player kills blop
-                [] Event: kill
+            [X] Player damages blop
+                [X] Event: attack - with damage
+            [X] Player kills blop
+                [X] Event: kill
+    [] Blop AI
+        [] Next to Hero - Attack Hero
             [] Blop damages player
                 [] Event: attack - with damage
             [] Blop kills player
                 [] Event: kill
-    [] Blop AI
+        [] In FOV - Charge Hero
+        [] Have Wander Goal - head there
+        [] Start a Wander - 20%
+        [] Random Move - 20%
+        [] Idle
     [] Drops
+
+MoveSystem:
+    [] Collide same team -> swap places as move
+    [] Mark Hero friends with Ally component
 
 MultiWorld:
     [] Allow up+down stairs
 
 Effects:
     [] Add more Effects
+    [] DestroyWalls
+    [] Whirl - old Cleave: N,S,E,W attack
+    [] Extend # - attack additional squares towards target: A-->
+    [] Swipe - attack in arc of 3 dirs centered on target
+    [] Shock - chain to all attached shockables (water tiles and blops in/next to)
 
 Triggers:
     [] Add more Triggers
     [] Only allow to fire once per actor turn
         [] Can we use tick for this?
+    [] OnAttack
+    [] OnLoseLife
+    [] OnKill
+    [] OnMyDeath
 
 Tiles:
     [] Lava damages blops and hero
