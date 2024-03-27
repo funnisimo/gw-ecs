@@ -1,6 +1,9 @@
 import type { Bundle } from "gw-ecs/entity";
 import { blopBundle } from "./comps/blop";
 
+////////////////////////////////////////////
+// TYPES
+
 export const BLOP_TYPE: Record<string, string> = {
   MINI: "MINI",
   SMALL: "SMALL",
@@ -8,6 +11,9 @@ export const BLOP_TYPE: Record<string, string> = {
   WARRIOR: "WARRIOR",
   COMPLEX: "COMPLEX",
 };
+
+////////////////////////////////////////////
+// BUNDLES
 
 export const MINI_BLOP_BUNDLE = blopBundle(BLOP_TYPE.MINI, {
   name: "Mini Blop",
@@ -61,6 +67,9 @@ export const BLOP_BUNDLES = [
   WARRIOR_BLOP_BUNDLE,
   COMPLEX_BLOP_BUNDLE,
 ];
+
+////////////////////////////////////////////
+// SPAWN_TABLE
 
 export interface SpawnInfo {
   bundle: Bundle;
