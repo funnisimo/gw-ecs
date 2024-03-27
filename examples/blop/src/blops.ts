@@ -5,6 +5,7 @@ import { blopBundle } from "./comps/blop";
 // TYPES
 
 export const BLOP_TYPE: Record<string, string> = {
+  HERO: "HERO",
   MINI: "MINI",
   SMALL: "SMALL",
   FAT: "FAT",

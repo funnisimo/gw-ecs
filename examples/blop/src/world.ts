@@ -11,7 +11,6 @@ import {
   Sprite,
   Tile,
   Trigger,
-  coloredName,
 } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { CollisionManager } from "gw-ecs/common/collisions";
@@ -36,6 +35,7 @@ import { SystemSet } from "gw-ecs/system";
 import { FocusHelper } from "./uniques";
 import * as Constants from "./constants";
 import { Log } from "./uniques/log";
+import { coloredName } from "./utils";
 
 function blockedMove(actor: Entity, target: Entity, world: World) {
   world.getUnique(Log).add("#{red}Blocked#{}");

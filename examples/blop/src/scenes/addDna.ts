@@ -5,7 +5,7 @@ import type { World } from "gw-ecs/world";
 import type { Entity } from "gw-ecs/entity";
 import { Trigger, Effect, Blop } from "../comps";
 import { DNA } from "../comps/dna";
-import { coloredName } from "../comps/name";
+import { coloredName } from "../utils";
 import { drawLines, drawLog, drawMap, drawMapHeader } from "./main";
 import { Log } from "../uniques";
 

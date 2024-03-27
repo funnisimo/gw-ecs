@@ -8,3 +8,4 @@ export * from "./trigger";
 export * from "./fx";
 export * from "./effect";
 export * from "./name";
+export * from "./dna";

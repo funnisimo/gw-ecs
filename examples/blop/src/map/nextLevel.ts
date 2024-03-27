@@ -1,6 +1,5 @@
-import { Entity } from "gw-ecs/entity";
 import { World } from "gw-ecs/world";
-import { createHero } from "../comps/hero";
+import { createHero } from "../hero";
 import * as Constants from "../constants";
 import { FOV, Log } from "../uniques";
 import {

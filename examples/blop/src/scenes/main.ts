@@ -28,7 +28,7 @@ import type { Entity } from "gw-ecs/entity";
 import { Mixer, type SpriteData } from "gw-utils/sprite";
 import { GameEvent } from "../queues";
 import { Log } from "../uniques";
-import { coloredName } from "../comps/name";
+import { coloredName } from "../utils";
 import { FocusHelper } from "../uniques/focusHelper";
 import { BLACK } from "gw-utils/color";
 

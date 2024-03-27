@@ -15,8 +15,9 @@ import { Aspect, type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
 import { flash } from "../fx/flash";
-import { Name, coloredName } from "./name";
+import { Name } from "./name";
 import { Log } from "../uniques";
+import { coloredName } from "../utils";
 
 export class Effect {
   name: string;
