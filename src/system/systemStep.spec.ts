@@ -216,15 +216,13 @@ describe("EntitySystemStep", () => {
     expect(step.length).toEqual(0);
   });
 
-  test("addSystem", () => {
+  test("addSystem - entity systems", () => {
     const world = new World();
     const entity = world.create();
     const entity2 = world.create();
 
     const cb = jest.fn();
     const step = new EntitySystemStep("update");
-    // @ts-ignore
-    expect(() => step.addSystem(new TestSystem(cb, 2))).toThrow(); // Must be EntitySystem
 
     step.addSystem(new TestEntitySystem(cb, 2)); // Must be EntitySystem
     expect(step.length).toEqual(1);
@@ -248,6 +246,44 @@ describe("EntitySystemStep", () => {
     expect(cb).toHaveBeenNthCalledWith(4, 1, entity2);
     expect(cb).toHaveBeenNthCalledWith(5, 2, entity2);
     expect(cb).toHaveBeenNthCalledWith(6, 3, entity2);
+  });
+
+  test("addSystem - other systems", () => {
+    const world = new World().registerQueue(A);
+    const entity = world.create();
+    const entity2 = world.create();
+
+    const cb = jest.fn();
+    const step = new EntitySystemStep("update");
+
+    const entityCb = jest.fn().mockImplementation((id, e) => {
+      cb(id, e);
+      world.pushQueue(new A());
+    });
+    step.addSystem(new TestEntitySystem(entityCb, 2)); // Must be EntitySystem
+    expect(step.length).toEqual(1);
+
+    step.addSystem(new TestQueueSystem(cb, 3, A), "post");
+    expect(step.length).toEqual(2);
+
+    step.addSystem(new TestSystem(cb, 1), "pre");
+    expect(step.length).toEqual(3);
+
+    expect(step._preSystems).toHaveLength(1);
+    expect(step._systems).toHaveLength(1);
+    expect(step._postSystems).toHaveLength(1);
+
+    step.start(world);
+
+    step.run(world, 0, 0);
+    // Processes each entity through all systems...
+    expect(cb).toHaveBeenNthCalledWith(1, 1);
+    expect(cb).toHaveBeenNthCalledWith(2, 2, entity);
+    expect(cb).toHaveBeenNthCalledWith(3, 3, expect.any(A));
+    // Then goes onto the next entity.
+    expect(cb).toHaveBeenNthCalledWith(4, 1);
+    expect(cb).toHaveBeenNthCalledWith(5, 2, entity2);
+    expect(cb).toHaveBeenNthCalledWith(6, 3, expect.any(A));
   });
 
   test("add fn system", () => {
@@ -353,10 +389,8 @@ describe("queueSystemStep", () => {
   test("add system - not queue system", () => {
     const cb = jest.fn();
     const step = new QueueSystemStep("update", A);
-    // @ts-ignore
-    expect(() => step.addSystem(new TestSystem(cb, 2))).toThrow(); // Must be QueueSystem
-    // @ts-ignore
-    expect(() => step.addSystem(new TestEntitySystem(cb, 2))).toThrow(); // Must be QueueSystem
+    expect(() => step.addSystem(new TestSystem(cb, 2))).not.toThrow();
+    expect(() => step.addSystem(new TestEntitySystem(cb, 2))).not.toThrow();
   });
 
   test("add system - wrong component", () => {

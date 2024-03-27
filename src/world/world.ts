@@ -132,6 +132,10 @@ export class World {
       //   system.destroyEntities(this._toDestroy)
       // );
       //   this._components.destroyEntities(this._toDestroy);
+
+      this._toDestroy.forEach((entity) => {
+        this._level._components.entityDestroyed(entity);
+      });
       this._entities.destroyEntities(this._toDestroy);
       this._toDestroy = [];
 

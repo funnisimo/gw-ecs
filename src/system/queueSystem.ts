@@ -4,17 +4,17 @@ import { World } from "../world/world.js";
 import { RunIfFn, System } from "./system.js";
 
 export class QueueSystem<T> extends System {
-  _comp: Queue<T>;
+  _queue: Queue<T>;
   _reader!: QueueReader<T>;
 
   constructor(comp: Queue<T>, runIf?: RunIfFn) {
     super(runIf);
-    this._comp = comp;
+    this._queue = comp;
   }
 
   start(world: World): void {
     super.start(world);
-    this._reader = world.getReader(this._comp);
+    this._reader = world.getReader(this._queue);
   }
 
   run(world: World, time: number, delta: number): void {

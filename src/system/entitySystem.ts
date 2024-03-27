@@ -24,6 +24,7 @@ export class EntitySystem extends System {
   }
 
   runEntity(world: World, entity: Entity, time: number, delta: number): void {}
+
   runQueueItem(world: World, item: any, time: number, delta: number): void {
     return this.run(world, time, delta);
   }

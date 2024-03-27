@@ -1,5 +1,3 @@
-[] Schedule
-[] ScheduleService
 
 Observation Mode:
     [] Include special tiles
@@ -10,6 +8,10 @@ Observation Mode:
         * You can remember an item that may or may not still be there
         * will require cloning an item in some fashion
             * How to track Pos?
+
+Schedule:
+    [X] ScheduleService
+    [X] Auto detect entities not rescheduled
 
 Path Following:
     [] Show path to mouse
@@ -26,23 +28,27 @@ Blops:
         * Return 1000 x from gaussian
     Hero -> Blop collisions:
         [X] Start with "Hello"
-        [] Attack
+        [X] Attack
             [X] Player damages blop
                 [X] Event: attack - with damage
             [X] Player kills blop
                 [X] Event: kill
     [] Blop AI
-        [] Next to Hero - Attack Hero
-            [] Blop damages player
-                [] Event: attack - with damage
-            [] Blop kills player
-                [] Event: kill
+        [X] Next to Hero - Attack Hero
+            [X] Blop damages player
+                [X] Event: attack - with damage
+            [X] Blop kills player
+                [X] Event: kill
         [] In FOV - Charge Hero
         [] Have Wander Goal - head there
         [] Start a Wander - 20%
         [] Random Move - 20%
         [] Idle
     [] Drops
+
+Game Over:
+    [] Detect and Notify
+    [] Allow restart
 
 MoveSystem:
     [] Collide same team -> swap places as move
@@ -64,7 +70,7 @@ Triggers:
     [] Only allow to fire once per actor turn
         [] Can we use tick for this?
     [] OnAttack
-    [] OnLoseLife
+    [] OnHurt - old OnLoseLife
     [] OnKill
     [] OnMyDeath
 
@@ -90,3 +96,10 @@ Pickup:
     [X] Need to update FocusHelper
         * Remove picked up entity
         * store.notify?
+
+
+# Future
+
+App:
+    [] Add splash screen/main menu?
+

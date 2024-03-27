@@ -147,12 +147,19 @@ export class SetStore<T> implements CompStore<T> {
   }
 
   entityCreated(entity: Entity): void {
-    if (entity.has(this._comp)) {
+    const v = entity.fetch(this._comp);
+    if (v) {
       this._data.add(entity);
+      this._watchers.forEach((w) => w && w.compSet && w.compSet(entity, v));
     }
   }
 
   entityDestroyed(entity: Entity): void {
-    this._data.delete(entity);
+    if (this._data.delete(entity)) {
+      const v = entity.fetch(this._comp)!;
+      this._watchers.forEach(
+        (w) => w && w.compRemoved && w.compRemoved(entity, v)
+      );
+    }
   }
 }

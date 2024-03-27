@@ -8,7 +8,7 @@ import type { Entity } from "gw-ecs/entity";
 import { QueueSystem } from "gw-ecs/system";
 import { coloredName } from "../utils";
 
-export class EventSystem extends QueueSystem<GameEvent> {
+export class DnaSystem extends QueueSystem<GameEvent> {
   constructor(runIf?: RunIfFn) {
     super(GameEvent, runIf);
   }
@@ -33,7 +33,7 @@ export class EventSystem extends QueueSystem<GameEvent> {
 
   tryFire(world: World, event: GameEvent, entity: Entity) {
     console.log("- event: " + event.type);
-    let dna = event.entity.fetch(DNA)!;
+    let dna = entity.fetch(DNA)!;
     for (let i = 0; i < dna.length; ++i) {
       const trigger = dna.triggers[i];
       if (trigger && trigger.matches(world, event, entity)) {

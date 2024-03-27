@@ -211,7 +211,7 @@ export class QueueSystemSet<T> extends SystemSet {
   // @ts-ignore
   addStep(name: string | QueueSystemStep, opts: AddStepOpts = {}): this {
     if (name instanceof QueueSystemStep) {
-      if (name._comp !== this._comp) {
+      if (name._queue !== this._comp) {
         throw new Error("Steps must have same component as step.");
       }
     }

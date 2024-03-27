@@ -101,24 +101,24 @@ export class SystemStep extends System {
 }
 
 export class EntitySystemStep extends SystemStep {
-  declare _preSystems: EntitySystem[];
-  declare _systems: EntitySystem[];
-  declare _postSystems: EntitySystem[];
+  // declare _preSystems: EntitySystem[];
+  // declare _systems: EntitySystem[];
+  // declare _postSystems: EntitySystem[];
 
   // TODO - Add optional Aspect?
 
   // @ts-ignore
   addSystem(
-    sys: EntitySystem | EntitySystemFn,
+    sys: System | EntitySystemFn,
     order?: SystemOrder,
     enabled = true
   ): this {
     if (typeof sys === "function") {
       sys = new EntityFunctionSystem(sys);
     }
-    if (!(sys instanceof EntitySystem)) {
-      throw new Error("Must be EntitySystem");
-    }
+    // if (!(sys instanceof EntitySystem)) {
+    //   throw new Error("Must be EntitySystem");
+    // }
     super.addSystem(sys, order, enabled);
     return this;
   }
@@ -144,7 +144,7 @@ export class EntitySystemStep extends SystemStep {
 
   _runEntitySystem(
     world: World,
-    sys: EntitySystem,
+    sys: System | EntitySystem,
     entity: Entity,
     time: number,
     delta: number
@@ -152,7 +152,7 @@ export class EntitySystemStep extends SystemStep {
     if (!sys.shouldRun(world, time, delta)) {
       return false;
     }
-    if (!sys.accept(entity)) return false;
+    if ("accept" in sys && !sys.accept(entity)) return false;
     sys.runEntity(world, entity, time, delta);
     sys.lastTick = world.tick();
     // world.maintain();
@@ -166,36 +166,36 @@ export class EntitySystemStep extends SystemStep {
 }
 
 export class QueueSystemStep<T> extends SystemStep {
-  _comp: Queue<T>;
+  _queue: Queue<T>;
   _reader!: QueueReader<T>;
-  declare _preSystems: QueueSystem<T>[];
-  declare _systems: QueueSystem<T>[];
-  declare _postSystems: QueueSystem<T>[];
+  // declare _preSystems: QueueSystem<T>[];
+  // declare _systems: QueueSystem<T>[];
+  // declare _postSystems: QueueSystem<T>[];
 
   constructor(name: string, comp: Queue<T>) {
     super(name);
-    this._comp = comp;
+    this._queue = comp;
   }
 
   start(world: World): void {
-    this._reader = world.getReader(this._comp);
+    this._reader = world.getReader(this._queue);
     super.start(world);
   }
 
   // @ts-ignore
   addSystem(
-    sys: QueueSystem<T> | QueueSystemFn<T>,
+    sys: System | QueueSystem<T> | QueueSystemFn<T>,
     order?: SystemOrder,
     enabled = true
   ): this {
     if (typeof sys === "function") {
-      sys = new QueueFunctionSystem<T>(this._comp, sys);
-    } else if (this._comp !== sys._comp) {
+      sys = new QueueFunctionSystem<T>(this._queue, sys);
+    } else if ("_queue" in sys && this._queue !== sys._queue) {
       throw new Error("System has wrong component type.");
     }
-    if (!(sys instanceof QueueSystem)) {
-      throw new Error("Must be QueueSystem");
-    }
+    // if (!(sys instanceof QueueSystem)) {
+    //   throw new Error("Must be QueueSystem");
+    // }
     super.addSystem(sys, order, enabled);
     return this;
   }
@@ -222,7 +222,7 @@ export class QueueSystemStep<T> extends SystemStep {
 
   _runQueueSystem(
     world: World,
-    sys: QueueSystem<T>,
+    sys: System | QueueSystem<T>,
     item: T,
     time: number,
     delta: number

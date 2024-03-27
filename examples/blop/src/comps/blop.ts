@@ -3,6 +3,7 @@ import { Sprite, type SpriteConfig } from "./sprite";
 import { Bundle } from "gw-ecs/entity";
 import { Collider } from "gw-ecs/common";
 import { Name } from "./name";
+import { Actor, type AiFn } from "./actor";
 
 export interface SpawnInfo {
   average: number;
@@ -47,9 +48,11 @@ export interface BlopConfig extends SpriteConfig {
   power?: number;
   maxChange?: number;
   spawn?: SpawnInfo;
+  ai?: AiFn[];
 }
 
 export function blopBundle(type: string, config: BlopConfig): Bundle {
+  const ai = config.ai || [];
   const bundle = new Bundle(
     () =>
       new Blop(
@@ -62,6 +65,7 @@ export function blopBundle(type: string, config: BlopConfig): Bundle {
     .with(new Sprite(config.ch, config.fg, config.bg))
     .with(new Collider("blop", "actor"))
     // TODO - AI?
+    .with(new Actor(...ai))
     // TODO - Drops
     // TODO - DNA
     .with(new Name(config.name));

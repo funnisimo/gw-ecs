@@ -136,11 +136,9 @@ describe("EntitySystems", () => {
     mgr.addSystem("turn", new TestEntitySystem("b"));
     expect(step).toHaveLength(1);
 
-    expect(() => mgr.addSystem("turn", new TestSystem("a"))).toThrow(
-      "Must be EntitySystem"
-    );
+    expect(() => mgr.addSystem("turn", new TestSystem("a"))).not.toThrow();
     mgr.addSystem(new TestSystem("c")); // update step
-    expect(step).toHaveLength(1); // not added to this step
+    expect(step).toHaveLength(2); // entity system + regular system
 
     mgr.addStep(new EntitySystemStep("calc")); // add another
   });
@@ -156,8 +154,6 @@ describe("EntitySystems", () => {
     expect(set.getStep("d")).toHaveLength(0);
     mgr.addSystem("turn", "d", new TestEntitySystem("d"));
     expect(set.getStep("d")).toHaveLength(1);
-    expect(() => mgr.addSystem("turn", "d", new TestSystem("d"))).toThrow(
-      "Must be EntitySystem"
-    );
+    expect(() => mgr.addSystem("turn", "d", new TestSystem("d"))).not.toThrow();
   });
 });

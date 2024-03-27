@@ -14,6 +14,8 @@ import {
   TILE_ASPECT,
   TRIGGER_ASPECT,
   Tile,
+  Wait,
+  addAction,
 } from "../comps";
 import { type Buffer } from "gw-utils/buffer";
 import { Aspect, World } from "gw-ecs/world";
@@ -78,8 +80,7 @@ export const mainScene = {
       const hero = game.hero;
       if (hero) {
         console.log("keypress - move", ev.dir);
-        hero.set(new Move(ev.dir));
-        game.ready = true;
+        addAction(hero, new Move(ev.dir));
       }
     } else if (ev.key === " ") {
       logs.makeLogsOld();
@@ -87,9 +88,7 @@ export const mainScene = {
       const hero = game.hero;
       if (hero) {
         console.log("keypress - wait");
-        world.pushQueue(new GameEvent(hero, "wait"));
-        world.pushQueue(new GameEvent(hero, "turn", { time: 0 }));
-        game.ready = true;
+        addAction(hero, new Wait());
       }
     } else if (ev.key === "Escape") {
       logs.makeLogsOld();
@@ -109,7 +108,7 @@ export const mainScene = {
       game.changed = true;
     } else if (ev.key == "Backspace") {
       logs.makeLogsOld();
-      gotoNextLevel(world);
+      gotoNextLevel(world, game.hero);
     } else {
       console.log("key", ev.key);
     }

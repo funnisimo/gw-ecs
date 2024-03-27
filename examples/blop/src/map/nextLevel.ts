@@ -22,6 +22,7 @@ import { Game } from "../uniques";
 import { random, type XY } from "gw-utils";
 import { gaussian } from "../utils";
 import { SPAWN_TABLE } from "../blops";
+import { calculateFov, updateVisibility } from "../systems";
 
 export function nextLevel(world: World) {
   const game = world.getUnique(Game);
@@ -43,11 +44,9 @@ export function nextLevel(world: World) {
   makeNormalLevel(world, game.depth);
   // }
 
-  const posMgr = world.getUnique(PosManager);
-  posMgr.everyXY((x, y, entities) => {
-    const blocksVisibility = entities[0].fetch(Tile)!.blocksVision;
-    fov.setBlocksVisibility(x, y, blocksVisibility);
-  }, TILE_ASPECT);
+  updateVisibility(world);
+  calculateFov(world, game.hero);
+  game.changed = true;
 
   world.getUnique(Log).add("");
   world.getUnique(Log).add("=== LEVEL " + game.depth + " ===");

@@ -1,6 +1,7 @@
 import type { Entity } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world";
 import {
+  Actor,
   Blop,
   DNA,
   HealEffect,
@@ -22,6 +23,7 @@ export function createHero(world: World): Entity {
     new Sprite("@", "yellow"),
     new Collider("hero", "actor"),
     new Blop(BLOP_TYPE.HERO, 20, 2),
+    new Actor(), // No AI so will return false, waiting for user
     dna,
     new Name("Hero")
   );

@@ -6,7 +6,7 @@ import type { World } from "gw-ecs/world/world";
 import { Move } from "../comps/move";
 import { COLLIDER_ASPECT, CollisionManager } from "gw-ecs/common/collisions";
 import { Game } from "../uniques";
-import { TILE_ASPECT, Tile } from "../comps";
+import { TILE_ASPECT, Tile, removeAction } from "../comps";
 import { GameEvent } from "../queues";
 
 export class MoveSystem extends EntitySystem {
@@ -14,17 +14,17 @@ export class MoveSystem extends EntitySystem {
     super(new Aspect(Move, Pos));
   }
 
-  shouldRun(world: World, _time: number, _delta: number): boolean {
-    const game = world.getUnique(Game);
-    return game.ready;
-  }
+  // shouldRun(world: World, _time: number, _delta: number): boolean {
+  //   const game = world.getUnique(Game);
+  //   return game.ready;
+  // }
 
   runEntity(world: World, entity: Entity, time: number, delta: number): void {
     const game = world.getUnique(Game);
     const posMgr = world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
 
-    const dxy = entity.remove(Move)!.dir;
+    const dxy = removeAction(entity, Move)!.dir;
 
     let slide = false;
 
@@ -36,7 +36,7 @@ export class MoveSystem extends EntitySystem {
       if (others.length > 0) {
         if (world.getUnique(CollisionManager).collide(entity, others)) {
           game.changed = true; // Force redraw
-          break;
+          return; // turn handled by colliders
         }
       }
 
@@ -60,10 +60,6 @@ export class MoveSystem extends EntitySystem {
       // trigger tile change (StepOn...)
     } while (slide);
 
-    // NOTE - Bumping into a wall is a turn right now
-    //      - To change, check a flag that gets set on successful move (when event fired)
     world.pushQueue(new GameEvent(entity, "turn", { time: 0 }));
-
-    // TODO - reschedule actor
   }
 }
