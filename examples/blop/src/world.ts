@@ -1,5 +1,6 @@
 import { World } from "gw-ecs/world";
 import {
+  Attack,
   Blop,
   BumpSprite,
   Effect,
@@ -36,6 +37,7 @@ import { FocusHelper } from "./uniques";
 import * as Constants from "./constants";
 import { Log } from "./uniques/log";
 import { coloredName } from "./utils";
+import { AttackSystem } from "./systems/attack";
 
 function blockedMove(actor: Entity, target: Entity, world: World) {
   world.getUnique(Log).add("#{red}Blocked#{}");
@@ -64,6 +66,11 @@ function sayHello(actor: Entity, target: Entity, world: World) {
   return true; // We handled it
 }
 
+function attackBlop(actor: Entity, target: Entity, world: World) {
+  actor.set(new Attack(target));
+  return true; // We handled it
+}
+
 export const world = new World()
   .registerComponent(Hero)
   .registerComponent(Tile)
@@ -76,6 +83,7 @@ export const world = new World()
   .registerComponent(Trigger)
   .registerComponent(Effect)
   .registerComponent(Pickup)
+  .registerComponent(Attack)
   .registerQueue(GameEvent)
   .addSystemSet(
     new SystemSet("game", ["start", "move", "act", "events", "finish"])
@@ -83,9 +91,12 @@ export const world = new World()
   .addSystem("game", "move", new MoveSystem())
   .addSystem("game", "post-move", new PickupSystem())
   .addSystem("game", "post-move", new FovSystem().runIf(heroMoved)) // So that FOV is accurate for act, events
+  .addSystem("game", "act", new AttackSystem())
   .addSystem("game", "events", new EventSystem())
-  .addSystem("game", "post-events", new FovSystem().runIf(heroTeleported)) // So that teleport updates before net loop
-  .addSystem("game", "finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish') -or- addCommit('game', 'world')
+  .addSystem("game", "post-events", new FovSystem().runIf(heroTeleported)) // So that teleport updates before next loop
+  .addSystem("game", "finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish') -or- both of the following...
+  // TODO - addCommitDelayed('game', 'world')
+  // TODO - addMaintainQueue(GameEvent, 'game', 'finish') -or- addMaintainQueues('game', 'finish')
   .addSystem(new TimerSystem())
   .addSystem(new RunSystemSet("game").runIf(gameReady)) // TODO - addRunSystemSet('game', gameReady)
   .setUnique(new Log(Constants.LOG_HEIGHT, Constants.LOG_WIDTH))
@@ -97,7 +108,7 @@ export const world = new World()
   )
   .setUnique(new CollisionManager(), (col) => {
     col
-      .register(["hero"], ["blop"], sayHello)
+      .register(["hero"], ["blop"], attackBlop)
       // .register(["blop"], ["hero"], attack)
       .register("actor", "wall", blockedMove)
       .register("hero", "stairs", (a, t, w) => gotoNextLevel(w));

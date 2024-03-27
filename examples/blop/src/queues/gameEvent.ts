@@ -2,13 +2,14 @@ import type { Entity } from "gw-ecs/entity";
 import type { Loc, XY } from "gw-utils";
 import type { Pos } from "gw-ecs/common";
 
-export type GameEventType = "wait" | "move" | "turn";
+export type GameEventType = "wait" | "move" | "turn" | "attack" | "kill";
 
 export interface GameEventOpts {
   dir?: Loc;
   pos?: Pos;
   target?: Entity;
   time?: number;
+  damage?: number;
 }
 
 export class GameEvent {
@@ -18,6 +19,7 @@ export class GameEvent {
   pos?: Pos;
   target?: Entity;
   time: number;
+  damage: number;
 
   constructor(entity: Entity, type: GameEventType, opts: GameEventOpts = {}) {
     this.entity = entity;
@@ -26,5 +28,6 @@ export class GameEvent {
     this.target = opts.target;
     this.pos = opts.pos;
     this.time = opts.time || 0;
+    this.damage = opts.damage || 0;
   }
 }

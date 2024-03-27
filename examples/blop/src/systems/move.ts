@@ -63,5 +63,7 @@ export class MoveSystem extends EntitySystem {
     // NOTE - Bumping into a wall is a turn right now
     //      - To change, check a flag that gets set on successful move (when event fired)
     world.pushQueue(new GameEvent(entity, "turn", { time: 0 }));
+
+    // TODO - reschedule actor
   }
 }

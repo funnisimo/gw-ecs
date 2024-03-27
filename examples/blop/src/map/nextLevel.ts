@@ -9,6 +9,7 @@ import {
 } from "./utils";
 import {
   Hero,
+  Name,
   STAIRS_BUNDLE,
   TILE_ASPECT,
   Tile,
@@ -121,8 +122,12 @@ function makeNormalLevel(world: World, depth: number) {
 
 function makeBlops(world: World, playerPos: XY, depth: number) {
   const mgr = world.getUnique(PosManager);
-  var numberOfBlops =
-    2 + Math.max(0, random.normal(depth / 2, Constants.BLOP_NUMBER_STDDEV));
+  var numberOfBlops = Math.min(
+    depth * 2,
+    2 + Math.max(0, random.normal(depth / 2, Constants.BLOP_NUMBER_STDDEV))
+  );
+
+  console.log("GENERATING " + numberOfBlops + " BLOPS");
 
   const weights = SPAWN_TABLE.map((t) =>
     Math.round(1000 * t.weight * gaussian(t.average, t.deviation, depth))
@@ -141,6 +146,7 @@ function makeBlops(world: World, playerPos: XY, depth: number) {
       Constants.MIN_BLOP_DISTANCE_AT_START
     );
     mgr.set(blop, blopPos.x, blopPos.y);
+    console.log(blop.fetch(Name)!.name, blopPos);
   }
 }
 

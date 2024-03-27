@@ -27,6 +27,14 @@ Blops:
     Hero -> Blop collisions:
         [X] Start with "Hello"
         [] Attack
+            [] Player damages blop
+                [] Event: attack - with damage
+            [] Player kills blop
+                [] Event: kill
+            [] Blop damages player
+                [] Event: attack - with damage
+            [] Blop kills player
+                [] Event: kill
     [] Blop AI
     [] Drops
 
@@ -38,6 +46,11 @@ Effects:
 
 Triggers:
     [] Add more Triggers
+    [] Only allow to fire once per actor turn
+        [] Can we use tick for this?
+
+Tiles:
+    [] Lava damages blops and hero
 
 FOV:
     [X] Keep FOV for Hero
