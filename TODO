@@ -102,3 +102,11 @@ MultiWorld:
     [] Store `notify` in a MultiWorld needs to be tested/updated
         * One one register should be required
     
+Entity:
+    [] Should `tags` be a standard part of `Entity`?
+    [] Could be integrated into `Aspect`
+        * If separate, then this isn't realistic
+
+Aspect:
+    [] Allow test functions in `with`, `without`, `one`, and `some`.
+        * (entity) => boolean

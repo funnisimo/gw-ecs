@@ -44,7 +44,14 @@ Blops:
         [] Start a Wander - 20%
         [] Random Move - 20%
         [] Idle
-    [] Drops
+    Drops:
+        [] Drop DNA
+        [] Most of the time?
+        [] More than one?
+    Smarts:
+        [] Avoid Ember?
+    DNA:
+        [] Spawn with DNA
 
 Game Over:
     [] Detect and Notify

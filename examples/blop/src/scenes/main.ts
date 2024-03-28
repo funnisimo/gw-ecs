@@ -108,7 +108,7 @@ export const mainScene = {
       game.changed = true;
     } else if (ev.key == "Backspace") {
       logs.makeLogsOld();
-      gotoNextLevel(world, game.hero);
+      gotoNextLevel(world, game.hero!);
     } else {
       console.log("key", ev.key);
     }

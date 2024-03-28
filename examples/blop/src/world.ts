@@ -81,50 +81,47 @@ function attackBlop(actor: Entity, target: Entity, world: World) {
 }
 
 export const world = new World()
-  .registerComponent(Hero)
-  .registerComponent(Tile)
-  .registerComponent(Sprite)
-  .registerComponent(Move)
-  .registerComponent(Blop)
-  .registerComponent(DNA)
   .registerComponent(FX)
   .registerComponent(Name)
+  .registerComponent(Sprite)
+  .registerComponent(Tile)
+  .registerComponent(Hero)
+  .registerComponent(Blop)
+  .registerComponent(DNA)
   .registerComponent(Trigger)
   .registerComponent(Effect)
   .registerComponent(Pickup)
-  .registerComponent(Attack)
   .registerComponent(Actor)
   .registerComponent(Wait)
+  .registerComponent(Move)
+  .registerComponent(Attack)
   .registerQueue(GameEvent)
   .setUnique(new Log(Constants.LOG_HEIGHT, Constants.LOG_WIDTH))
   .setUnique(new Game())
   .setUnique(new Timers())
   .setUnique(new Schedule())
+  .setUnique(new FOV(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT)) // , notifyFovWhenTilesChange
   .setUnique(
-    new FOV(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT),
-    notifyFovWhenTilesChange
-  )
-  .setUnique(new CollisionManager(), (col) => {
-    col
-      .register(["hero"], ["blop"], attackBlop)
-      .register(["blop"], ["hero"], attackBlop)
+    new CollisionManager()
+      .register("hero", "blop", attackBlop)
+      .register("blop", "hero", attackBlop)
       .register("actor", "wall", blockedMove)
-      .register("hero", "stairs", (a, t, w) => gotoNextLevel(w, a));
-  })
+      .register("hero", "stairs", (a, t, w) => gotoNextLevel(w, a))
+  )
   .addSystemSet(
     new EntitySystemSet("game", ["start", "move", "act", "events", "finish"])
+      .addSystem("move", new MoveSystem())
+      .addSystem("post-move", new PickupSystem())
+      .addSystem("post-move", new FovSystem().runIf(heroMoved)) // So that FOV is accurate for act, events
+      .addSystem("act", new AttackSystem())
+      .addSystem("act", new WaitSystem())
+      .addSystem("events", new DnaSystem())
+      .addSystem("post-events", new FovSystem().runIf(heroTeleported)) // So that teleport updates before next loop
+      .addSystem("finish", new RescheduleSystem())
+      .addSystem("finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish') -or- both of the following...
+    // TODO - addCommitDelayed('game', 'world')
+    // TODO - addMaintainQueue(GameEvent, 'game', 'finish') -or- addMaintainQueues('game', 'finish')
   )
-  .addSystem("game", "move", new MoveSystem())
-  .addSystem("game", "post-move", new PickupSystem())
-  .addSystem("game", "post-move", new FovSystem().runIf(heroMoved)) // So that FOV is accurate for act, events
-  .addSystem("game", "act", new AttackSystem())
-  .addSystem("game", "act", new WaitSystem())
-  .addSystem("game", "events", new DnaSystem())
-  .addSystem("game", "post-events", new FovSystem().runIf(heroTeleported)) // So that teleport updates before next loop
-  .addSystem("game", "finish", new RescheduleSystem())
-  .addSystem("game", "finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish') -or- both of the following...
-  // TODO - addCommitDelayed('game', 'world')
-  // TODO - addMaintainQueue(GameEvent, 'game', 'finish') -or- addMaintainQueues('game', 'finish')
   .addSystem(new TimerSystem())
   .addSystem(new GameTurnSystem("game").runIf(gameReady)) // TODO - addRunSystemSet('game', gameReady)
   .start();
