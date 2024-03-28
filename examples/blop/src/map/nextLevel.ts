@@ -4,7 +4,7 @@ import * as Constants from "../constants";
 import { FOV, Log } from "../uniques";
 import {
   findClosestEmptyFloor as findClosestSpawnTile,
-  findSpawnTileFarFrom,
+  findEmptyFloorTileFarFrom,
   setTileType,
 } from "./utils";
 import {
@@ -91,7 +91,7 @@ function makeNormalLevel(world: World, depth: number) {
   mgr.set(hero, heroXY.x, heroXY.y);
   // console.log("hero starting xy", heroXY);
 
-  var stairsXY = findSpawnTileFarFrom(
+  var stairsXY = findEmptyFloorTileFarFrom(
     world,
     heroXY,
     Constants.STAIRS_MIN_DISTANCE
@@ -139,7 +139,7 @@ function makeBlops(world: World, playerPos: XY, depth: number) {
     const bundle = SPAWN_TABLE[index].bundle;
     const blop = bundle.create(world);
 
-    const blopPos = findSpawnTileFarFrom(
+    const blopPos = findEmptyFloorTileFarFrom(
       world,
       playerPos,
       Constants.MIN_BLOP_DISTANCE_AT_START

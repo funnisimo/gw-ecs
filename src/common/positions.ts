@@ -70,27 +70,48 @@ export class Pos {
   //   this._y -= y || 0;
   // }
 
+  plus(loc: [number, number]): Pos;
   plus(pos: { x: number; y: number }): Pos;
   plus(x: number, y: number): Pos;
-  plus(x: number | { x: number; y: number }, y?: number): Pos {
+  plus(
+    x: number | { x: number; y: number } | [number, number],
+    y?: number
+  ): Pos {
+    if (Array.isArray(x)) {
+      return this.plus(x[0], x[1]);
+    }
     if (typeof x === "object") {
       return this.plus(x.x, x.y);
     }
     return new Pos((x || 0) + this._x, (y || 0) + this._y, this._x, this._y);
   }
 
+  minus(loc: [number, number]): Pos;
   minus(pos: { x: number; y: number }): Pos;
   minus(x: number, y: number): Pos;
-  minus(x: number | { x: number; y: number }, y?: number): Pos {
+  minus(
+    x: number | { x: number; y: number } | [number, number],
+    y?: number
+  ): Pos {
+    if (Array.isArray(x)) {
+      return this.minus(x[0], x[1]);
+    }
     if (typeof x === "object") {
       return this.minus(x.x, x.y);
     }
     return new Pos(this._x - (x || 0), this._y - (y || 0), this._x, this._y);
   }
 
+  equals(loc: [number, number]): boolean;
   equals(pos: { x: number; y: number }): boolean;
   equals(x: number, y: number): boolean;
-  equals(x: number | { x: number; y: number }, y?: number): boolean {
+  equals(
+    x: number | { x: number; y: number } | [number, number],
+    y?: number
+  ): boolean {
+    if (Array.isArray(x)) {
+      return this.equals(x[0], x[1]);
+    }
     if (typeof x === "object") {
       return this.equals(x.x, x.y);
     }
@@ -125,6 +146,7 @@ export class PosManager implements EntityWatcher, WorldInit {
     return this._size;
   }
 
+  // TODO - hasXY(xy: {x: number, y: number}): boolean;
   hasXY(x: number, y: number): boolean {
     return x >= 0 && x < this._size[0] && y >= 0 && y < this._size[1];
   }
@@ -137,6 +159,7 @@ export class PosManager implements EntityWatcher, WorldInit {
     return x + y * this.width;
   }
 
+  // TODO - createFn: (xy) => Entity
   fill(createFn: (x: number, y: number) => Entity) {
     for (let x = 0; x < this.width; ++x) {
       for (let y = 0; y < this.height; ++y) {
@@ -218,6 +241,7 @@ export class PosManager implements EntityWatcher, WorldInit {
     entity._removeComp(Pos);
   }
 
+  // TODO - cb: (xy, entities) => any
   eachXY(
     cb: (x: number, y: number, entities: Entity[]) => any,
     aspect?: Aspect,
@@ -234,6 +258,7 @@ export class PosManager implements EntityWatcher, WorldInit {
     }
   }
 
+  // TODO - cb: (xy, entities) => any
   everyXY(
     cb: (x: number, y: number, entities: Entity[]) => any,
     aspect?: Aspect,
@@ -258,7 +283,7 @@ export class PosManager implements EntityWatcher, WorldInit {
       entities: [...this._entitiesAt.entries()].map(([index, entities]) => {
         const x = index % this._size[0];
         const y = Math.floor(index / this._size[0]);
-        return [x, y, entities.length];
+        return [x, y, entities.map((e) => e.index)];
       }),
     });
   }

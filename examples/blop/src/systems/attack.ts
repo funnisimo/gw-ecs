@@ -23,6 +23,9 @@ export class AttackSystem extends EntitySystem {
     attackBlop.charge = 0;
 
     targetBlop.health -= damage;
+
+    // TODO - Remove WanderTo?
+
     world
       .getUnique(Log)
       .add(

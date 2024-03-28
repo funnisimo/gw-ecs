@@ -37,7 +37,17 @@ export const WORLD_BIG_PATCHES_MIN_SIZE = 2;
 export const WORLD_BIG_PATCHES_MAX_SIZE = 7;
 export const WORLD_SMALL_PATCHES_MIN_SIZE = 1;
 export const WORLD_SMALL_PATCHES_MAX_SIZE = 4;
-export const END_DEPTH = 11; //////////////////////////////////////////////////////
+export const END_DEPTH = 11;
+
+//////////////////////////////////////////////////////
+// AI
+//////////////////////////////////////////////////////
+
+export const BLOP_RANDOM_MOVE_CHANCE = 20; // Every 5 idle turns
+export const BLOP_WANDER_CHANCE = 10; // Every 10 idle turns
+export const BLOP_WANDER_DISTANCE = 10;
+
+//////////////////////////////////////////////////////
 // EFFECTS
 //////////////////////////////////////////////////////
 
@@ -50,12 +60,16 @@ export const HURT_SELF_GENE_EFFECT_DAMAGE = 1;
 export const LASER_DAMAGE = 1;
 export const DESTROY_WALL_RADIUS = 2;
 export const BONUS_ATTACK_DAMAGE_PER_CHARGE = 1;
-export const MAX_CHARGED_STACKS = 5; //////////////////////////////////////////////////////
+export const MAX_CHARGED_STACKS = 5;
+
+//////////////////////////////////////////////////////
 // ITEMS
 //////////////////////////////////////////////////////
 
 export const EXPAND_LIFE_AMOUNT = 5;
-export const REINFORCE_AMOUNT = 1; //////////////////////////////////////////////////////
+export const REINFORCE_AMOUNT = 1;
+
+//////////////////////////////////////////////////////
 // DISPLAY DIMENSIONS
 //////////////////////////////////////////////////////
 
@@ -83,41 +97,6 @@ export const LOG_TOP = MAP_TOP + MAP_HEIGHT + 1;
 export const LOG_LEFT = 0;
 export const LOG_WIDTH = SCREEN_WIDTH;
 export const LOG_HEIGHT = SCREEN_HEIGHT - LOG_TOP;
-
-// export const TEXT_WIDTH_COEF = 2;
-// export const LOG_TEXT_WIDTH = LOG_WIDTH * TEXT_WIDTH_COEF;
-// export const INFO_WIDTH = 20;
-// export const INFO_TEXT_WIDTH = INFO_WIDTH * TEXT_WIDTH_COEF;
-// export const MAP_HEADER_OFFSET = GWU.xy.xy(1 + LOG_WIDTH + 1, 1);
-// export const MAP_HEADER_TEXT_WIDTH = MAP_HEADER_WIDTH * TEXT_WIDTH_COEF;
-// export const MAP_HEADER_HEIGHT = 1;
-// export const MAP_OFFSET = GWU.xy.plus(
-//   MAP_HEADER_OFFSET,
-//   GWU.xy.xy(0, MAP_HEADER_HEIGHT + 1)
-// );
-// export const HELP_OFFSET = GWU.xy.xy(
-//   MAP_HEADER_OFFSET.x,
-//   MAP_OFFSET.y + MAP_HEIGHT + 1
-// );
-// export const HELP_TEXT_WIDTH = HELP_WIDTH * TEXT_WIDTH_COEF;
-// export const DISPLAY_HEIGHT =
-//   1 + MAP_HEADER_HEIGHT + 1 + MAP_HEIGHT + 1 + HELP_HEIGHT + 1;
-// export const LOG_OFFSET = GWU.xy.xy(1, 1);
-// export const INFO_HEIGHT = DISPLAY_HEIGHT - 2;
-// export const INFO_OFFSET = GWU.xy.xy(MAP_OFFSET.x + MAP_WIDTH + 1, 1);
-// export const DISPLAY_WIDTH = 1 + LOG_WIDTH + 1 + MAP_WIDTH + 1 + INFO_WIDTH + 1;
-// export const HEALTH_GAUGE_LENGTH = 20;
-// export const MODAL_OFFSET = GWU.xy.xy(15, 8);
-// export const MODAL_WIDTH = DISPLAY_WIDTH - 2 * MODAL_OFFSET.x;
-// export const MODAL_TEXT_WIDTH = MODAL_WIDTH * TEXT_WIDTH_COEF;
-// export const DETAILS_WIDTH = 20;
-// export const DETAILS_OFFSET = GWU.xy.xy(
-//   DISPLAY_WIDTH - 1 - INFO_WIDTH - 2 - DETAILS_WIDTH,
-//   2
-// );
-// export const DETAILS_TEXT_WIDTH = DETAILS_WIDTH * TEXT_WIDTH_COEF;
-// export const LINES_BETWEEN_DETAILS_SECTIONS = 3;
-// export const LINE_WIDTH_RATIO = 0.2;
 
 //////////////////////////////////////////////////////
 // COLORS

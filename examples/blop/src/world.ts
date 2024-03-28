@@ -14,6 +14,7 @@ import {
   Tile,
   Trigger,
   Wait,
+  TravelTo,
   addAction,
   noTurn,
   takeTurn,
@@ -48,9 +49,14 @@ import { AttackSystem } from "./systems/attack";
 import { GameTurnSystem } from "./systems/gameTurn";
 
 function blockedMove(actor: Entity, target: Entity, world: World) {
-  world.getUnique(Log).add("#{red}Blocked#{}");
-  flash(world, target.fetch(Pos)!, BumpSprite, 150);
-  noTurn(world, actor);
+  if (actor.has(Hero)) {
+    world.getUnique(Log).add("#{red}Blocked#{}");
+    flash(world, target.fetch(Pos)!, BumpSprite, 150);
+    noTurn(world, actor);
+  } else {
+    console.log("- blop blocked");
+    addAction(actor, new Wait()); // Turns random move into a wait
+  }
   return true; // We handled the collision
 }
 
@@ -80,6 +86,18 @@ function attackBlop(actor: Entity, target: Entity, world: World) {
   return true; // We handled it
 }
 
+function pushCharge(actor: Entity, target: Entity, world: World) {
+  // TODO - Should this be an action component?
+  //      - addAction(actor, new ChargeBlop(target));
+  const blop = actor.fetch(Blop)!;
+  world
+    .getUnique(Log)
+    .add(`${coloredName(actor)} charges ${coloredName(target)}!`);
+  blop.charge += 1;
+  addAction(actor, new Wait());
+  return true;
+}
+
 export const world = new World()
   .registerComponent(FX)
   .registerComponent(Name)
@@ -95,6 +113,7 @@ export const world = new World()
   .registerComponent(Wait)
   .registerComponent(Move)
   .registerComponent(Attack)
+  .registerComponent(TravelTo)
   .registerQueue(GameEvent)
   .setUnique(new Log(Constants.LOG_HEIGHT, Constants.LOG_WIDTH))
   .setUnique(new Game())
@@ -104,7 +123,10 @@ export const world = new World()
   .setUnique(
     new CollisionManager()
       .register("hero", "blop", attackBlop)
+      // Hero swap with ally (incl dummy)
       .register("blop", "hero", attackBlop)
+      // Blop swap with dummy ally
+      .register("blop", "blop", pushCharge) // TODO - What about swaps?
       .register("actor", "wall", blockedMove)
       .register("hero", "stairs", (a, t, w) => gotoNextLevel(w, a))
   )

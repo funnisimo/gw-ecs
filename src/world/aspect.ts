@@ -26,13 +26,13 @@ export class Aspect {
     return this;
   }
 
-  one(...components: AnyComponent[]): Aspect {
+  oneOf(...components: AnyComponent[]): Aspect {
     if (components.length == 0) return this;
     this._oneComponents.push(components);
     return this;
   }
 
-  some(...components: AnyComponent[]): Aspect {
+  someOf(...components: AnyComponent[]): Aspect {
     if (components.length == 0) return this;
     this._someComponents.push(components);
     return this;
@@ -76,8 +76,16 @@ export class Aspect {
     return entities.find((e) => this.match(e, sinceTick));
   }
 
-  every(entities: Entity[], sinceTick = 0): Entity[] {
+  filter(entities: Entity[], sinceTick = 0): Entity[] {
     return entities.filter((e) => this.match(e, sinceTick));
+  }
+
+  some(entities: Entity[], sinceTick = 0): boolean {
+    return entities.some((e) => this.match(e, sinceTick));
+  }
+
+  every(entities: Entity[], sinceTick = 0): boolean {
+    return entities.every((e) => this.match(e, sinceTick));
   }
 
   /**

@@ -39,7 +39,7 @@ Blops:
                 [X] Event: attack - with damage
             [X] Blop kills player
                 [X] Event: kill
-        [] In FOV - Charge Hero
+        [X] In FOV - Charge Hero
         [] Have Wander Goal - head there
         [] Start a Wander - 20%
         [] Random Move - 20%
@@ -52,6 +52,9 @@ Blops:
         [] Avoid Ember?
     DNA:
         [] Spawn with DNA
+    Other:
+        [] Vary Blop speeds
+        [] Vary Blop AI
 
 Game Over:
     [] Detect and Notify

@@ -63,6 +63,7 @@ export function noTurn(world: World, entity: Entity) {
   const actor = entity.fetch(Actor);
   if (actor) {
     actor.scheduled = true;
+    // TODO : actor.ready = false; ?????
   }
 }
 

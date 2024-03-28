@@ -194,6 +194,10 @@ export class FOV {
   }
   reset() {
     this.flags.fill(0);
+
+    // TODO - REMOVE :: This is for testing AI only
+    this.makeAlwaysVisible();
+
     // this.changed = true;
     // this.flags.forEach((_v, x, y) => {
     //   this.callback(x, y, false);

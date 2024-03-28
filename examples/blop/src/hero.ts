@@ -12,6 +12,7 @@ import {
 } from "./comps";
 import { Collider } from "gw-ecs/common";
 import { BLOP_TYPE } from "./blops";
+import { aiTravel } from "./ai";
 
 export function createHero(world: World): Entity {
   const dna = new DNA(2);
@@ -23,7 +24,7 @@ export function createHero(world: World): Entity {
     new Sprite("@", "yellow"),
     new Collider("hero", "actor"),
     new Blop(BLOP_TYPE.HERO, 20, 2),
-    new Actor(), // No AI so will return false, waiting for user
+    new Actor(aiTravel), // Try to travel to location
     dna,
     new Name("Hero")
   );

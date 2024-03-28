@@ -1,7 +1,7 @@
 import type { GameEvent } from "../queues";
 import type { Entity } from "gw-ecs/entity";
 import { Pos, PosManager } from "gw-ecs/common/positions";
-import { findEmptyTileForSpawn } from "../map/utils";
+import { findEmptyFloorTile } from "../map/utils";
 import {
   Blop,
   EffectSprite,
@@ -43,7 +43,7 @@ export class TeleportEffect extends Effect {
   apply(world: World, event: GameEvent, owner: Entity) {
     const posMgr = world.getUnique(PosManager);
 
-    const newXY = findEmptyTileForSpawn(world);
+    const newXY = findEmptyFloorTile(world);
     posMgr.set(owner, newXY.x, newXY.y);
     flash(world, newXY, TeleportSprite);
 

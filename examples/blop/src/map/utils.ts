@@ -45,6 +45,7 @@ class RandomXY {
   }
 }
 
+// TODO - Should this allow undefined return instead of throwing?
 export function findClosestEmptyFloor(world: World, pos: XY.XY): XY.XY {
   const mgr = world.getUnique(PosManager);
   const locs = XY.closestMatchingLocs(pos.x, pos.y, (x, y) => {
@@ -59,10 +60,10 @@ export function findClosestEmptyFloor(world: World, pos: XY.XY): XY.XY {
   return XY.asXY(loc);
 }
 
-export function findEmptyTileForSpawn(
+export function findEmptyFloorTile(
   world: World,
   matchFn?: (xy: XY.XY) => boolean
-): XY.XY {
+): XY.XY | undefined {
   const mgr = world.getUnique(PosManager);
 
   const rng = world.getUnique(Random) || random;
@@ -76,20 +77,23 @@ export function findEmptyTileForSpawn(
     if (matchFn) return matchFn(xy);
     return true;
   });
-  if (loc) return loc;
-  throw new Error("Failed to: findEmptyTileForSpawn");
+  return loc;
 }
 
-export function findSpawnTileFarFrom(world: World, farLoc: XY.XY, dist = 10) {
+export function findEmptyFloorTileFarFrom(
+  world: World,
+  fromPos: XY.XY,
+  dist = 10
+): XY.XY | undefined {
   // eslint-disable-next-line no-constant-condition
-  const pos = findEmptyTileForSpawn(world, (xy) => {
-    return XY.manhattanDistanceFromTo(xy, farLoc) >= dist;
+  const pos = findEmptyFloorTile(world, (xy) => {
+    return XY.manhattanDistanceFromTo(xy, fromPos) >= dist;
   });
 
   return pos;
 }
 
-export function setTileType(world: World, xy: XY.XY, bundle: Bundle) {
+export function setTileType(world: World, xy: XY.XY, bundle: Bundle): void {
   const mgr = world.getUnique(PosManager);
   const entity = mgr.firstAt(xy.x, xy.y, TILE_ASPECT);
   if (!entity)

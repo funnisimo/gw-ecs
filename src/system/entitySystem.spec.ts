@@ -16,8 +16,8 @@ describe("entity system", () => {
   }
 
   it("use its aspect to check whether an entity match or not", () => {
-    let aspectA = new Aspect().with(A).one(B);
-    let aspectB = new Aspect().one(B).without(C);
+    let aspectA = new Aspect().with(A).oneOf(B);
+    let aspectB = new Aspect().oneOf(B).without(C);
     let systemA = new MyEntitySytem(aspectA);
     let systemB = new MyEntitySytem(aspectB);
 

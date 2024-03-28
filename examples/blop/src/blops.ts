@@ -1,10 +1,6 @@
 import type { Bundle, Entity } from "gw-ecs/entity";
 import { blopBundle } from "./comps/blop";
-import type { World } from "gw-ecs/world";
-import { Game } from "./uniques";
-import { Pos } from "gw-ecs/common";
-import { distanceFromTo } from "gw-utils/xy";
-import { Attack, Wait, addAction } from "./comps";
+import { blopAi } from "./ai";
 
 ////////////////////////////////////////////
 // TYPES
@@ -18,35 +14,6 @@ export const BLOP_TYPE: Record<string, string> = {
   WARRIOR: "WARRIOR",
   COMPLEX: "COMPLEX",
 };
-
-////////////////////////////////////////////
-// AI
-
-export function blopAi(
-  world: World,
-  blop: Entity,
-  time: number,
-  delta: number
-): boolean {
-  const game = world.getUnique(Game);
-  const hero = game.hero!;
-
-  // [] Next to Hero - Attack Hero
-  const myPos = blop.fetch(Pos)!;
-  const heroPos = hero.fetch(Pos)!;
-  if (distanceFromTo(myPos, heroPos) == 1) {
-    addAction(blop, new Attack(hero));
-    return true;
-  }
-  // [] In FOV - Charge Hero
-  // [] Have Wander Goal - head there
-  // [] Start a Wander - 20%
-  // [] Random Move - 20%
-  // [] Idle
-
-  addAction(blop, new Wait());
-  return true; // At worst case we are just idle
-}
 
 ////////////////////////////////////////////
 // BUNDLES

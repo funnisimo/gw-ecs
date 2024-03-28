@@ -97,6 +97,8 @@ SystemStep:
     [] Track own delta?
         [] lastTime
 
+PosManager:
+    [] Work with XY in addition to X, Y
 
 MultiWorld:
     [] Store `notify` in a MultiWorld needs to be tested/updated

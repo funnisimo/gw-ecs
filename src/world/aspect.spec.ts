@@ -46,7 +46,7 @@ describe("Aspect", () => {
     });
 
     it("should matchs entity if it has at least one of the required components", () => {
-      let aspect = new Aspect().one(A, B, C);
+      let aspect = new Aspect().oneOf(A, B, C);
       const entityA = world.create();
       entityA.set(new A());
       expect(aspect.match(entityA)).toBeTrue();
@@ -62,7 +62,7 @@ describe("Aspect", () => {
       expect(aspect.match(entityB)).toBeFalse(); // It has 2, but only 1 is the filter
     });
     it("should refuses entity if it has none of all the required components", () => {
-      let aspect = new Aspect().one(A, B, C);
+      let aspect = new Aspect().oneOf(A, B, C);
       const entity = world.create();
       expect(aspect.match(entity)).toBeFalse();
       entity.set(new D());
@@ -105,7 +105,7 @@ describe("Aspect", () => {
     });
 
     it("all and one", () => {
-      let aspect = new Aspect().with(A, B).one(C, D);
+      let aspect = new Aspect().with(A, B).oneOf(C, D);
       const entity = world.create();
       entity.set(new A());
       entity.set(new B());
@@ -147,7 +147,7 @@ describe("Aspect", () => {
     });
 
     it("one and none", () => {
-      let aspect = new Aspect().one(A, B).without(C, D);
+      let aspect = new Aspect().oneOf(A, B).without(C, D);
       let entity = world.create();
       expect(aspect.match(entity)).toBeFalse(); // []
       entity.set(new A());
@@ -167,7 +167,7 @@ describe("Aspect", () => {
     });
 
     it("all, one and none", () => {
-      let aspect = new Aspect().with(A, B).one(C, D).without(E);
+      let aspect = new Aspect().with(A, B).oneOf(C, D).without(E);
       let entity = world.create();
       entity.set(new A());
       entity.set(new B());
@@ -193,7 +193,7 @@ describe("Aspect", () => {
     });
 
     it("all, one, some, and none", () => {
-      let aspect = new Aspect().with(A, B).one(C, D).some(E, F).without(G);
+      let aspect = new Aspect().with(A, B).oneOf(C, D).someOf(E, F).without(G);
       let entity = world.create();
       entity.set(new A());
       entity.set(new B());
