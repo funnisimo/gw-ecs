@@ -33,17 +33,17 @@ Blops:
                 [X] Event: attack - with damage
             [X] Player kills blop
                 [X] Event: kill
-    [] Blop AI
+    [X] Blop AI
         [X] Next to Hero - Attack Hero
             [X] Blop damages player
                 [X] Event: attack - with damage
             [X] Blop kills player
                 [X] Event: kill
         [X] In FOV - Charge Hero
-        [] Have Wander Goal - head there
-        [] Start a Wander - 20%
-        [] Random Move - 20%
-        [] Idle
+        [X] Have Wander Goal - head there
+        [X] Start a Wander - 20%
+        [X] Random Move - 20%
+        [X] Idle
     Drops:
         [] Drop DNA
         [] Most of the time?
