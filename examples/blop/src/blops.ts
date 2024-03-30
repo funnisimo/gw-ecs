@@ -1,6 +1,6 @@
 import type { Bundle, Entity } from "gw-ecs/entity";
 import { blopBundle } from "./comps/blop";
-import { blopAi } from "./ai";
+import { BLOP_AI, blopAi } from "./ai";
 
 ////////////////////////////////////////////
 // TYPES
@@ -24,7 +24,7 @@ export const MINI_BLOP_BUNDLE = blopBundle(BLOP_TYPE.MINI, {
   power: 1,
   ch: "b",
   fg: "brown",
-  ai: [blopAi],
+  ai: BLOP_AI,
 });
 
 export const SMALL_BLOP_BUNDLE = blopBundle(BLOP_TYPE.SMALL, {
@@ -33,7 +33,7 @@ export const SMALL_BLOP_BUNDLE = blopBundle(BLOP_TYPE.SMALL, {
   power: 2,
   ch: "b",
   fg: "orange",
-  ai: [blopAi],
+  ai: BLOP_AI,
 });
 
 export const FAT_BLOP_BUNDLE = blopBundle(BLOP_TYPE.FAT, {
@@ -42,7 +42,7 @@ export const FAT_BLOP_BUNDLE = blopBundle(BLOP_TYPE.FAT, {
   power: 1,
   ch: "F",
   fg: "pink",
-  ai: [blopAi],
+  ai: BLOP_AI,
 });
 
 export const WARRIOR_BLOP_BUNDLE = blopBundle(BLOP_TYPE.WARRIOR, {
@@ -51,7 +51,7 @@ export const WARRIOR_BLOP_BUNDLE = blopBundle(BLOP_TYPE.WARRIOR, {
   power: 4,
   ch: "W",
   fg: "red",
-  ai: [blopAi],
+  ai: BLOP_AI,
 });
 
 export const COMPLEX_BLOP_BUNDLE = blopBundle(BLOP_TYPE.COMPLEX, {
@@ -61,7 +61,7 @@ export const COMPLEX_BLOP_BUNDLE = blopBundle(BLOP_TYPE.COMPLEX, {
   ch: "C",
   fg: "yellow",
   // TODO - assign more dna entries
-  ai: [blopAi],
+  ai: BLOP_AI,
 });
 
 // TODO - BLOP_DUMMY

@@ -4,6 +4,7 @@ import { FOV, Game } from "./uniques";
 import { Pos, PosManager } from "gw-ecs/common";
 import {
   Attack,
+  BLOP_ASPECT,
   Move,
   TILE_ASPECT,
   Tile,
@@ -20,6 +21,7 @@ import {
   BLOP_WANDER_DISTANCE,
 } from "./constants";
 import { findEmptyFloorTileFarFrom } from "./map/utils";
+import { pathFromTo } from "./utils";
 
 ////////////////////////////////////////////
 // AI
@@ -37,6 +39,15 @@ export function blopAi(
   if (aiRandomMove(world, blop)) return true;
   return aiWait(world, blop);
 }
+
+export const BLOP_AI = [
+  aiAttackHero,
+  aiChargeHero,
+  aiTravel,
+  aiStartWander,
+  aiRandomMove,
+  aiWait,
+];
 
 export function aiAttackHero(world: World, blop: Entity): boolean {
   const game = world.getUnique(Game);
@@ -64,31 +75,11 @@ export function aiChargeHero(world: World, blop: Entity): boolean {
 
   // [X] In FOV - Charge Hero
   const fov = world.getUnique(FOV);
-  const posMgr = world.getUnique(PosManager);
   if (!fov || !fov.isDirectlyVisible(myPos.x, myPos.y)) return false;
 
   blop.remove(TravelTo); // [X] Clear Travel goal
 
-  const nextSteps = fromTo(
-    myPos,
-    heroPos,
-    (x, y) => {
-      // TODO - Cache this
-      const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT);
-      if (!tileEntity) return MoveCost.Obstruction;
-      const tile = tileEntity.fetch(Tile)!;
-      if (tile.blocksMove) return MoveCost.Blocked;
-      // TODO - incorporate damage
-      // TODO - understand slide - AVOID
-      // TODO - different move costs for water, etc...
-
-      // TODO - Other blops in way - AVOID (except dummy b/c swap)
-      // TODO - Other Colliders?
-
-      return MoveCost.Ok;
-    },
-    true
-  );
+  const nextSteps = pathFromTo(world, myPos, heroPos);
   console.log(
     "blop path to hero",
     myPos.xy(),
@@ -117,27 +108,7 @@ export function aiTravel(world: World, blop: Entity): boolean {
   }
 
   // [X] Take next step
-  const posMgr = world.getUnique(PosManager);
-  const nextSteps = fromTo(
-    myPos,
-    travelTo.goal,
-    (x, y) => {
-      // TODO - Cache this
-      const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT);
-      if (!tileEntity) return MoveCost.Obstruction;
-      const tile = tileEntity.fetch(Tile)!;
-      if (tile.blocksMove) return MoveCost.Blocked;
-      // TODO - incorporate damage
-      // TODO - understand slide - AVOID
-      // TODO - different move costs for water, etc...
-
-      // TODO - Other blops in way - AVOID (except dummy b/c swap)
-      // TODO - Other Colliders?
-
-      return MoveCost.Ok;
-    },
-    true
-  );
+  const nextSteps = pathFromTo(world, myPos, travelTo.goal);
   console.log(
     "blop travel path",
     myPos.xy(),

@@ -1,6 +1,10 @@
 import type { Entity } from "gw-ecs/entity";
-import { Name, Sprite } from "./comps";
+import { BLOP_ASPECT, Name, Sprite, TILE_ASPECT, Tile } from "./comps";
 import { clamp } from "gw-utils/utils";
+import type { XY } from "gw-utils";
+import type { World } from "gw-ecs/world";
+import { MoveCost, fromTo } from "gw-utils/path";
+import { PosManager } from "gw-ecs/common";
 
 const SQRT_2_PI = Math.sqrt(2 * Math.PI);
 // https://www.math.net/gaussian-distribution
@@ -35,4 +39,33 @@ export function quadInOut(input: number): number {
 export function cubicOut(input: number): number {
   input -= 1;
   return input * input * input + 1;
+}
+
+export function pathFromTo(world: World, fromPos: XY, toPos: XY) {
+  const posMgr = world.getUnique(PosManager);
+
+  return fromTo(
+    fromPos,
+    toPos,
+    (x, y) => {
+      // TODO - Cache this
+      const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT);
+      if (!tileEntity) return MoveCost.Obstruction;
+      const tile = tileEntity.fetch(Tile)!;
+      if (tile.blocksMove) return MoveCost.Blocked;
+
+      // TODO - different move costs for water, etc...
+      // - understand slide - AVOID
+      // - understand hurt - AVOID
+
+      // [x] Other blops in way - AVOID
+      // TODO - (except dummy b/c swap)
+      if (posMgr.firstAt(x, y, BLOP_ASPECT)) {
+        return MoveCost.Avoided;
+      }
+
+      return MoveCost.Ok;
+    },
+    true
+  );
 }
