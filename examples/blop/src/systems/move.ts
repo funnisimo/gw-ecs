@@ -9,10 +9,19 @@ import {
   Collider,
   CollisionManager,
 } from "gw-ecs/common/collisions";
-import { Game } from "../uniques";
-import { TILE_ASPECT, Tile, removeAction } from "../comps";
+import { FOV, FocusHelper, Game, Log } from "../uniques";
+import {
+  AppearSprite,
+  EntityInfo,
+  TILE_ASPECT,
+  Tile,
+  TravelTo,
+  removeAction,
+} from "../comps";
 import { GameEvent } from "../queues";
 import * as XY from "gw-utils/xy";
+import { coloredName, interrupt } from "../utils";
+import { flash } from "../fx/flash";
 
 export class MoveSystem extends EntitySystem {
   constructor() {
@@ -25,6 +34,7 @@ export class MoveSystem extends EntitySystem {
   // }
 
   runEntity(world: World, entity: Entity, time: number, delta: number): void {
+    const focus = world.getUnique(FocusHelper);
     const game = world.getUnique(Game);
     const posMgr = world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;
@@ -52,7 +62,29 @@ export class MoveSystem extends EntitySystem {
         new GameEvent(entity, "move", { dir: dxy, pos: pos.clone() })
       );
 
-      // check for pickups
+      // remove from path if appropriate
+      // TODO - This should go elsewhere
+      if (entity === game.hero && focus.path && focus.path.length) {
+        if (XY.equals(pos, focus.path[0])) {
+          focus.path.shift();
+        }
+      }
+
+      // [X] - Did we become visible?  Should we interupt the hero?
+      if (game.hero!.has(TravelTo)) {
+        const fov = world.getUnique(FOV);
+        if (fov.becameVisible(pos.x, pos.y)) {
+          const info = entity.update(EntityInfo);
+          if (info) {
+            if (info.shouldInterruptWhenSeen()) {
+              interrupt(game.hero!);
+              world.getUnique(Log).add(`A ${coloredName(entity)} appears. 2`);
+              flash(world, pos, AppearSprite);
+            }
+            info.seen();
+          }
+        }
+      }
 
       let tileEntity = posMgr.firstAt(newX, newY, TILE_ASPECT)!;
       const tile = tileEntity.fetch(Tile)!;

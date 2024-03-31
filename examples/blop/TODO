@@ -12,15 +12,32 @@ Observation Mode:
 Schedule:
     [X] ScheduleService
     [X] Auto detect entities not rescheduled
+    [] Auto break if Hero turn
 
 Path Following:
-    [] Show path to mouse
-    [] Allow Click to make Hero follow path
-    [] Also Enter?
-    [] Stop following automatically
-        - Pickup something
-        - Take damage
-        - See Blop - only new?
+    [X] Show path to mouse
+    [X] Allow Click to make Hero follow path
+    [] Also 'Enter'
+    Stop following automatically when:
+        [X] See something to pickup
+        [X] Take damage
+        [X] See Blop - only new?
+    [] Auto ignore stairs unless it is the goal
+    [X] Auto ignore pickup
+    [] Move interrupt logic out of `FovSystem`
+        * at least the TravelTo aware part
+
+Stairs:
+    [] Prompt for usage?  Key for usage: '>', 'Enter'?
+    [] '>' to auto path to stairs
+
+Messages:
+    [] 'A Stairs appears.'?
+    [] 'A Every7Turns appears.'
+
+EntityInfo:
+    [] Combine with `Name`
+    [] Add text format info - describeA, describeThe, ...
 
 Blops:
     [X] Add blops
@@ -50,22 +67,23 @@ Blops:
         [] More than one?
     Smarts:
         [] Avoid Ember?
+        [] Avoid Ice?
     DNA:
         [] Spawn with DNA
     Other:
         [] Vary Blop speeds
         [] Vary Blop AI
 
+AI:
+    [] Allow register + use string id
+
 Game Over:
     [] Detect and Notify
     [] Allow restart
 
 MoveSystem:
-    [] Collide same team -> swap places as move
+    [] Collide same team -> swap places as move?
     [] Mark Hero friends with Ally component
-
-MultiWorld:
-    [] Allow up+down stairs
 
 Effects:
     [] Add more Effects
@@ -74,6 +92,7 @@ Effects:
     [] Extend # - attack additional squares towards target: A-->
     [] Swipe - attack in arc of 3 dirs centered on target
     [] Shock - chain to all attached shockables (water tiles and blops in/next to)
+    [] Explode - big explosion (radius 3)
 
 Triggers:
     [] Add more Triggers
@@ -109,6 +128,9 @@ Pickup:
 
 
 # Future
+
+MultiWorld:
+    [] Allow up+down stairs
 
 App:
     [] Add splash screen/main menu?

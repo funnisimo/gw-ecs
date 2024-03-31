@@ -21,7 +21,7 @@ import {
   BLOP_WANDER_DISTANCE,
 } from "./constants";
 import { findEmptyFloorTileFarFrom } from "./map/utils";
-import { pathFromTo } from "./utils";
+import { interrupt, pathFromTo } from "./utils";
 
 ////////////////////////////////////////////
 // AI
@@ -57,8 +57,8 @@ export function aiAttackHero(world: World, blop: Entity): boolean {
   const myPos = blop.fetch(Pos)!;
   const heroPos = hero.fetch(Pos)!;
   if (XY.distanceFromTo(myPos, heroPos) == 1) {
-    blop.remove(TravelTo); // [X] Clear Travel goal
-
+    // TODO - Move to attack?
+    interrupt(blop); // [X] Clear Travel goal
     addAction(blop, new Attack(hero));
     return true;
   }
@@ -77,7 +77,7 @@ export function aiChargeHero(world: World, blop: Entity): boolean {
   const fov = world.getUnique(FOV);
   if (!fov || !fov.isDirectlyVisible(myPos.x, myPos.y)) return false;
 
-  blop.remove(TravelTo); // [X] Clear Travel goal
+  interrupt(blop); // [X] Clear Travel goal
 
   const nextSteps = pathFromTo(world, myPos, heroPos);
   console.log(
@@ -86,8 +86,8 @@ export function aiChargeHero(world: World, blop: Entity): boolean {
     heroPos.xy(),
     nextSteps.map((l) => `${l[0]},${l[1]}`)
   );
-  if (nextSteps.length > 2) {
-    const dir = XY.dirFromTo(nextSteps[0], nextSteps[1]);
+  if (nextSteps.length > 0) {
+    const dir = XY.dirFromTo(myPos, nextSteps[0]);
     addAction(blop, new Move(dir));
     return true;
   }
@@ -116,17 +116,17 @@ export function aiTravel(world: World, blop: Entity): boolean {
     nextSteps.map((l) => `${l[0]},${l[1]}`)
   );
 
-  if (nextSteps.length > 1) {
-    const dir = XY.dirFromTo(nextSteps[0], nextSteps[1]);
+  if (nextSteps.length > 0) {
+    const dir = XY.dirFromTo(myPos, nextSteps[0]);
     addAction(blop, new Move(dir));
-    if (XY.equals(nextSteps[1], travelTo.goal)) {
+    if (XY.equals(nextSteps[0], travelTo.goal)) {
       // we will reach goal so lets stop wandering
       blop.remove(TravelTo);
     }
     return true;
   }
 
-  console.log("-- no path found to wander goal --");
+  console.log("-- no path found to travel goal --");
   blop.remove(TravelTo);
   return false;
 }

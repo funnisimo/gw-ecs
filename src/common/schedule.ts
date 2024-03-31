@@ -11,6 +11,12 @@ interface TaskInfo {
   nextItem: TaskInfo | null;
 }
 
+export enum RunResult {
+  Ok,
+  Retry, // also does break
+  Break,
+}
+
 export class Schedule {
   private nextItem: TaskInfo | null;
   public time: number;
@@ -134,8 +140,12 @@ export class ScheduleSystem extends System {
     while (entity) {
       if (entity instanceof Entity) {
         // TODO - what to do with delta in gameTurn mode?
-        if (!this.runEntity(world, entity, schedule.time, 0)) {
+        const res = this.runEntity(world, entity, schedule.time, 0);
+        if (res === RunResult.Retry) {
           schedule.restore(entity);
+        }
+        // Retry or Break
+        if (res !== RunResult.Ok) {
           return;
         }
       } else {
@@ -154,8 +164,8 @@ export class ScheduleSystem extends System {
     entity: Entity,
     time: number,
     delta: number
-  ): boolean {
+  ): RunResult {
     this.systems.runEntity(world, entity, time, delta);
-    return true;
+    return RunResult.Ok;
   }
 }

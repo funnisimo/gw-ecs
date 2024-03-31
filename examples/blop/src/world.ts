@@ -18,6 +18,7 @@ import {
   addAction,
   noTurn,
   takeTurn,
+  EntityInfo,
 } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { CollisionManager } from "gw-ecs/common/collisions";
@@ -61,6 +62,11 @@ function blockedMove(actor: Entity, target: Entity, world: World) {
 }
 
 export function gotoNextLevel(world: World, hero: Entity) {
+  // [] Avoid stairs unless it is our goal
+  if (hero.has(TravelTo)) {
+    return false;
+  }
+
   takeTurn(world, hero); // counts as a step
 
   nextLevel(world);
@@ -114,6 +120,7 @@ export const world = new World()
   .registerComponent(Move)
   .registerComponent(Attack)
   .registerComponent(TravelTo)
+  .registerComponent(EntityInfo)
   .registerQueue(GameEvent)
   .setUnique(new Log(Constants.LOG_HEIGHT, Constants.LOG_WIDTH))
   .setUnique(new Game())

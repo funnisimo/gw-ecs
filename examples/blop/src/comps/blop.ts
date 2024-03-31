@@ -4,6 +4,7 @@ import { Bundle } from "gw-ecs/entity";
 import { Collider } from "gw-ecs/common";
 import { Name } from "./name";
 import { Actor, type AiFn } from "./actor";
+import { EntityFlags, EntityInfo } from "./entityInfo";
 
 export interface SpawnInfo {
   average: number;
@@ -68,6 +69,7 @@ export function blopBundle(type: string, config: BlopConfig): Bundle {
     .with(new Actor(...ai))
     // TODO - Drops
     // TODO - DNA
+    .with(new EntityInfo("ALWAYS_INTERRUPT"))
     .with(new Name(config.name));
   return bundle;
 }

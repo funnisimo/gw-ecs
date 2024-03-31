@@ -1,12 +1,12 @@
 import { type RunIfFn, EntitySystem } from "gw-ecs/system";
 import { Aspect, World } from "gw-ecs/world";
-import { Attack, Blop, DamageSprite, removeAction } from "../comps";
+import { Attack, Blop, DamageSprite, TravelTo, removeAction } from "../comps";
 import type { Entity } from "gw-ecs/entity";
 import { GameEvent } from "../queues";
 import { flash } from "../fx/flash";
 import { Pos } from "gw-ecs/common";
 import { Log } from "../uniques";
-import { coloredName } from "../utils";
+import { coloredName, interrupt } from "../utils";
 
 export class AttackSystem extends EntitySystem {
   constructor(runIf?: RunIfFn) {
@@ -24,7 +24,8 @@ export class AttackSystem extends EntitySystem {
 
     targetBlop.health -= damage;
 
-    // TODO - Remove WanderTo?
+    // TODO - Move to General interrupt
+    interrupt(target);
 
     world
       .getUnique(Log)

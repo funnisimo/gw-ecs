@@ -45,7 +45,7 @@ export function nextLevel(world: World) {
   // }
 
   updateVisibility(world);
-  calculateFov(world, game.hero);
+  calculateFov(world, game.hero!, false);
   game.changed = true;
 
   world.getUnique(Log).add("");
@@ -91,11 +91,14 @@ function makeNormalLevel(world: World, depth: number) {
   mgr.set(hero, heroXY.x, heroXY.y);
   // console.log("hero starting xy", heroXY);
 
-  var stairsXY = findEmptyFloorTileFarFrom(
+  const stairsXY = findEmptyFloorTileFarFrom(
     world,
     heroXY,
     Constants.STAIRS_MIN_DISTANCE
   );
+  if (!stairsXY) {
+    throw new Error("Failed to find location for stairs.");
+  }
   setTileType(world, stairsXY, STAIRS_BUNDLE);
 
   const triggerXY = findClosestSpawnTile(world, startingHeroXY);
@@ -144,8 +147,13 @@ function makeBlops(world: World, playerPos: XY, depth: number) {
       playerPos,
       Constants.MIN_BLOP_DISTANCE_AT_START
     );
-    mgr.set(blop, blopPos.x, blopPos.y);
-    console.log(blop.fetch(Name)!.name, blopPos);
+    if (!blopPos) {
+      world.destroyNow(blop);
+      console.warn("Failed to find place to spawn blop.");
+    } else {
+      mgr.set(blop, blopPos.x, blopPos.y);
+      console.log(blop.fetch(Name)!.name, blopPos);
+    }
   }
 }
 

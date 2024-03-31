@@ -47,6 +47,14 @@ export class FOV {
     });
   }
 
+  get width(): number {
+    return this.flags.width;
+  }
+
+  get height(): number {
+    return this.flags.height;
+  }
+
   //   /////////////////////////////////
   //   // WORLD INIT
 
@@ -141,6 +149,13 @@ export class FOV {
     return !!(this.getFlag(x, y) & FovFlags.WAS_ANY_KIND_OF_VISIBLE);
   }
 
+  becameVisible(x: number, y: number): boolean {
+    const flags = this.flags.get(x, y) || 0;
+    const isVisible = !!(flags & FovFlags.ANY_KIND_OF_VISIBLE);
+    const wasVisible = !!(flags & FovFlags.WAS_ANY_KIND_OF_VISIBLE);
+    return isVisible && !wasVisible;
+  }
+
   ////////////////////////////////
   // ADJUSTMENTS
 
@@ -196,7 +211,7 @@ export class FOV {
     this.flags.fill(0);
 
     // TODO - REMOVE :: This is for testing AI only
-    this.makeAlwaysVisible();
+    // this.makeAlwaysVisible();
 
     // this.changed = true;
     // this.flags.forEach((_v, x, y) => {

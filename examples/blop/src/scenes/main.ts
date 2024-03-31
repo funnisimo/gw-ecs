@@ -14,6 +14,7 @@ import {
   TILE_ASPECT,
   TRIGGER_ASPECT,
   Tile,
+  TravelTo,
   Wait,
   addAction,
 } from "../comps";
@@ -30,7 +31,7 @@ import type { Entity } from "gw-ecs/entity";
 import { Mixer, type SpriteData } from "gw-utils/sprite";
 import { GameEvent } from "../queues";
 import { Log } from "../uniques";
-import { coloredName } from "../utils";
+import { coloredName, pathFromToUsingFov } from "../utils";
 import { FocusHelper } from "../uniques/focusHelper";
 import { BLACK } from "gw-utils/color";
 
@@ -50,6 +51,9 @@ export const mainScene = {
         const mgr = world.getUnique(PosManager);
         const entities = mgr.getAt(x, y);
         console.log("map click", x, y, entities);
+
+        const game = world.getUnique(Game);
+        game.hero!.set(new TravelTo({ x, y }));
         return;
       }
     }
@@ -63,7 +67,13 @@ export const mainScene = {
         const x = ev.x;
         const y = ev.y - Constants.MAP_TOP;
         game.changed = !focus.pos || focus.pos.x !== x || focus.pos.y !== y;
-        focus.focusAt({ x, y });
+        focus.focusAt(
+          { x, y },
+          pathFromToUsingFov(world, game.hero!.fetch(Pos)!, {
+            x,
+            y,
+          })
+        );
         return;
       }
     }
@@ -209,14 +219,20 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
         }
       }
 
-      const isFocus = focus.pos && focus.pos.x == x && focus.pos.y == y;
-      if (isFocus) {
-        buffer.draw(x + x0, y + y0, sprite.ch, sprite.bg, sprite.fg);
-      } else {
-        buffer.draw(x + x0, y + y0, sprite.ch, sprite.fg, sprite.bg);
-      }
+      buffer.draw(x + x0, y + y0, sprite.ch, sprite.fg, sprite.bg);
     }
   }, new Aspect(Pos, Sprite));
+
+  if (focus.pos) {
+    buffer.invert(focus.pos.x + x0, focus.pos.y + y0);
+  }
+  if (focus.path && focus.path.length) {
+    // Avoid first and last
+    for (let i = 0; i < focus.path.length - 1; ++i) {
+      const loc = focus.path[i];
+      buffer.highlight(loc[0] + x0, loc[1] + y0, "yellow", 50);
+    }
+  }
 }
 
 export function drawLog(

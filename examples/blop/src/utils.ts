@@ -1,10 +1,18 @@
 import type { Entity } from "gw-ecs/entity";
-import { BLOP_ASPECT, Name, Sprite, TILE_ASPECT, Tile } from "./comps";
+import {
+  BLOP_ASPECT,
+  Name,
+  Sprite,
+  TILE_ASPECT,
+  Tile,
+  TravelTo,
+} from "./comps";
 import { clamp } from "gw-utils/utils";
-import type { XY } from "gw-utils";
+import type { Loc, XY } from "gw-utils";
 import type { World } from "gw-ecs/world";
 import { MoveCost, fromTo } from "gw-utils/path";
 import { PosManager } from "gw-ecs/common";
+import { FOV } from "./uniques";
 
 const SQRT_2_PI = Math.sqrt(2 * Math.PI);
 // https://www.math.net/gaussian-distribution
@@ -41,22 +49,20 @@ export function cubicOut(input: number): number {
   return input * input * input + 1;
 }
 
-export function pathFromTo(world: World, fromPos: XY, toPos: XY) {
+export function pathFromTo(world: World, fromPos: XY, toPos: XY): Loc[] {
   const posMgr = world.getUnique(PosManager);
 
-  return fromTo(
+  const path = fromTo(
     fromPos,
     toPos,
     (x, y) => {
-      // TODO - Cache this
+      if (!posMgr.hasXY(x, y)) return MoveCost.Obstruction;
+
+      // TODO - Cache tile travel info
       const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT);
       if (!tileEntity) return MoveCost.Obstruction;
       const tile = tileEntity.fetch(Tile)!;
       if (tile.blocksMove) return MoveCost.Blocked;
-
-      // TODO - different move costs for water, etc...
-      // - understand slide - AVOID
-      // - understand hurt - AVOID
 
       // [x] Other blops in way - AVOID
       // TODO - (except dummy b/c swap)
@@ -64,8 +70,59 @@ export function pathFromTo(world: World, fromPos: XY, toPos: XY) {
         return MoveCost.Avoided;
       }
 
+      // TODO - different move costs for water, etc...
+      // - understand slide - AVOID
+      // - understand hurt - AVOID
+
       return MoveCost.Ok;
     },
     true
   );
+  // remove starting loc
+  path.shift();
+  return path;
+}
+
+export function pathFromToUsingFov(
+  world: World,
+  fromPos: XY,
+  toPos: XY
+): Loc[] {
+  const posMgr = world.getUnique(PosManager);
+  const fov = world.getUnique(FOV);
+
+  const path = fromTo(
+    fromPos,
+    toPos,
+    (x, y) => {
+      if (!posMgr.hasXY(x, y)) return MoveCost.Obstruction;
+      if (!fov.isRevealed(x, y)) return MoveCost.Avoided;
+
+      // TODO - Cache tile travel info
+      const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT);
+      if (!tileEntity) return MoveCost.Obstruction;
+      const tile = tileEntity.fetch(Tile)!;
+      if (tile.blocksMove) return MoveCost.Blocked;
+
+      // [x] Other blops in way - Blocked
+      // TODO - (except dummy b/c swap)
+      if (posMgr.firstAt(x, y, BLOP_ASPECT)) {
+        return MoveCost.Blocked;
+      }
+
+      // TODO - different move costs for water, etc...
+      // - understand slide - AVOID
+      // - understand hurt - AVOID
+
+      return MoveCost.Ok;
+    },
+    true
+  );
+
+  path.shift(); // remove starting spot
+  return path;
+}
+
+export function interrupt(entity: Entity) {
+  entity.remove(TravelTo);
 }

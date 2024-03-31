@@ -66,6 +66,7 @@ World:
         * this.addEventSystem(WorldShutdown, sys)
     [] addStoreWatcher(comp, fn)
         * fn: (world: World, store: CompStore<C>) -> StoreWatcher<C>
+        * addComponentWatcher?
     [] expectUnique
     [] ensureUnique
     [] expectGlobal
@@ -73,6 +74,15 @@ World:
     [] world.entities() -vs- world.level.entities()
         * The accessing of level should not be required
         * world.allEntities() vs world.entities()?
+    auto register:
+        [] world.autoRegisterComponents()
+        [] world.autoRegisterQueues()
+        [] world.autoRegisterEvents()
+        [] world.autoRegister() -- all of the above
+
+Uniques+Globals:
+    [] track update?
+    [] isUpdated(comp, ticks)?
 
 SystemSet:
     [] What is default step if you supply custom steps?

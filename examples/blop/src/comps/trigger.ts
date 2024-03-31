@@ -12,6 +12,7 @@ import { Aspect, type World } from "gw-ecs/world";
 import { Hero } from "./hero";
 import { App } from "gw-utils/app";
 import { Name } from "./name";
+import { EntityInfo } from "./entityInfo";
 
 export type TriggerFn = (event: GameEvent, owner: Entity) => boolean;
 
@@ -164,6 +165,7 @@ export function createRandomTrigger(world: World, rng?: Random): Entity {
     TriggerSprite,
     trigger,
     new Pickup(pickupTrigger),
+    new EntityInfo("INTERRUPT_WHEN_SEEN"),
     new Name(trigger.name)
   );
 }

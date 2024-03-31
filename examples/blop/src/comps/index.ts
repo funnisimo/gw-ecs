@@ -13,3 +13,4 @@ export * from "./attack";
 export * from "./actor";
 export * from "./wait";
 export * from "./travel";
+export * from "./entityInfo";

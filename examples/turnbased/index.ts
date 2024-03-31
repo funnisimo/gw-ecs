@@ -5,7 +5,7 @@ import { EntitySystemSet } from "gw-ecs/system/systemSet";
 import { System } from "gw-ecs/system";
 import { Entity } from "gw-ecs/entity";
 import { Aspect } from "gw-ecs/world/aspect";
-import { Schedule, ScheduleSystem } from "gw-ecs/common/schedule";
+import { RunResult, Schedule, ScheduleSystem } from "gw-ecs/common/schedule";
 
 class Messages {
   data: string[] = [];
@@ -142,19 +142,19 @@ class GameTurnSystem extends ScheduleSystem {
     entity: Entity,
     time: number,
     delta: number
-  ): boolean {
+  ): RunResult {
     const actor = entity.fetch(Actor);
     if (!actor) {
       // TODO - Log?
       term("No Actor.\n");
-      return true; // This entity should not be rescheduled
+      return RunResult.Ok; // This entity should not be rescheduled
     }
 
     if (
       !actor.ready &&
       !actor.ai.some((aiFn) => aiFn(world, entity, time, delta))
     ) {
-      return false;
+      return RunResult.Retry;
     }
     world.getUnique(Messages).add(`^gRun entity^ - ${entity.index} @ ${time}`);
     actor.ready = false;

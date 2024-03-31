@@ -18,6 +18,7 @@ import { flash } from "../fx/flash";
 import { Name } from "./name";
 import { Log } from "../uniques";
 import { coloredName } from "../utils";
+import { EntityInfo } from "./entityInfo";
 
 export class Effect {
   name: string;
@@ -44,6 +45,11 @@ export class TeleportEffect extends Effect {
     const posMgr = world.getUnique(PosManager);
 
     const newXY = findEmptyFloorTile(world);
+    if (!newXY) {
+      world.getUnique(Log).add(`${coloredName(owner)} failed to teleport.`);
+      return true;
+    }
+
     posMgr.set(owner, newXY.x, newXY.y);
     flash(world, newXY, TeleportSprite);
 
@@ -110,6 +116,7 @@ export function createRandomEffect(world: World, rng?: Random): Entity {
     EffectSprite,
     effect,
     new Pickup(pickupEffect),
+    new EntityInfo("INTERRUPT_WHEN_SEEN"),
     new Name(effect.name)
   );
 }

@@ -1,10 +1,10 @@
-import { Schedule, ScheduleSystem } from "gw-ecs/common";
+import { RunResult, Schedule, ScheduleSystem } from "gw-ecs/common";
 import type { RunIfFn } from "gw-ecs/system";
 import type { World } from "gw-ecs/world";
 import { Actor } from "../comps";
 import type { Entity } from "gw-ecs/entity";
 import { coloredName } from "../utils";
-import { Log } from "../uniques";
+import { Game, Log } from "../uniques";
 
 export class GameTurnSystem extends ScheduleSystem {
   constructor(setName: string, runIf?: RunIfFn) {
@@ -37,19 +37,19 @@ export class GameTurnSystem extends ScheduleSystem {
     entity: Entity,
     time: number,
     delta: number
-  ): boolean {
+  ): RunResult {
     const actor = entity.fetch(Actor);
     if (!actor) {
       // TODO - Exception?
       console.log("game turn for entity with no Actor component!");
-      return true; // Removes this entity from the schedule
+      return RunResult.Ok; // Removes this entity from the schedule
     }
 
     if (
       !actor.ready &&
       !actor.ai.some((aiFn) => aiFn(world, entity, time, delta))
     ) {
-      return false; // Will be unshifted back onto schedule and remain as first entity
+      return RunResult.Retry; // Will be unshifted back onto schedule and remain as first entity
     }
     actor.ready = false;
     actor.scheduled = false;
@@ -57,6 +57,9 @@ export class GameTurnSystem extends ScheduleSystem {
     if (!actor.scheduled) {
       console.warn("Entity not rescheduled.");
     }
-    return true;
+
+    // If our hero is acting then break so we can draw
+    const game = world.getUnique(Game);
+    return entity === game.hero ? RunResult.Break : RunResult.Ok;
   }
 }

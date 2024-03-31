@@ -1,10 +1,20 @@
-import { System, type RunIfFn, EntitySystem } from "gw-ecs/system";
+import { type RunIfFn, EntitySystem } from "gw-ecs/system";
 import { Aspect, type World } from "gw-ecs/world";
-import { FOV, FovFlags, Game, demoteCellVisibility } from "../uniques";
+import { FOV, FovFlags, Game, Log, demoteCellVisibility } from "../uniques";
 import { Pos, PosManager } from "gw-ecs/common";
 import { distanceFromTo } from "gw-utils/xy";
-import { Hero, TILE_ASPECT, Tile } from "../comps";
+import {
+  AppearSprite,
+  ENTITY_INFO_ASPECT,
+  EntityInfo,
+  Hero,
+  TILE_ASPECT,
+  Tile,
+  TravelTo,
+} from "../comps";
 import type { Entity } from "gw-ecs/entity";
+import { coloredName, interrupt } from "../utils";
+import { flash } from "../fx/flash";
 
 export function heroMoved(
   world: World,
@@ -31,10 +41,6 @@ export function heroTeleported(
 }
 
 export class FovSystem extends EntitySystem {
-  //   constructor(runIf?: RunIfFn) {
-  //     super(runIf || heroMoved); // TODO - heroMoved should not be in this (part of setup)
-  //   }
-
   constructor(runIf?: RunIfFn) {
     super(new Aspect(Hero).updated(Pos), runIf);
   }
@@ -60,12 +66,7 @@ export function updateVisibility(world: World) {
   }, TILE_ASPECT);
 }
 
-export function calculateFov(world: World, hero?: Entity | null) {
-  if (!hero) {
-    const game = world.getUnique(Game);
-    hero = game.hero!;
-  }
-
+export function calculateFov(world: World, hero: Entity, flashNew = true) {
   const fov = world.getUnique(FOV);
   const heroPos = hero.fetch(Pos)!;
   const radius = 99;
@@ -75,56 +76,42 @@ export function calculateFov(world: World, hero?: Entity | null) {
   fov.flags.update(demoteCellVisibility);
 
   // TODO - iterate all entities with FovSource component
-  //      - FovSource = { radius: number, type: FovFlag }
-  // this.site.eachViewport((x, y, radius, type) => {
-  //   let flag = type & FovFlags.VIEWPORT_TYPES;
-  //   if (!flag) flag = FovFlags.VISIBLE;
-  //   // if (!flag)
-  //   //     throw new Error('Received invalid viewport type: ' + Flag.toString(FovFlags, type));
-
-  //   if (radius == 0) {
-  //     this.flags._data[x][y] |= flag;
-  //     return;
-  //   }
-
-  //   this.fov.calculate(x, y, radius, (x, y, v) => {
-  //     if (v) {
-  //       this.flags._data[x][y] |= flag;
-  //     }
-  //   });
-  // });
-
   fov.calc.calculate(heroPos.x, heroPos.y, radius, (x, y, v) => {
     if (v) {
       fov.setFlags(x, y, FovFlags.PLAYER);
     }
   });
 
-  // if (PLAYER.bonus.clairvoyance < 0) {
-  //   discoverCell(PLAYER.xLoc, PLAYER.yLoc);
-  // }
-  //
-  // if (PLAYER.bonus.clairvoyance != 0) {
-  // 	updateClairvoyance();
-  // }
-  //
-  // updateTelepathy();
-  // updateMonsterDetection();
-
   // updateLighting();
   fov.flags.update(promoteCellVisibility.bind(null, fov));
 
-  // if (PLAYER.status.hallucinating > 0) {
-  // 	for (theItem of DUNGEON.items) {
-  // 		if ((pmap[theItem.xLoc][theItem.yLoc].flags & DISCOVERED) && refreshDisplay) {
-  // 			refreshDungeonCell(theItem.xLoc, theItem.yLoc);
-  // 		}
-  // 	}
-  // 	for (monst of DUNGEON.monsters) {
-  // 		if ((pmap[monst.xLoc][monst.yLoc].flags & DISCOVERED) && refreshDisplay) {
-  // 			refreshDungeonCell(monst.xLoc, monst.yLoc);
-  // 		}
-  // 	}
+  // See if something that the player is interested in comes into view
+  // TODO - This should go somewhere else... another service?
+  // if (hero.has(TravelTo)) {
+  let needsInterrupt = false;
+  const posMgr = world.getUnique(PosManager);
+  for (let x = 0; x < fov.width; ++x) {
+    for (let y = 0; y < fov.height; ++y) {
+      if (fov.becameVisible(x, y)) {
+        const entities = posMgr.getAt(x, y, ENTITY_INFO_ASPECT);
+        // Are any of the entities interesting?
+        if (entities.length > 0) {
+          entities.forEach((e) => {
+            const info = e.update(EntityInfo)!;
+            if (info.shouldInterruptWhenSeen()) {
+              needsInterrupt = true;
+              world.getUnique(Log).add(`A ${coloredName(e)} appears.`);
+              flashNew && flash(world, e.fetch(Pos)!, AppearSprite);
+            }
+            info.seen();
+          });
+        }
+      }
+    }
+  }
+  if (needsInterrupt) {
+    interrupt(hero);
+  }
   // }
 }
 

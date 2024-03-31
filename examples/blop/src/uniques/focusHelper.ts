@@ -1,6 +1,6 @@
 import type { Entity } from "gw-ecs/entity";
 import type { World, WorldInit } from "gw-ecs/world";
-import { distanceFromTo, equals, type XY } from "gw-utils/xy";
+import { distanceFromTo, equals, type Loc, type XY } from "gw-utils/xy";
 import { BLOP_ASPECT, Tile } from "../comps";
 import { Pos } from "gw-ecs/common";
 import { FOV } from "./fov";
@@ -8,12 +8,13 @@ import { FOV } from "./fov";
 export class FocusHelper implements WorldInit {
   entities: Entity[];
   entityIndex = 0;
-  pos: XY | null;
+  _pos: XY | null;
+  path: Loc[] = [];
 
   constructor() {
     this.entities = [];
     this.entityIndex = -1;
-    this.pos = null;
+    this._pos = null;
   }
 
   worldInit(world: World): void {
@@ -25,9 +26,14 @@ export class FocusHelper implements WorldInit {
     });
   }
 
+  get pos(): XY | null {
+    return this._pos;
+  }
+
   reset(world: World, pos: XY) {
     this.entities = [];
-    this.pos = null; // { x: pos.x, y: pos.y };
+    this._pos = null; // { x: pos.x, y: pos.y };
+    this.path = [];
     world.level.entities().forEach((e) => {
       if (e.has(Tile)) return;
       const pos = e.fetch(Pos);
@@ -42,8 +48,12 @@ export class FocusHelper implements WorldInit {
     );
   }
 
-  focusAt(pos: XY) {
-    this.pos = { x: pos.x, y: pos.y };
+  focusAt(pos: XY, path?: Loc[]) {
+    this._pos = { x: pos.x, y: pos.y };
+    this.path = path || [];
+    // if (this.path.length > 0) {
+    //   console.log(this.path.map((l) => `${l[0]},${l[1]}`));
+    // }
     this.entities.sort(
       (a, b) =>
         distanceFromTo(a.fetch(Pos)!, pos) - distanceFromTo(b.fetch(Pos)!, pos)
@@ -57,12 +67,13 @@ export class FocusHelper implements WorldInit {
 
   clearFocus() {
     this.entityIndex = -1;
-    this.pos = null;
+    this._pos = null;
+    this.path = [];
   }
 
   next(world: World): Entity | undefined {
     if (this.entities.length == 0) {
-      this.pos = null;
+      this._pos = null;
       return undefined;
     }
     let tries = 0;
@@ -77,7 +88,7 @@ export class FocusHelper implements WorldInit {
       if (fov.isRevealed(pos.x, pos.y)) {
         // blops have to be visible to be seen
         if (!BLOP_ASPECT.match(e) || fov.isVisible(pos.x, pos.y)) {
-          this.pos = pos.xy();
+          this._pos = pos.xy();
           return e;
         }
       }
@@ -87,7 +98,7 @@ export class FocusHelper implements WorldInit {
 
   prev(world: World): Entity | undefined {
     if (this.entities.length == 0) {
-      this.pos = null;
+      this._pos = null;
       return undefined;
     }
     let tries = 0;
@@ -102,7 +113,7 @@ export class FocusHelper implements WorldInit {
       if (fov.isRevealed(pos.x, pos.y)) {
         // blops have to be visible to be seen
         if (!BLOP_ASPECT.match(e) || fov.isVisible(pos.x, pos.y)) {
-          this.pos = pos.xy();
+          this._pos = pos.xy();
           return e;
         }
       }
