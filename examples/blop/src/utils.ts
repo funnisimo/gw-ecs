@@ -1,7 +1,7 @@
 import type { Entity } from "gw-ecs/entity";
 import {
   BLOP_ASPECT,
-  Name,
+  EntityInfo,
   Sprite,
   TILE_ASPECT,
   Tile,
@@ -25,7 +25,7 @@ export function gaussian(mu: number, stddev: number, x: number): number {
 
 export function coloredName(entity: Entity): string {
   let sprite = entity.fetch(Sprite) || { fg: "white" };
-  let name = entity.fetch(Name);
+  let name = entity.fetch(EntityInfo);
 
   if (!name) return `#{${sprite.fg} Entity}`;
 

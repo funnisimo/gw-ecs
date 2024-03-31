@@ -2,7 +2,6 @@ import { Aspect, World } from "gw-ecs/world";
 import { Sprite, type SpriteConfig } from "./sprite";
 import { Collider } from "gw-ecs/common/collisions";
 import { Bundle, Entity } from "gw-ecs/entity";
-import { Name } from "./name";
 import { EntityInfo } from "./entityInfo";
 
 export interface TileConfig {
@@ -44,17 +43,18 @@ export function tileBundle(
   opts: TileBundleConfig = { ch: "!" }
 ): Bundle {
   const bundle = new Bundle();
-  bundle
-    .with(new Name(tile.name))
-    .with(tile)
-    .with(new Sprite(opts.ch, opts.fg, opts.bg));
+  bundle.with(tile).with(new Sprite(opts.ch, opts.fg, opts.bg));
+
+  if (tile.stairs) {
+    bundle.with(new EntityInfo(tile.name, "INTERRUPT_WHEN_SEEN"));
+  } else {
+    bundle.with(new EntityInfo(tile.name));
+  }
 
   if (tile.blocksMove) {
     bundle.with(new Collider("wall"));
   } else if (tile.stairs) {
-    bundle
-      .with(new Collider("stairs"))
-      .with(new EntityInfo("INTERRUPT_WHEN_SEEN"));
+    bundle.with(new Collider("stairs"));
   } else {
     bundle.with((w: World, e: Entity) => {
       e.remove(Collider);

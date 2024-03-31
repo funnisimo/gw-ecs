@@ -7,7 +7,6 @@ export * from "./pickup";
 export * from "./trigger";
 export * from "./fx";
 export * from "./effect";
-export * from "./name";
 export * from "./dna";
 export * from "./attack";
 export * from "./actor";

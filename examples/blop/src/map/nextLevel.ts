@@ -9,7 +9,7 @@ import {
 } from "./utils";
 import {
   Hero,
-  Name,
+  EntityInfo,
   STAIRS_BUNDLE,
   TILE_ASPECT,
   Tile,
@@ -152,7 +152,7 @@ function makeBlops(world: World, playerPos: XY, depth: number) {
       console.warn("Failed to find place to spawn blop.");
     } else {
       mgr.set(blop, blopPos.x, blopPos.y);
-      console.log(blop.fetch(Name)!.name, blopPos);
+      console.log(blop.fetch(EntityInfo)!.name, blopPos);
     }
   }
 }

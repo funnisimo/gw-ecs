@@ -8,7 +8,6 @@ import {
   FX,
   Hero,
   Move,
-  Name,
   Pickup,
   Sprite,
   Tile,
@@ -106,7 +105,6 @@ function pushCharge(actor: Entity, target: Entity, world: World) {
 
 export const world = new World()
   .registerComponent(FX)
-  .registerComponent(Name)
   .registerComponent(Sprite)
   .registerComponent(Tile)
   .registerComponent(Hero)

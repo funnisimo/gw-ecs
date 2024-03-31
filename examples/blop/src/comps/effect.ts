@@ -15,7 +15,6 @@ import { Aspect, type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
 import { flash } from "../fx/flash";
-import { Name } from "./name";
 import { Log } from "../uniques";
 import { coloredName } from "../utils";
 import { EntityInfo } from "./entityInfo";
@@ -116,8 +115,7 @@ export function createRandomEffect(world: World, rng?: Random): Entity {
     EffectSprite,
     effect,
     new Pickup(pickupEffect),
-    new EntityInfo("INTERRUPT_WHEN_SEEN"),
-    new Name(effect.name)
+    new EntityInfo(effect.name, "INTERRUPT_WHEN_SEEN")
   );
 }
 

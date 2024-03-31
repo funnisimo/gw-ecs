@@ -8,9 +8,11 @@ export enum EntityFlags {
 }
 
 export class EntityInfo {
+  name: string;
   flags: EntityFlags;
 
-  constructor(flags: FlagBase) {
+  constructor(name: string, flags: FlagBase = 0) {
+    this.name = name;
     this.flags = from(EntityFlags, flags);
   }
 

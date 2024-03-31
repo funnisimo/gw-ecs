@@ -6,7 +6,7 @@ import {
   DNA,
   HealEffect,
   Hero,
-  Name,
+  EntityInfo,
   Sprite,
   WaitTrigger,
 } from "./comps";
@@ -26,6 +26,6 @@ export function createHero(world: World): Entity {
     new Blop(BLOP_TYPE.HERO, 20, 2),
     new Actor(aiTravel), // Try to travel to location
     dna,
-    new Name("Hero")
+    new EntityInfo("Hero")
   );
 }
