@@ -1,15 +1,15 @@
 import type { AnyComponent } from "../component/component.js";
-import { Entity } from "../entity/entity.js";
-import { World } from "./world.js";
+import { Entity } from "./entity.js";
+// import { World } from "./world.js";
 
 export class Aspect {
-  protected _allComponents: AnyComponent[];
-  protected _oneComponents: AnyComponent[][];
-  protected _someComponents: AnyComponent[][];
-  protected _noneComponents: AnyComponent[];
-  protected _addedComponents: AnyComponent[];
-  protected _updatedComponents: AnyComponent[];
-  protected _removedComponents: AnyComponent[];
+  _allComponents: AnyComponent[];
+  _oneComponents: AnyComponent[][];
+  _someComponents: AnyComponent[][];
+  _noneComponents: AnyComponent[];
+  _addedComponents: AnyComponent[];
+  _updatedComponents: AnyComponent[];
+  _removedComponents: AnyComponent[];
 
   constructor(...allComponents: AnyComponent[]) {
     this._allComponents = allComponents;
@@ -88,65 +88,65 @@ export class Aspect {
     return entities.every((e) => this.match(e, sinceTick));
   }
 
-  /**
-   * Returns an iterable across all entities on the active level of the world.
-   * This performs the same on a `World` and a `MultiWorld`.
-   * @param world
-   * @param sinceTick
-   */
-  *active(world: World, sinceTick: number = 0): Iterable<Entity> {
-    for (let entity of world.level.entities()) {
-      if (this.match(entity, sinceTick)) {
-        yield entity;
-      }
-    }
-  }
+  // /**
+  //  * Returns an iterable across all entities on the active level of the world.
+  //  * This performs the same on a `World` and a `MultiWorld`.
+  //  * @param world
+  //  * @param sinceTick
+  //  */
+  // *active(world: World, sinceTick: number = 0): Iterable<Entity> {
+  //   for (let entity of world.level.entities()) {
+  //     if (this.match(entity, sinceTick)) {
+  //       yield entity;
+  //     }
+  //   }
+  // }
 
-  /**
-   * Returns an iterable across all entities on the active level of the world.
-   * This performs the same on a `World` and a `MultiWorld`.
-   * @param world
-   * @param sinceTick
-   */
-  *activeEntries(
-    world: World,
-    sinceTick: number = 0
-  ): Iterable<[Entity, AnyComponent[]]> {
-    for (let entity of this.active(world, sinceTick)) {
-      yield [entity, this._allComponents.map((c) => entity.fetch(c))];
-    }
-  }
+  // /**
+  //  * Returns an iterable across all entities on the active level of the world.
+  //  * This performs the same on a `World` and a `MultiWorld`.
+  //  * @param world
+  //  * @param sinceTick
+  //  */
+  // *activeEntries(
+  //   world: World,
+  //   sinceTick: number = 0
+  // ): Iterable<[Entity, AnyComponent[]]> {
+  //   for (let entity of this.active(world, sinceTick)) {
+  //     yield [entity, this._allComponents.map((c) => entity.fetch(c))];
+  //   }
+  // }
 
-  /**
-   * Returns an iterable across all entities on all levels of the world.
-   * On a `World` this is the same as `active` since there is only one level.
-   * On a `MultiWorld` this will be across all the added levels.
-   * @param world
-   * @param sinceTick
-   */
-  *all(world: World, sinceTick: number = 0): Iterable<Entity> {
-    for (let entity of world.entities()) {
-      if (this.match(entity, sinceTick)) {
-        yield entity;
-      }
-    }
-  }
+  // /**
+  //  * Returns an iterable across all entities on all levels of the world.
+  //  * On a `World` this is the same as `active` since there is only one level.
+  //  * On a `MultiWorld` this will be across all the added levels.
+  //  * @param world
+  //  * @param sinceTick
+  //  */
+  // *all(world: World, sinceTick: number = 0): Iterable<Entity> {
+  //   for (let entity of world.entities()) {
+  //     if (this.match(entity, sinceTick)) {
+  //       yield entity;
+  //     }
+  //   }
+  // }
 
-  /**
-   * Returns an iterable across all entities on all levels of the world.
-   * On a `World` this is the same as `active` since there is only one level.
-   * On a `MultiWorld` this will be across all the added levels.
-   * @param world
-   * @param sinceTick
-   */
-  *allEntries(
-    world: World,
-    sinceTick: number = 0
-  ): Iterable<[Entity, AnyComponent[]]> {
-    for (let entity of this.all(world, sinceTick)) {
-      yield [entity, this._allComponents.map((c) => entity.fetch(c))];
-    }
-  }
+  // /**
+  //  * Returns an iterable across all entities on all levels of the world.
+  //  * On a `World` this is the same as `active` since there is only one level.
+  //  * On a `MultiWorld` this will be across all the added levels.
+  //  * @param world
+  //  * @param sinceTick
+  //  */
+  // *allEntries(
+  //   world: World,
+  //   sinceTick: number = 0
+  // ): Iterable<[Entity, AnyComponent[]]> {
+  //   for (let entity of this.all(world, sinceTick)) {
+  //     yield [entity, this._allComponents.map((c) => entity.fetch(c))];
+  //   }
+  // }
 
   /////////
 

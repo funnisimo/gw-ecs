@@ -1,4 +1,4 @@
-import { Aspect } from "../world/aspect.js";
+import { Aspect } from "../entity/aspect.js";
 import { World } from "../world/world.js";
 import { EntitySystem } from "./entitySystem.js";
 import { IntervalTracker } from "./intervalSystem.js";

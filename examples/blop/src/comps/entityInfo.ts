@@ -1,4 +1,4 @@
-import { Aspect } from "gw-ecs/world";
+import { Aspect } from "gw-ecs/entity";
 import { fl, from, type FlagBase } from "gw-utils/flag";
 
 export enum EntityFlags {

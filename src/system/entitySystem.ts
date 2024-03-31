@@ -1,4 +1,4 @@
-import { Aspect } from "../world/aspect.js";
+import { Aspect } from "../entity/aspect.js";
 import { RunIfFn, System } from "./system.js";
 import { Entity } from "../entity/entity.js";
 import { World } from "../world/world.js";

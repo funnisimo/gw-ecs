@@ -1,9 +1,9 @@
 import terminal from "terminal-kit";
 import * as ROT from "rot-js";
-import { Aspect, World } from "gw-ecs/world";
+import { World } from "gw-ecs/world";
 import { EntitySystem, System } from "gw-ecs/system";
 import { Pos, PosManager } from "gw-ecs/common";
-import { Entity } from "gw-ecs/entity";
+import { Aspect, Entity } from "gw-ecs/entity";
 
 function ifDo<T>(maybeVal: T, doFn: (t: NonNullable<T>) => any): boolean {
   if (!maybeVal) return false;
@@ -45,7 +45,7 @@ class OpenSystem extends EntitySystem {
 
     if (!box.ananas) {
       term.moveTo(0, 26).eraseLine.blue("Empty");
-      world.queueDestroy(boxEntity);
+      world.destroyLater(boxEntity);
     } else {
       term.moveTo(0, 26).eraseLine.green("You found the ^yananas^ !");
       term.processExit(0);

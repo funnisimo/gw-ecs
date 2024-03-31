@@ -1,5 +1,5 @@
 import { Entity } from "../entity/entity.js";
-import { Aspect } from "../world/aspect.js";
+import { Aspect } from "../entity/aspect.js";
 import { World, WorldInit } from "../world/world.js";
 
 export class Collider {

@@ -1,7 +1,7 @@
-import { Aspect, World } from "gw-ecs/world";
+import { World } from "gw-ecs/world";
 import { Sprite, type SpriteConfig } from "./sprite";
 import { Collider } from "gw-ecs/common/collisions";
-import { Bundle, Entity } from "gw-ecs/entity";
+import { Aspect, Bundle, Entity } from "gw-ecs/entity";
 import { EntityInfo } from "./entityInfo";
 
 export interface TileConfig {

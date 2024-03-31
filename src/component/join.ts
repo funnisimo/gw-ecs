@@ -1,11 +1,15 @@
-import { Entity } from "../entity/entity.js";
-import { Aspect, World } from "../world/index.js";
+import { Entity, Aspect } from "../entity/index.js";
+import { World } from "../world/index.js";
 import { AnyComponent } from "./component.js";
 
-export function join(
+export function* join(
   world: World,
   ...comps: AnyComponent[]
 ): Iterable<[Entity, AnyComponent[]]> {
   const aspect = new Aspect().with(...comps);
-  return aspect.activeEntries(world);
+  for (let entity of world.level.entities().values()) {
+    if (aspect.match(entity)) {
+      yield [entity, aspect._allComponents.map((c) => entity.fetch(c))];
+    }
+  }
 }

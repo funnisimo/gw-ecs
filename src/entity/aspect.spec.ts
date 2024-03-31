@@ -1,5 +1,5 @@
 import "jest-extended";
-import { World } from "./world";
+import { World } from "../world/world";
 import { Aspect } from "./aspect";
 
 class A {}
@@ -223,31 +223,31 @@ describe("Aspect", () => {
     test.todo(".added(A).updated(B).removed(C).with(D,E).without(F)");
   });
 
-  describe("keys, entries", () => {
-    test("simple", () => {
-      const world = new World();
-      world.registerComponent(A).registerComponent(B);
-      world.start();
+  // describe("keys, entries", () => {
+  //   test("simple", () => {
+  //     const world = new World();
+  //     world.registerComponent(A).registerComponent(B);
+  //     world.start();
 
-      const e1 = world.create();
-      const e2 = world.create();
-      const e3 = world.create();
+  //     const e1 = world.create();
+  //     const e2 = world.create();
+  //     const e3 = world.create();
 
-      const a = new A();
-      e1.set(a);
-      e2.set(new A());
+  //     const a = new A();
+  //     e1.set(a);
+  //     e2.set(new A());
 
-      const b = new B();
-      e1.set(b);
-      e3.set(new B());
+  //     const b = new B();
+  //     e1.set(b);
+  //     e3.set(new B());
 
-      // 1 = A + B
-      // 2 = A
-      // 3 = B
+  //     // 1 = A + B
+  //     // 2 = A
+  //     // 3 = B
 
-      const aspect = new Aspect().with(A, B);
-      expect([...aspect.all(world)]).toEqual([e1]);
-      expect([...aspect.allEntries(world)]).toEqual([[e1, [a, b]]]);
-    });
-  });
+  //     const aspect = new Aspect().with(A, B);
+  //     expect([...aspect.all(world)]).toEqual([e1]);
+  //     expect([...aspect.allEntries(world)]).toEqual([[e1, [a, b]]]);
+  //   });
+  // });
 });

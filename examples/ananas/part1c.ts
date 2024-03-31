@@ -1,8 +1,9 @@
 import terminal from "terminal-kit";
 import * as ROT from "rot-js";
-import { Aspect, World } from "gw-ecs/world";
+import { World } from "gw-ecs/world";
 import { System } from "gw-ecs/system";
 import { PosManager } from "gw-ecs/common";
+import { Aspect } from "gw-ecs/entity";
 
 type XY = { x: number; y: number };
 

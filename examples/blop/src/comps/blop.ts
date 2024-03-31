@@ -1,4 +1,4 @@
-import { Aspect } from "gw-ecs/world";
+import { Aspect } from "gw-ecs/entity";
 import { Sprite, type SpriteConfig } from "./sprite";
 import { Bundle } from "gw-ecs/entity";
 import { Collider } from "gw-ecs/common";

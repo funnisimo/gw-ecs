@@ -1,5 +1,5 @@
-import { Entity, EntityWatcher, Index } from "../entity/entity.js";
-import { Aspect, World, WorldInit } from "../world/index.js";
+import { Entity, EntityWatcher, Index, Aspect } from "../entity/index.js";
+import { World, WorldInit } from "../world/index.js";
 
 export class Pos {
   _x: number;

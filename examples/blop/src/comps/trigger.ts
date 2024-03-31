@@ -1,14 +1,14 @@
 import { type Random, random } from "gw-utils/rng";
 import { xy } from "gw-utils";
 import type { GameEvent } from "../queues";
-import type { Entity } from "gw-ecs/entity";
+import { Aspect, Entity } from "gw-ecs/entity";
 import { NAMED_DIRS, type Loc } from "gw-utils/xy";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { PATCH_TILES, TILE_ASPECT, Tile } from "./tile";
 import { capitalize } from "gw-utils/text";
 import { TriggerSprite } from "./sprite";
 import { Pickup } from "./pickup";
-import { Aspect, type World } from "gw-ecs/world";
+import { type World } from "gw-ecs/world";
 import { Hero } from "./hero";
 import { App } from "gw-utils/app";
 import { EntityInfo } from "./entityInfo";

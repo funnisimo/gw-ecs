@@ -12,7 +12,7 @@ Observation Mode:
 Schedule:
     [X] ScheduleService
     [X] Auto detect entities not rescheduled
-    [] Auto break if Hero turn
+    [X] Auto break if Hero turn
 
 Path Following:
     [X] Show path to mouse
@@ -22,10 +22,11 @@ Path Following:
         [X] See something to pickup
         [X] Take damage
         [X] See Blop - only new?
-    [] Auto ignore stairs unless it is the goal
+    [X] Auto ignore stairs unless it is the goal
     [X] Auto ignore pickup
-    [] Move interrupt logic out of `FovSystem`
+    Move interrupt logic out of `FovSystem`:
         * at least the TravelTo aware part
+        [] make it an Event
 
 Stairs:
     [] Prompt for usage?  Key for usage: '>', 'Enter'?
@@ -36,7 +37,7 @@ Messages:
     [] 'A Every7Turns appears.'
 
 EntityInfo:
-    [] Combine with `Name`
+    [X] Combine with `Name`
     [] Add text format info - describeA, describeThe, ...
 
 Blops:
@@ -126,6 +127,9 @@ Pickup:
         * Remove picked up entity
         * store.notify?
 
+Main Scene:
+    [] Use keymap
+    [] Make drawing more reusable
 
 # Future
 

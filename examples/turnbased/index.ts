@@ -4,7 +4,7 @@ import { EntitySystem } from "gw-ecs/system/entitySystem";
 import { EntitySystemSet } from "gw-ecs/system/systemSet";
 import { System } from "gw-ecs/system";
 import { Entity } from "gw-ecs/entity";
-import { Aspect } from "gw-ecs/world/aspect";
+import { Aspect } from "gw-ecs/entity";
 import { RunResult, Schedule, ScheduleSystem } from "gw-ecs/common/schedule";
 
 class Messages {

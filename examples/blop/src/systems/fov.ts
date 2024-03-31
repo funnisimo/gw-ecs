@@ -1,5 +1,5 @@
 import { type RunIfFn, EntitySystem } from "gw-ecs/system";
-import { Aspect, type World } from "gw-ecs/world";
+import { type World } from "gw-ecs/world";
 import { FOV, FovFlags, Game, Log, demoteCellVisibility } from "../uniques";
 import { Pos, PosManager } from "gw-ecs/common";
 import { distanceFromTo } from "gw-utils/xy";
@@ -10,9 +10,8 @@ import {
   Hero,
   TILE_ASPECT,
   Tile,
-  TravelTo,
 } from "../comps";
-import type { Entity } from "gw-ecs/entity";
+import { Aspect, Entity } from "gw-ecs/entity";
 import { coloredName, interrupt } from "../utils";
 import { flash } from "../fx/flash";
 

@@ -1,5 +1,5 @@
 import type { GameEvent } from "../queues";
-import type { Entity } from "gw-ecs/entity";
+import { Aspect, Entity } from "gw-ecs/entity";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { findEmptyFloorTile } from "../map/utils";
 import {
@@ -11,7 +11,7 @@ import {
   TeleportSprite,
   DamageSprite,
 } from "./index";
-import { Aspect, type World } from "gw-ecs/world";
+import { type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
 import { flash } from "../fx/flash";

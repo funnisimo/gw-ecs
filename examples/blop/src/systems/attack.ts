@@ -1,7 +1,7 @@
 import { type RunIfFn, EntitySystem } from "gw-ecs/system";
-import { Aspect, World } from "gw-ecs/world";
+import { World } from "gw-ecs/world";
 import { Attack, Blop, DamageSprite, TravelTo, removeAction } from "../comps";
-import type { Entity } from "gw-ecs/entity";
+import { Aspect, Entity } from "gw-ecs/entity";
 import { GameEvent } from "../queues";
 import { flash } from "../fx/flash";
 import { Pos } from "gw-ecs/common";

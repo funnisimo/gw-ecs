@@ -19,7 +19,6 @@ import {
   addAction,
 } from "../comps";
 import { type Buffer } from "gw-utils/buffer";
-import { Aspect, World } from "gw-ecs/world";
 import { gotoNextLevel, world } from "../world";
 import {
   getBlopEntityAt,
@@ -27,9 +26,8 @@ import {
   getTileEntityAt,
 } from "../map/utils";
 import { DNA } from "../comps/dna";
-import type { Entity } from "gw-ecs/entity";
-import { Mixer, type SpriteData } from "gw-utils/sprite";
-import { GameEvent } from "../queues";
+import { Aspect, Entity } from "gw-ecs/entity";
+import { Mixer } from "gw-utils/sprite";
 import { Log } from "../uniques";
 import { coloredName, pathFromToUsingFov } from "../utils";
 import { FocusHelper } from "../uniques/focusHelper";

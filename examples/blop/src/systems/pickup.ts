@@ -1,7 +1,7 @@
 import type { Entity } from "gw-ecs/entity/entity";
 import { EntitySystem } from "gw-ecs/system/entitySystem";
 import { Pos, PosManager } from "gw-ecs/common/positions";
-import { Aspect } from "gw-ecs/world";
+import { Aspect } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world/world";
 import { Hero, PICKUP_ASPECT, Pickup, TravelTo } from "../comps";
 
