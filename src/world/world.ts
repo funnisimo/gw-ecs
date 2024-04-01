@@ -17,6 +17,12 @@ import { Resources } from "./resources.js";
 import { AnyComponent, Component } from "../component/component.js";
 import { AnyCompStoreCtr, CompStore } from "../component/store.js";
 import { AnyComponentArg, Bundle } from "../entity/bundle.js";
+import {
+  TriggerCls,
+  TriggerHandler,
+  TriggerHandlerFn,
+  TriggerManager,
+} from "./trigger.js";
 
 export interface WorldInit {
   worldInit?(world: World): void;
@@ -76,6 +82,7 @@ export class World {
   _level: Level;
   _entities: Entities;
   _toDestroy: Entity[];
+  _triggers: TriggerManager;
 
   // TODO - Move to World
   _delta: number;
@@ -86,6 +93,7 @@ export class World {
     this._level = new Level("world");
     this._globals = globals || new Resources();
     this._systems = new SystemManager();
+    this._triggers = new TriggerManager();
     this._entities = new Entities(new WorldComponentSource(this));
     this._entities.notify(new WorldEntityWatcher(this));
     this._delta = 0;
@@ -289,6 +297,48 @@ export class World {
     const queue = this.getQueue(comp!);
     queue.push(val);
     return val;
+  }
+
+  ///////////////////////
+  // TRIGGERS
+
+  registerTrigger<T>(trigger: TriggerCls<T>, steps?: string[]): this {
+    this._triggers.register(trigger, steps);
+    return this;
+  }
+
+  addTriggerStep<T>(
+    trigger: TriggerCls<T>,
+    step: string,
+    opts: AddStepOpts = {}
+  ): this {
+    this._triggers.addStep(trigger, step, opts);
+    return this;
+  }
+
+  addTrigger<T>(
+    trigger: TriggerCls<T>,
+    handler: TriggerHandler<T> | TriggerHandlerFn<T>
+  ): this;
+  addTrigger<T>(
+    trigger: TriggerCls<T>,
+    step: string,
+    handler: TriggerHandler<T> | TriggerHandlerFn<T>
+  ): this;
+  addTrigger<T>(trigger: TriggerCls<T>, ...args: any[]): this {
+    if (args.length == 1) {
+      this._triggers.addHandler(trigger, args[0]);
+    } else {
+      this._triggers.addHandler(trigger, args[0], args[1]);
+    }
+    return this;
+  }
+
+  emitTrigger<T>(event: T, time?: number) {
+    if (time === undefined) {
+      time = this.time;
+    }
+    this._triggers.emit(this, event, time);
   }
 
   ////////////

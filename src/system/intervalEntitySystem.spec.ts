@@ -1,7 +1,7 @@
 import "jest-extended";
-import { World, Aspect } from "../world";
+import { World } from "../world";
 import { IntervalEntitySystem, DelayedEntitySystem } from "./index";
-import { Entity } from "../entity";
+import { Entity, Aspect } from "../entity";
 
 class A {}
 class B {}

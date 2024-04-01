@@ -3,7 +3,7 @@ import { System } from "./system.js";
 import { SystemManager } from "./manager.js";
 import { World } from "../world/world.js";
 import { EntitySystem } from "./entitySystem.js";
-import { Aspect } from "../world/aspect.js";
+import { Aspect } from "../entity/index.js";
 import { EntitySystemStep } from "./systemStep.js";
 import { EntitySystemSet } from "./systemSet.js";
 

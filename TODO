@@ -18,7 +18,7 @@ Delayed:
 Events:
     [] registerEvent(comp extends Event, steps=['emit'])
     [] addEventStep(comp, step, opts={})
-    [] addEventSystem(comp extends Event, step?, sys)
+    [] addEventHandler( step?, handler)
     [] emitEvent(c)
         * Fires all registered systems synchronously
     [] class Event
@@ -31,10 +31,11 @@ Events:
         - StartScene?
             * Or ShowScene
         - StopScene?
-    [] EventSystem extends System
-        [] runEventItem
-    [] EventSystemStep
-    [] EventSystemSet
+    [-] EventSystem extends System
+        [-] runEventItem
+    [-] EventSystemStep
+    [-] EventSystemSet
+    [] 
 
 System:
     [] System implements WorldInit

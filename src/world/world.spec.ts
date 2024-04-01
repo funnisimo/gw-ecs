@@ -1,6 +1,6 @@
 import "jest-extended";
-import { World, Aspect } from ".";
-import { Entity } from "../entity";
+import { World } from ".";
+import { Entity, Aspect } from "../entity";
 import { EntitySystem, System } from "../system";
 
 class A {}
