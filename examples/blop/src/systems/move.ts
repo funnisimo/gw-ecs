@@ -13,6 +13,7 @@ import { FOV, FocusHelper, Game, Log } from "../uniques";
 import {
   AppearSprite,
   EntityInfo,
+  Interrupt,
   TILE_ASPECT,
   Tile,
   TravelTo,
@@ -20,7 +21,7 @@ import {
 } from "../comps";
 import { GameEvent } from "../queues";
 import * as XY from "gw-utils/xy";
-import { coloredName, interrupt } from "../utils";
+import { coloredName } from "../utils";
 import { flash } from "../fx/flash";
 
 export class MoveSystem extends EntitySystem {
@@ -77,7 +78,7 @@ export class MoveSystem extends EntitySystem {
           const info = entity.update(EntityInfo);
           if (info) {
             if (info.shouldInterruptWhenSeen()) {
-              interrupt(game.hero!);
+              world.emitTrigger(new Interrupt(game.hero!));
               world.getUnique(Log).add(`A ${coloredName(entity)} appears. 2`);
               flash(world, pos, AppearSprite);
             }

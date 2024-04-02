@@ -8,11 +8,12 @@ import {
   ENTITY_INFO_ASPECT,
   EntityInfo,
   Hero,
+  Interrupt,
   TILE_ASPECT,
   Tile,
 } from "../comps";
 import { Aspect, Entity } from "gw-ecs/entity";
-import { coloredName, interrupt } from "../utils";
+import { coloredName } from "../utils";
 import { flash } from "../fx/flash";
 
 export function heroMoved(
@@ -109,7 +110,7 @@ export function calculateFov(world: World, hero: Entity, flashNew = true) {
     }
   }
   if (needsInterrupt) {
-    interrupt(hero);
+    world.emitTrigger(new Interrupt(hero));
   }
   // }
 }

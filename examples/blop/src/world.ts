@@ -18,6 +18,7 @@ import {
   noTurn,
   takeTurn,
   EntityInfo,
+  Interrupt,
 } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { CollisionManager } from "gw-ecs/common/collisions";
@@ -103,6 +104,12 @@ function pushCharge(actor: Entity, target: Entity, world: World) {
   return true;
 }
 
+function interruptEntity(world: World, interrupt: Interrupt) {
+  console.log("-- interrupt --");
+  const entity = interrupt.entity;
+  entity.remove(TravelTo);
+}
+
 export const world = new World()
   .registerComponent(FX)
   .registerComponent(Sprite)
@@ -120,6 +127,7 @@ export const world = new World()
   .registerComponent(TravelTo)
   .registerComponent(EntityInfo)
   .registerQueue(GameEvent)
+  .registerTrigger(Interrupt)
   .setUnique(new Log(Constants.LOG_HEIGHT, Constants.LOG_WIDTH))
   .setUnique(new Game())
   .setUnique(new Timers())
@@ -151,6 +159,7 @@ export const world = new World()
   )
   .addSystem(new TimerSystem())
   .addSystem(new GameTurnSystem("game").runIf(gameReady)) // TODO - addRunSystemSet('game', gameReady)
+  .addTrigger(Interrupt, interruptEntity)
   .start();
 
 declare global {

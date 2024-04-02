@@ -122,7 +122,3 @@ export function pathFromToUsingFov(
   path.shift(); // remove starting spot
   return path;
 }
-
-export function interrupt(entity: Entity) {
-  entity.remove(TravelTo);
-}

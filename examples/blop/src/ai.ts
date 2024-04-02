@@ -5,6 +5,7 @@ import { Pos, PosManager } from "gw-ecs/common";
 import {
   Attack,
   BLOP_ASPECT,
+  Interrupt,
   Move,
   TILE_ASPECT,
   Tile,
@@ -21,7 +22,7 @@ import {
   BLOP_WANDER_DISTANCE,
 } from "./constants";
 import { findEmptyFloorTileFarFrom } from "./map/utils";
-import { interrupt, pathFromTo } from "./utils";
+import { pathFromTo } from "./utils";
 
 ////////////////////////////////////////////
 // AI
@@ -58,7 +59,7 @@ export function aiAttackHero(world: World, blop: Entity): boolean {
   const heroPos = hero.fetch(Pos)!;
   if (XY.distanceFromTo(myPos, heroPos) == 1) {
     // TODO - Move to attack?
-    interrupt(blop); // [X] Clear Travel goal
+    world.emitTrigger(new Interrupt(blop)); // [X] Clear Travel goal
     addAction(blop, new Attack(hero));
     return true;
   }
@@ -77,7 +78,7 @@ export function aiChargeHero(world: World, blop: Entity): boolean {
   const fov = world.getUnique(FOV);
   if (!fov || !fov.isDirectlyVisible(myPos.x, myPos.y)) return false;
 
-  interrupt(blop); // [X] Clear Travel goal
+  world.emitTrigger(new Interrupt(blop)); // [X] Clear Travel goal
 
   const nextSteps = pathFromTo(world, myPos, heroPos);
   console.log(
