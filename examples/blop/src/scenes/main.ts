@@ -35,10 +35,10 @@ import { BLACK } from "gw-utils/color";
 
 export const mainScene = {
   start() {
-    nextLevel(world);
     const focus = world.getUniqueOr(FocusHelper, () => new FocusHelper());
     const game = world.getUniqueOr(Game, () => new Game());
-    focus.reset(world, game.hero!.fetch(Pos)!);
+    nextLevel(world);
+    // focus.reset(world, game.hero!.fetch(Pos)!);
   },
   click(ev: Event) {
     if (ev.x < Constants.MAP_WIDTH) {
@@ -116,7 +116,7 @@ export const mainScene = {
       game.changed = true;
     } else if (ev.key == "Backspace") {
       logs.makeLogsOld();
-      gotoNextLevel(world, game.hero!);
+      nextLevel(world);
     } else {
       console.log("key", ev.key);
     }

@@ -138,11 +138,50 @@ export class EveryXTrigger extends Trigger {
   }
 }
 
+export class AttackTrigger extends Trigger {
+  constructor() {
+    super("OnAttack", "each time its owner attacks.");
+  }
+
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
+    return event.type === "attack" && owner === event.entity;
+  }
+}
+
+export class KillTrigger extends Trigger {
+  constructor() {
+    super("OnKill", "each time its owner kills another.");
+  }
+
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
+    return event.type === "kill" && owner === event.entity;
+  }
+}
+
+export class DeathTrigger extends Trigger {
+  constructor() {
+    super("OnMyDeath", "when its owner dies.");
+  }
+
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
+    return event.type === "kill" && owner === event.target;
+  }
+}
+
+export class HurtTrigger extends Trigger {
+  constructor() {
+    super("OnHurt", "when its owner loses health.");
+  }
+
+  matches(world: World, event: GameEvent, owner: Entity): boolean {
+    return (
+      event.type === "attack" && owner === event.target && event.damage > 0
+    );
+  }
+}
+
 // turnaround
 // swap
-// onattack   // removed(attack).with(dna)
-// onkill     // added(killed).without(ally, hero)
-// onloselife // removed(damage).with(dna)
 // ontrigger  // ????
 // onstepnearally // updated(pos).with(dna)
 // onallydeath    // added(killed).with(ally).without(hero)
@@ -154,6 +193,10 @@ export const triggerClasses = [
   EveryXTrigger,
   StepOnTrigger,
   ChangeTileTypeTrigger,
+  AttackTrigger,
+  KillTrigger,
+  DeathTrigger,
+  HurtTrigger,
 ];
 
 export function createRandomTrigger(world: World, rng?: Random): Entity {

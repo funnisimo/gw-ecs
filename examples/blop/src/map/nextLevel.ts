@@ -1,7 +1,7 @@
 import { World } from "gw-ecs/world";
 import { createHero } from "../hero";
 import * as Constants from "../constants";
-import { FOV, Log } from "../uniques";
+import { FOV, FocusHelper, Log } from "../uniques";
 import {
   findClosestEmptyFloor as findClosestSpawnTile,
   findEmptyFloorTileFarFrom,
@@ -38,6 +38,9 @@ export function nextLevel(world: World) {
   const fov = world.getUnique(FOV);
   fov.reset();
 
+  world.getUnique(Log).add("");
+  world.getUnique(Log).add("=== LEVEL " + game.depth + " ===");
+
   // if (depth >= Constants.END_DEPTH) {
   //   makeBlopuletWorld(world);
   // } else {
@@ -48,26 +51,8 @@ export function nextLevel(world: World) {
   calculateFov(world, game.hero!, false);
   game.changed = true;
 
-  world.getUnique(Log).add("");
-  world.getUnique(Log).add("=== LEVEL " + game.depth + " ===");
-
-  //   return {
-  //     depth: depth,
-  //     world: newLevel.world,
-  //     player: player,
-  //     blops: newLevel.blops,
-  //     pickables: newLevel.pickables,
-  //     observationMode: null,
-  //     placeGeneMode:
-  //       (_state$placeGeneMode =
-  //         state === null || state === void 0 ? void 0 : state.placeGeneMode) !==
-  //         null && _state$placeGeneMode !== void 0
-  //         ? _state$placeGeneMode
-  //         : null,
-  //     modalMode: null,
-  //     finishedGame: false,
-  //     finishedLevel: false,
-  //   };
+  const focus = world.getUnique(FocusHelper);
+  focus.reset(world, game.hero!.fetch(Pos)!);
 }
 
 function makeNormalLevel(world: World, depth: number) {

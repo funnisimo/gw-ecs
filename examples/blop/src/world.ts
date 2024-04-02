@@ -70,10 +70,10 @@ export function gotoNextLevel(world: World, hero: Entity) {
   takeTurn(world, hero); // counts as a step
 
   nextLevel(world);
-  const focus = world.getUnique(FocusHelper);
-  const game = world.getUnique(Game);
-  focus.reset(world, game.hero!.fetch(Pos)!);
-  game.changed = true;
+  // const focus = world.getUnique(FocusHelper);
+  // const game = world.getUnique(Game);
+  // focus.reset(world, game.hero!.fetch(Pos)!);
+  // game.changed = true;
   return true; // We handled the collision
 }
 

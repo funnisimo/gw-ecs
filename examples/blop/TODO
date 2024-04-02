@@ -88,7 +88,7 @@ MoveSystem:
 
 Effects:
     [] Add more Effects
-    [] DestroyWalls
+    [] DestroyWalls - radius 2
     [] Whirl - old Cleave: N,S,E,W attack
     [] Extend # - attack additional squares towards target: A-->
     [] Swipe - attack in arc of 3 dirs centered on target
@@ -99,10 +99,14 @@ Triggers:
     [] Add more Triggers
     [] Only allow to fire once per actor turn
         [] Can we use tick for this?
-    [] OnAttack
-    [] OnHurt - old OnLoseLife
-    [] OnKill
-    [] OnMyDeath
+    [X] OnAttack
+    [X] OnHurt - old OnLoseLife
+    [X] OnKill
+    [X] OnMyDeath
+    [] StepNearWall
+    [] StepNearAlly
+    [] SwapPlaces
+    [] AllyDeath
 
 Tiles:
     [] Lava damages blops and hero

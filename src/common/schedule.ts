@@ -104,6 +104,22 @@ export class Schedule {
       prev.nextItem = current.nextItem;
     }
   }
+
+  forEach(fn: (item: TaskType, time: number) => void) {
+    let next = this.nextItem;
+    while (next) {
+      if (next.item) fn(next.item, next.time);
+      next = next.nextItem;
+    }
+  }
+
+  map<T>(fn: (item: TaskType, time: number) => T): T[] {
+    const out: T[] = [];
+    this.forEach((i, t) => {
+      out.push(fn(i, t));
+    });
+    return out;
+  }
 }
 
 export class ScheduleSystem extends System {

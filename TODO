@@ -78,6 +78,7 @@ World:
         [] world.autoRegisterComponents()
         [] world.autoRegisterQueues()
         [] world.autoRegisterEvents()
+        [] world.autoRegisterTriggers()
         [] world.autoRegister() -- all of the above
 
 Uniques+Globals:
