@@ -1,4 +1,4 @@
-import { Component } from "../component";
+import { Component, AnyComponent } from "../component";
 import { AddStepOpts, SystemOrder } from "../system";
 import { World } from "./world";
 
@@ -13,9 +13,6 @@ import { World } from "./world";
 
 // TODO - subclasses work as base class
 //      - MySubEvent extends AnotherEvent
-
-export type TriggerCls<T> = Component<T>;
-export type AnyTriggerCls = TriggerCls<any>;
 
 export type HandleIfFn = (
   world: World,
@@ -48,7 +45,7 @@ export class TriggerHandler<T> {
   start(world: World) {}
 
   // return true to stop trigger propagation
-  runTrigger(world: World, event: T, time: number): boolean {
+  runTrigger(world: World, comp: T, time: number): boolean {
     return false;
   }
 
@@ -59,7 +56,7 @@ export class TriggerHandler<T> {
 
 export type TriggerHandlerFn<T> = (
   world: World,
-  event: T,
+  comp: T,
   time: number
 ) => boolean | void;
 
@@ -71,8 +68,8 @@ export class TriggerFnHandler<T> extends TriggerHandler<T> {
     this._fn = fn;
   }
 
-  runTrigger(world: World, event: T, time: number): boolean {
-    return this._fn(world, event, time) === true;
+  runTrigger(world: World, comp: T, time: number): boolean {
+    return this._fn(world, comp, time) === true;
   }
 }
 
@@ -138,18 +135,18 @@ export class HandlerStep<T> {
     this._postHandlers.forEach((s) => s.start(world));
   }
 
-  emit(world: World, event: T, time: number): boolean {
+  emit(world: World, comp: T, time: number): boolean {
     // find exits if predicate returns true
     // runHandler returns true if propagationStopped
     let r =
       this._preHandlers.find((sys) => {
-        return this._runHandler(world, sys, event, time);
+        return this._runHandler(world, sys, comp, time);
       }) ||
       this._handlers.find((sys) => {
-        return this._runHandler(world, sys, event, time);
+        return this._runHandler(world, sys, comp, time);
       }) ||
       this._postHandlers.find((sys) => {
-        return this._runHandler(world, sys, event, time);
+        return this._runHandler(world, sys, comp, time);
       });
     return r !== undefined;
   }
@@ -157,14 +154,14 @@ export class HandlerStep<T> {
   _runHandler(
     world: World,
     handler: TriggerHandler<T>,
-    event: T,
+    comp: T,
     time: number
   ): boolean {
     if (!handler.shouldRun(world, time)) {
       return false;
     }
 
-    let res = handler.runTrigger(world, event, time);
+    let res = handler.runTrigger(world, comp, time);
     handler.lastTick = world.tick();
     return res;
   }
@@ -183,11 +180,11 @@ export class HandlerStep<T> {
 }
 
 export class HandlerSet<T> {
-  _event: TriggerCls<T>;
+  _trigger: Component<T>;
   _steps: HandlerStep<T>[];
 
-  constructor(event: TriggerCls<T>, steps: string[] = ["emit"]) {
-    this._event = event;
+  constructor(event: Component<T>, steps: string[] = ["emit"]) {
+    this._trigger = event;
     this._steps = steps.map((n) => new HandlerStep(n));
   }
 
@@ -278,9 +275,9 @@ export class HandlerSet<T> {
     return this._steps.find((s) => s.name == name);
   }
 
-  emit(world: World, event: T, time: number) {
+  emit(world: World, comp: T, time: number) {
     for (let step of this._steps) {
-      if (step.emit(world, event, time)) {
+      if (step.emit(world, comp, time)) {
         return;
       }
     }
@@ -296,53 +293,53 @@ export class HandlerSet<T> {
 export type AnyHandlerSet = HandlerSet<any>;
 
 export class TriggerManager {
-  private _sets: Map<AnyTriggerCls, AnyHandlerSet>;
+  private _sets: Map<AnyComponent, AnyHandlerSet>;
 
   constructor() {
     this._sets = new Map();
   }
 
-  register<T>(event: TriggerCls<T>, steps?: string[]): this {
-    if (this._sets.get(event)) return this;
-    const set = new HandlerSet(event, steps);
-    this._sets.set(event, set);
+  register<T>(cls: Component<T>, steps?: string[]): this {
+    if (this._sets.get(cls)) return this;
+    const set = new HandlerSet(cls, steps);
+    this._sets.set(cls, set);
     return this;
   }
 
-  getSet<T>(event: TriggerCls<T>): HandlerSet<T> | undefined {
+  getSet<T>(cls: Component<T>): HandlerSet<T> | undefined {
     do {
-      const set = this._sets.get(event);
+      const set = this._sets.get(cls);
       if (set) return set as HandlerSet<T>;
-      event = Object.getPrototypeOf(event);
-    } while (event && !event.isPrototypeOf(Event));
+      cls = Object.getPrototypeOf(cls);
+    } while (cls && !cls.isPrototypeOf(Event));
   }
 
-  addStep<T>(event: TriggerCls<T>, name: string, opts: AddStepOpts = {}): this {
-    const set = this.getSet(event);
+  addStep<T>(cls: Component<T>, name: string, opts: AddStepOpts = {}): this {
+    const set = this.getSet(cls);
     if (!set)
       throw new Error(
-        "Failed to find registered event: " + event.constructor.name
+        "Failed to find registered event: " + cls.constructor.name
       );
     set.addStep(name, opts);
     return this;
   }
 
-  getStep<T>(cls: TriggerCls<T>, name: string): HandlerStep<T> | undefined {
+  getStep<T>(cls: Component<T>, name: string): HandlerStep<T> | undefined {
     const set = this.getSet(cls);
     return set?.getStep(name);
   }
 
   addHandler<T>(
-    event: TriggerCls<T>,
+    cls: Component<T>,
     handler: TriggerHandler<T> | TriggerHandlerFn<T>
   ): this;
   addHandler<T>(
-    event: TriggerCls<T>,
+    cls: Component<T>,
     step: string,
     handler: TriggerHandler<T> | TriggerHandlerFn<T>
   ): this;
-  addHandler<T>(event: TriggerCls<T>, ...args: any[]): this {
-    const set = this.getSet(event);
+  addHandler<T>(cls: Component<T>, ...args: any[]): this {
+    const set = this.getSet(cls);
     // TODO - Auto Register
     if (!set) throw new Error("Event not registered.");
     const step =
@@ -352,12 +349,12 @@ export class TriggerManager {
     return this;
   }
 
-  emit<T>(world: World, event: T, time: number) {
+  emit<T>(world: World, comp: T, time: number) {
     // @ts-ignore
-    const cls = event.constructor as TriggerCls<T>;
+    const cls = comp.constructor as Component<T>;
     const set = this.getSet(cls);
     if (!set) throw new Error("Event not registered.");
-    set.emit(world, event, time);
+    set.emit(world, comp, time);
   }
 
   maintain() {

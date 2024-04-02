@@ -8,21 +8,21 @@ Delayed:
         [] set/update/remove Unique?
         [] set/update/remove Global?
         [] queueItem(item)
-        [] emitEvent(event)
+        [] emitTrigger(event)
         [] runSystem(fn: System | SystemFn)?
         [] runSystemSet(set, time?, delta?)?
     [] world.maintain() - commits
         * Or world.commit();
         * addMaintain(set?, step?) -or- addCommit(set?, step?);
 
-Events:
-    [] registerEvent(comp extends Event, steps=['emit'])
-    [] addEventStep(comp, step, opts={})
-    [] addEventHandler( step?, handler)
-    [] emitEvent(c)
+Triggers:
+    [X] registerTrigger(comp extends Event, steps=['emit'])
+    [X] addTriggerStep(comp, step, opts={})
+    [X] addTrigger( step?, handler | fn)
+    [X] emitTrigger(c)
         * Fires all registered systems synchronously
-    [] class Event
-        - stopPropagation()
+    [-] class Event
+        [-] stopPropagation()
     [] World Events
         - WorldStartup
         - WorldShutdown
@@ -34,8 +34,7 @@ Events:
     [-] EventSystem extends System
         [-] runEventItem
     [-] EventSystemStep
-    [-] EventSystemSet
-    [] 
+    [-] EventSystemSet 
 
 System:
     [] System implements WorldInit

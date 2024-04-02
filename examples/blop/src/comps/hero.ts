@@ -1,4 +1,4 @@
-import { Aspect } from "gw-ecs/world";
+import { Aspect } from "gw-ecs/entity";
 
 export class Hero {}
 

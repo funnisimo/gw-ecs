@@ -17,12 +17,7 @@ import { Resources } from "./resources.js";
 import { AnyComponent, Component } from "../component/component.js";
 import { AnyCompStoreCtr, CompStore } from "../component/store.js";
 import { AnyComponentArg, Bundle } from "../entity/bundle.js";
-import {
-  TriggerCls,
-  TriggerHandler,
-  TriggerHandlerFn,
-  TriggerManager,
-} from "./trigger.js";
+import { TriggerHandler, TriggerHandlerFn, TriggerManager } from "./trigger.js";
 
 export interface WorldInit {
   worldInit?(world: World): void;
@@ -302,43 +297,43 @@ export class World {
   ///////////////////////
   // TRIGGERS
 
-  registerTrigger<T>(trigger: TriggerCls<T>, steps?: string[]): this {
-    this._triggers.register(trigger, steps);
+  registerTrigger<T>(component: Component<T>, steps?: string[]): this {
+    this._triggers.register(component, steps);
     return this;
   }
 
   addTriggerStep<T>(
-    trigger: TriggerCls<T>,
+    component: Component<T>,
     step: string,
     opts: AddStepOpts = {}
   ): this {
-    this._triggers.addStep(trigger, step, opts);
+    this._triggers.addStep(component, step, opts);
     return this;
   }
 
   addTrigger<T>(
-    trigger: TriggerCls<T>,
+    component: Component<T>,
     handler: TriggerHandler<T> | TriggerHandlerFn<T>
   ): this;
   addTrigger<T>(
-    trigger: TriggerCls<T>,
+    component: Component<T>,
     step: string,
     handler: TriggerHandler<T> | TriggerHandlerFn<T>
   ): this;
-  addTrigger<T>(trigger: TriggerCls<T>, ...args: any[]): this {
+  addTrigger<T>(component: Component<T>, ...args: any[]): this {
     if (args.length == 1) {
-      this._triggers.addHandler(trigger, args[0]);
+      this._triggers.addHandler(component, args[0]);
     } else {
-      this._triggers.addHandler(trigger, args[0], args[1]);
+      this._triggers.addHandler(component, args[0], args[1]);
     }
     return this;
   }
 
-  emitTrigger<T>(event: T, time?: number) {
+  emitTrigger<T>(component: T, time?: number) {
     if (time === undefined) {
       time = this.time;
     }
-    this._triggers.emit(this, event, time);
+    this._triggers.emit(this, component, time);
   }
 
   ////////////

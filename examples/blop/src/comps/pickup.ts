@@ -1,5 +1,5 @@
-import type { Entity } from "gw-ecs/entity";
-import { Aspect, type World } from "gw-ecs/world";
+import { Aspect, type Entity } from "gw-ecs/entity";
+import { type World } from "gw-ecs/world";
 
 export type PickupFn = (world: World, actor: Entity, item: Entity) => void;
 

@@ -1,7 +1,7 @@
 import { EntitySystem, type RunIfFn } from "gw-ecs/system";
-import { Aspect, World } from "gw-ecs/world";
+import { World } from "gw-ecs/world";
 import { Wait, removeAction } from "../comps";
-import type { Entity } from "gw-ecs/entity";
+import { type Entity, Aspect } from "gw-ecs/entity";
 import { GameEvent } from "../queues";
 
 export class WaitSystem extends EntitySystem {
