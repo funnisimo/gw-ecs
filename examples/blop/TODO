@@ -1,9 +1,11 @@
 
 Observation Mode:
-    [] Include special tiles
-        [] Stairs
+    * Uses EntityInfo and EntityFlags.OBSERVE
+    Include special tiles:
+        [X] Stairs
     [X] Include Blops
     [X] Limit to FOV 
+    [X] Include path
     [] Use Memory
         * You can remember an item that may or may not still be there
         * will require cloning an item in some fashion
@@ -17,7 +19,7 @@ Schedule:
 Path Following:
     [X] Show path to mouse
     [X] Allow Click to make Hero follow path
-    [] Also 'Enter'
+    [X] Also 'Enter'
     Stop following automatically when:
         [X] See something to pickup
         [X] Take damage
@@ -26,11 +28,15 @@ Path Following:
     [X] Auto ignore pickup
     Move interrupt logic out of `FovSystem`:
         * at least the TravelTo aware part
-        [] make it an Event
+        [X] make it a Trigger
 
 Stairs:
-    [] Prompt for usage?  Key for usage: '>', 'Enter'?
+    [] Prompt for usage?  Key for usage?: '>', 'Enter'?
     [] '>' to auto path to stairs
+    [] Brogue style alcove in wall?
+        * ###
+        * #>#
+        * ...
 
 Messages:
     [] 'A Stairs appears.'?
@@ -38,7 +44,7 @@ Messages:
 
 EntityInfo:
     [X] Combine with `Name`
-    [] Add text format info - describeA, describeThe, ...
+    [] Add text format info - describeA, describeThe, conjugate, ...
 
 Blops:
     [X] Add blops
@@ -79,8 +85,8 @@ AI:
     [] Allow register + use string id
 
 Game Over:
-    [] Detect and Notify
-    [] Allow restart
+    [] Detect and Notify (UI)
+    [] Allow restart (Enter to restart)
 
 MoveSystem:
     [] Collide same team -> swap places as move?
@@ -89,16 +95,22 @@ MoveSystem:
 Effects:
     [] Add more Effects
     [] DestroyWalls - radius 2
+        [] notifyFovWhenTilesChange? -or-
+        [] via trigger?  TilesChanged(XY[]) -or- TilesChanged()
+        [] No destroy outer walls - EntityInfo flag?  Different Sprite?
     [] Whirl - old Cleave: N,S,E,W attack
     [] Extend # - attack additional squares towards target: A-->
     [] Swipe - attack in arc of 3 dirs centered on target
     [] Shock - chain to all attached shockables (water tiles and blops in/next to)
     [] Explode - big explosion (radius 3)
+    [] SummonMini
+    [] SummonDummy
 
 Triggers:
     [] Add more Triggers
-    [] Only allow to fire once per actor turn
-        [] Can we use tick for this?
+    [-] Only allow to fire once per actor turn?
+        [-] Can we use tick for this?
+        * Mostly this is for OnHurt
     [X] OnAttack
     [X] OnHurt - old OnLoseLife
     [X] OnKill
@@ -107,6 +119,7 @@ Triggers:
     [] StepNearAlly
     [] SwapPlaces
     [] AllyDeath
+    [] StepNearBlop?
 
 Tiles:
     [] Lava damages blops and hero
@@ -131,14 +144,19 @@ Pickup:
         * Remove picked up entity
         * store.notify?
 
-Main Scene:
-    [] Use keymap
-    [] Make drawing more reusable
+Items:
+    [] Ensure certain number/type (ala Brogue)
 
 # Future
 
+Main Scene:
+    [] Use keymap
+    [] Make drawing more reusable
+    [] Click on messages to expand up to height of screen (like Brogue)
+
 MultiWorld:
     [] Allow up+down stairs
+    [] Prompt - do you want to take the stairs?
 
 App:
     [] Add splash screen/main menu?

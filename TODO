@@ -3,7 +3,7 @@ Delayed:
         [] createEntity(...comps)
         [] destroyEntity(entity)
         [] setComponent(entity, ...comps)
-        [] updateComponent(entity, ...comps)?
+        [] updateComponent(entity, compFn)?
         [] removeComponent(entity, ...comps)
         [] set/update/remove Unique?
         [] set/update/remove Global?
@@ -11,9 +11,9 @@ Delayed:
         [] emitTrigger(event)
         [] runSystem(fn: System | SystemFn)?
         [] runSystemSet(set, time?, delta?)?
-    [] world.maintain() - commits
+    [] world.commitDelayed() -or- world.delay.commit()
         * Or world.commit();
-        * addMaintain(set?, step?) -or- addCommit(set?, step?);
+    [] world.addCommitDelayed(set?, step?, order='post') -or- world.addCommit(set?, step?, order='post');
 
 Triggers:
     [X] registerTrigger(comp extends Event, steps=['emit'])
@@ -22,19 +22,19 @@ Triggers:
     [X] emitTrigger(c)
         * Fires all registered systems synchronously
     [-] class Event
-        [-] stopPropagation()
-    [] World Events
-        - WorldStartup
-        - WorldShutdown
-        - ActivateLevel
-        - DeactivateLevel
-        - StartScene?
+        [-] stopPropagation() - decided to use return code instead (true == stopPropagation)
+    World Triggers:
+        [-] WorldStartup?
+            * instead of 'start'?  Seems unnecessary
+            * Requires 'WorldInit'?  More complicated?
+        [] WorldShutdown?
+        [] ActivateLevel
+        [] DeactivateLevel
+        [-] StartScene?
             * Or ShowScene
-        - StopScene?
-    [-] EventSystem extends System
-        [-] runEventItem
-    [-] EventSystemStep
-    [-] EventSystemSet 
+        [-] StopScene?
+        [] DeleteEntity
+        [] CreateEntity
 
 System:
     [] System implements WorldInit
@@ -80,15 +80,17 @@ World:
         [] world.autoRegisterEvents()
         [] world.autoRegisterTriggers()
         [] world.autoRegister() -- all of the above
+    [] runDelta -> addTime + runSystems
+    [] maintain -> commit + maintainQueues
 
 Uniques+Globals:
     [] track update?
     [] isUpdated(comp, ticks)?
 
 SystemSet:
-    [] What is default step if you supply custom steps?
-        * First?
-        * Marker in text?
+    What is default step if you supply custom steps?:
+        [X] First?
+        [] Marker in text? '!'?
     [] Can you change default step in: addSystemStep(set, step)?
         * AddStepOpts: { default?: true }
     [] By default commits at the end of last step
@@ -101,7 +103,8 @@ SystemSet:
 
 SystemStep:
     [] Allow marking step as doing commit after it finishes
-        * AddStepOpts: { commit?: true }
+        * AddStepOpts: { commit?: true | SystemOrder }
+        * true = 'post'
     [] lastTick - upate this on run
     [] Should **NOT** be a System
         Just system-like
@@ -113,7 +116,7 @@ PosManager:
 
 MultiWorld:
     [] Store `notify` in a MultiWorld needs to be tested/updated
-        * One one register should be required
+        * Only one register should be required
     
 Entity:
     [] Should `tags` be a standard part of `Entity`?
@@ -123,3 +126,12 @@ Entity:
 Aspect:
     [] Allow test functions in `with`, `without`, `one`, and `some`.
         * (entity) => boolean
+
+Collisions:
+    [] callback - (actor, target, world) -> (world, actor, target)
+        * More consistent with other APIs
+
+Queues:
+    [] world.maintainQueue(comp)
+    [] world.maintainQueues()
+

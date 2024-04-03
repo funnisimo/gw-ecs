@@ -5,6 +5,7 @@ export enum EntityFlags {
   ALWAYS_INTERRUPT = fl(0),
   INTERRUPT_WHEN_SEEN = fl(1),
   SEEN = fl(2),
+  OBSERVE = fl(3),
 }
 
 export class EntityInfo {
@@ -27,6 +28,10 @@ export class EntityInfo {
 
   seen() {
     this.flags |= EntityFlags.SEEN;
+  }
+
+  hasFlag(flag: EntityFlags): boolean {
+    return (this.flags & flag) > 0;
   }
 }
 

@@ -46,7 +46,7 @@ export function tileBundle(
   bundle.with(tile).with(new Sprite(opts.ch, opts.fg, opts.bg));
 
   if (tile.stairs) {
-    bundle.with(new EntityInfo(tile.name, "INTERRUPT_WHEN_SEEN"));
+    bundle.with(new EntityInfo(tile.name, "INTERRUPT_WHEN_SEEN, OBSERVE"));
   } else {
     bundle.with(new EntityInfo(tile.name));
   }

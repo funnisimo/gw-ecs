@@ -11,8 +11,8 @@ import { clamp } from "gw-utils/utils";
 import type { Loc, XY } from "gw-utils";
 import type { World } from "gw-ecs/world";
 import { MoveCost, fromTo } from "gw-utils/path";
-import { PosManager } from "gw-ecs/common";
-import { FOV } from "./uniques";
+import { Pos, PosManager } from "gw-ecs/common";
+import { FOV, Game } from "./uniques";
 
 const SQRT_2_PI = Math.sqrt(2 * Math.PI);
 // https://www.math.net/gaussian-distribution
@@ -121,4 +121,11 @@ export function pathFromToUsingFov(
 
   path.shift(); // remove starting spot
   return path;
+}
+
+export function heroPathTo(world: World, pos: XY): Loc[] {
+  const game = world.getUnique(Game);
+  const hero = game.hero!;
+  const heroPos = hero.fetch(Pos)!;
+  return pathFromToUsingFov(world, heroPos, pos);
 }

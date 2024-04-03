@@ -31,7 +31,7 @@ import {
   heroMoved,
   heroTeleported,
 } from "./systems";
-import { FOV, Game, notifyFovWhenTilesChange } from "./uniques";
+import { FOV, Game } from "./uniques";
 import { GameEvent } from "./queues";
 import { DnaSystem } from "./systems/dna";
 import { DNA } from "./comps/dna";
@@ -40,14 +40,14 @@ import { TimerSystem } from "./systems/timers";
 import { flash } from "./fx/flash";
 import type { Entity } from "gw-ecs/entity";
 import { Pos } from "gw-ecs/common/positions";
-import { MaintainWorld, RunSystemSet, Schedule } from "gw-ecs/common";
-import { EntitySystemSet, QueueSystemStep, SystemSet } from "gw-ecs/system";
-import { FocusHelper } from "./uniques";
+import { MaintainWorld, Schedule } from "gw-ecs/common";
+import { EntitySystemSet } from "gw-ecs/system";
 import * as Constants from "./constants";
 import { Log } from "./uniques/log";
 import { coloredName } from "./utils";
 import { AttackSystem } from "./systems/attack";
 import { GameTurnSystem } from "./systems/gameTurn";
+import { Random } from "gw-utils/rng";
 
 function blockedMove(actor: Entity, target: Entity, world: World) {
   if (actor.has(Hero)) {
@@ -62,18 +62,26 @@ function blockedMove(actor: Entity, target: Entity, world: World) {
 }
 
 export function gotoNextLevel(world: World, hero: Entity) {
-  // [] Avoid stairs unless it is our goal
+  // [X] Avoid stairs unless it is our goal
   if (hero.has(TravelTo)) {
     return false;
   }
 
+  // hero moves to stairs loc
+  // TODO - set hero pos to stairs pos
   takeTurn(world, hero); // counts as a step
 
+  // TODO - prompt - do you want to take the stairs?
+  //      - allows you to pass stairs in hall with arrow moves
+  //      - default - 'yes'
+
+  // Heal hero - on Trigger - NextLevel
+  const blop = hero.fetch(Blop)!;
+  blop.health = blop.maxHealth;
+
+  // TODO - Trigger - NextLevel(depth + 1)
   nextLevel(world);
-  // const focus = world.getUnique(FocusHelper);
-  // const game = world.getUnique(Game);
-  // focus.reset(world, game.hero!.fetch(Pos)!);
-  // game.changed = true;
+
   return true; // We handled the collision
 }
 
@@ -88,11 +96,12 @@ function sayHello(actor: Entity, target: Entity, world: World) {
 }
 
 function attackBlop(actor: Entity, target: Entity, world: World) {
+  // TODO - If same team - return false;
   addAction(actor, new Attack(target));
   return true; // We handled it
 }
 
-function pushCharge(actor: Entity, target: Entity, world: World) {
+function pushChargeSameTeam(actor: Entity, target: Entity, world: World) {
   // TODO - Should this be an action component?
   //      - addAction(actor, new ChargeBlop(target));
   const blop = actor.fetch(Blop)!;
@@ -133,13 +142,19 @@ export const world = new World()
   .setUnique(new Timers())
   .setUnique(new Schedule())
   .setUnique(new FOV(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT)) // , notifyFovWhenTilesChange
+  .setUnique(new Random()) // for testing add a seed
   .setUnique(
     new CollisionManager()
-      .register("hero", "blop", attackBlop)
       // Hero swap with ally (incl dummy)
+      // .register('hero', 'blop', swapPlacesSameTeam)
+      .register("hero", "blop", attackBlop)
+
       .register("blop", "hero", attackBlop)
       // Blop swap with dummy ally
-      .register("blop", "blop", pushCharge) // TODO - What about swaps?
+      // .register('blop', 'dummy', swapPlacesSameTeam)
+      .register("blop", "blop", pushChargeSameTeam) // TODO - What about swaps? or summoned allies?
+      // .register('blop', 'blop', attackBlop)  // if not same team
+
       .register("actor", "wall", blockedMove)
       .register("hero", "stairs", (a, t, w) => gotoNextLevel(w, a))
   )
@@ -154,7 +169,7 @@ export const world = new World()
       .addSystem("post-events", new FovSystem().runIf(heroTeleported)) // So that teleport updates before next loop
       .addSystem("finish", new RescheduleSystem())
       .addSystem("finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish') -or- both of the following...
-    // TODO - addCommitDelayed('game', 'world')
+    // TODO - addCommitDelayed('game', 'finish')
     // TODO - addMaintainQueue(GameEvent, 'game', 'finish') -or- addMaintainQueues('game', 'finish')
   )
   .addSystem(new TimerSystem())

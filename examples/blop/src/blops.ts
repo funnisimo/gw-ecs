@@ -1,6 +1,6 @@
 import type { Bundle, Entity } from "gw-ecs/entity";
 import { blopBundle } from "./comps/blop";
-import { BLOP_AI, blopAi } from "./ai";
+import { BLOP_AI } from "./ai";
 
 ////////////////////////////////////////////
 // TYPES

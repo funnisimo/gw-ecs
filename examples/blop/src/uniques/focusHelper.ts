@@ -1,7 +1,7 @@
 import type { Entity } from "gw-ecs/entity";
 import type { World, WorldInit } from "gw-ecs/world";
 import { distanceFromTo, equals, type Loc, type XY } from "gw-utils/xy";
-import { BLOP_ASPECT, Tile } from "../comps";
+import { BLOP_ASPECT, EntityFlags, EntityInfo, Tile } from "../comps";
 import { Pos } from "gw-ecs/common";
 import { FOV } from "./fov";
 
@@ -35,9 +35,10 @@ export class FocusHelper implements WorldInit {
     this._pos = null; // { x: pos.x, y: pos.y };
     this.path = [];
     world.level.entities().forEach((e) => {
-      if (e.has(Tile)) return;
-      const pos = e.fetch(Pos);
-      if (!pos) return;
+      const info = e.fetch(EntityInfo);
+      if (!info) return;
+      if (!info.hasFlag(EntityFlags.OBSERVE)) return;
+      if (!e.has(Pos)) return;
       this.entities.push(e);
     });
     // const game = world.getUnique(Game);
@@ -123,6 +124,10 @@ export class FocusHelper implements WorldInit {
 
   current(): Entity | undefined {
     return this.entities[this.entityIndex];
+  }
+
+  setPath(path: Loc[]) {
+    this.path = path;
   }
 
   // selectClosestTo(pos: XY) : Entity {

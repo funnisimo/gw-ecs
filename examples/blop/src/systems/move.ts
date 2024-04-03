@@ -56,6 +56,7 @@ export class MoveSystem extends EntitySystem {
         }
       }
 
+      const oldXY = XY.newXY(pos);
       posMgr.set(entity, newX, newY);
       game.changed = true; // Force redraw
       // need fov update
@@ -72,20 +73,20 @@ export class MoveSystem extends EntitySystem {
       }
 
       // [X] - Did we become visible?  Should we interupt the hero?
-      if (game.hero!.has(TravelTo)) {
-        const fov = world.getUnique(FOV);
-        if (fov.becameVisible(pos.x, pos.y)) {
-          const info = entity.update(EntityInfo);
-          if (info) {
-            if (info.shouldInterruptWhenSeen()) {
-              world.emitTrigger(new Interrupt(game.hero!));
-              world.getUnique(Log).add(`A ${coloredName(entity)} appears. 2`);
-              flash(world, pos, AppearSprite);
-            }
-            info.seen();
+      // if (game.hero!.has(TravelTo)) {
+      const fov = world.getUnique(FOV);
+      if (!fov.isVisible(oldXY.x, oldXY.y) && fov.isVisible(pos.x, pos.y)) {
+        const info = entity.update(EntityInfo);
+        if (info) {
+          if (info.shouldInterruptWhenSeen()) {
+            world.emitTrigger(new Interrupt(game.hero!));
+            world.getUnique(Log).add(`A ${coloredName(entity)} appears.`);
+            flash(world, pos, AppearSprite);
           }
+          info.seen();
         }
       }
+      // }
 
       let tileEntity = posMgr.firstAt(newX, newY, TILE_ASPECT)!;
       const tile = tileEntity.fetch(Tile)!;

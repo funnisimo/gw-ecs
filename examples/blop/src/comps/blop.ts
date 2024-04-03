@@ -68,6 +68,6 @@ export function blopBundle(type: string, config: BlopConfig): Bundle {
     .with(new Actor(...ai))
     // TODO - Drops
     // TODO - DNA
-    .with(new EntityInfo(config.name, "ALWAYS_INTERRUPT"));
+    .with(new EntityInfo(config.name, "ALWAYS_INTERRUPT, OBSERVE"));
   return bundle;
 }

@@ -20,6 +20,7 @@ import { coloredName } from "../utils";
 import { EntityInfo } from "./entityInfo";
 
 export class Effect {
+  // TODO - Move effect name+description to EntityInfo
   name: string;
   description: string;
 
@@ -115,7 +116,7 @@ export function createRandomEffect(world: World, rng?: Random): Entity {
     EffectSprite,
     effect,
     new Pickup(pickupEffect),
-    new EntityInfo(effect.name, "INTERRUPT_WHEN_SEEN")
+    new EntityInfo(effect.name, "INTERRUPT_WHEN_SEEN, OBSERVE")
   );
 }
 

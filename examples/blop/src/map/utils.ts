@@ -5,7 +5,6 @@ import { Random, random } from "gw-utils/rng";
 import { Collider } from "gw-ecs/common/collisions";
 import type { World } from "gw-ecs/world";
 import type { Bundle, Entity } from "gw-ecs/entity";
-import { Name } from "../comps/name";
 
 class RandomXY {
   _indexes: number[];

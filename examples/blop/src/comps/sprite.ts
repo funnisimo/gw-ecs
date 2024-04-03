@@ -17,7 +17,3 @@ export const HealEffectSprite = new Sprite(null, null, "blue");
 export const TeleportSprite = new Sprite(null, null, "purple");
 export const DamageSprite = new Sprite("*", "yellow", "red");
 export const AppearSprite = new Sprite(null, null, "teal");
-
-export const HealSprite = new Sprite("♥", "pink");
-export const PowerupSprite = new Sprite("↑", "pink");
-export const AddSlotSprite = new Sprite("+", "pink");

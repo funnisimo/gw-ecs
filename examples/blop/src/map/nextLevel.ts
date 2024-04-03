@@ -4,6 +4,7 @@ import * as Constants from "../constants";
 import { FOV, FocusHelper, Log } from "../uniques";
 import {
   findClosestEmptyFloor as findClosestSpawnTile,
+  findEmptyFloorTile,
   findEmptyFloorTileFarFrom,
   setTileType,
 } from "./utils";
@@ -23,6 +24,8 @@ import { random, type XY } from "gw-utils";
 import { gaussian } from "../utils";
 import { SPAWN_TABLE } from "../blops";
 import { calculateFov, updateVisibility } from "../systems";
+import { ADDSLOT_BUNDLE, EXPAND_HEALTH_BUNDLE, POWERUP_BUNDLE } from "../drops";
+import { Random } from "gw-utils/rng";
 
 export function nextLevel(world: World) {
   const game = world.getUnique(Game);
@@ -97,21 +100,16 @@ function makeNormalLevel(world: World, depth: number) {
   mgr.set(effect, effectXY.x, effectXY.y);
 
   makeBlops(world, heroXY, depth);
-  // var items = makeItems(world, playerPos, depth);
-
-  return {
-    world: world,
-    // playerPos: playerPos,
-    // pickables: items,
-    // blops: blops,
-  };
+  makeItems(world, heroXY, depth);
 }
 
 function makeBlops(world: World, playerPos: XY, depth: number) {
   const mgr = world.getUnique(PosManager);
+  const rng = world.getUnique(Random) || random;
+
   var numberOfBlops = Math.min(
     depth * 2,
-    2 + Math.max(0, random.normal(depth / 2, Constants.BLOP_NUMBER_STDDEV))
+    2 + Math.max(0, rng.normal(depth / 2, Constants.BLOP_NUMBER_STDDEV))
   );
 
   console.log("GENERATING " + numberOfBlops + " BLOPS");
@@ -123,7 +121,7 @@ function makeBlops(world: World, playerPos: XY, depth: number) {
   console.log("spawn probabilities", weights);
 
   for (var i = 0; i < numberOfBlops; i++) {
-    const index = random.weighted(weights);
+    const index = rng.weighted(weights);
     const bundle = SPAWN_TABLE[index].bundle;
     const blop = bundle.create(world);
 
@@ -142,80 +140,45 @@ function makeBlops(world: World, playerPos: XY, depth: number) {
   }
 }
 
-// function makeItems(world, playerPos, depth) {
-//   var otherForbiddenPos = [playerPos];
-//   var items = [];
+function makeItems(world: World, playerPos: XY, depth: number) {
+  const rng = world.getUnique(Random) || random;
+  const posMgr = world.getUnique(PosManager);
 
-//   if (
-//     rot_js__WEBPACK_IMPORTED_MODULE_0__.RNG.getPercentage() <
-//     Constants.ADD_CHROMOSOME_ITEM_PROBABILITY
-//   ) {
-//     items.push({
-//       position: (0, _State__WEBPACK_IMPORTED_MODULE_7__.findEmptyTileForSpawn)(
-//         {
-//           world: world,
-//           pickables: items,
-//         },
-//         otherForbiddenPos
-//       ),
-//       object:
-//         new _pickables_items_Item__WEBPACK_IMPORTED_MODULE_6__.AddChromosomeItem(),
-//       noticedByPlayer: false,
-//     });
-//   }
+  if (rng.chance(Constants.ADD_CHROMOSOME_ITEM_PROBABILITY)) {
+    const itemPos = findEmptyFloorTile(world);
+    if (itemPos) {
+      console.log("* add slot", itemPos);
+      const entity = ADDSLOT_BUNDLE.create(world);
+      posMgr.set(entity, itemPos.x, itemPos.y);
+    }
+  }
 
-//   if (
-//     rot_js__WEBPACK_IMPORTED_MODULE_0__.RNG.getPercentage() <
-//     Constants.EXPAND_LIFE_ITEM_PROBABILITY
-//   ) {
-//     items.push({
-//       position: (0, _State__WEBPACK_IMPORTED_MODULE_7__.findEmptyTileForSpawn)(
-//         {
-//           world: world,
-//           pickables: items,
-//         },
-//         otherForbiddenPos
-//       ),
-//       object:
-//         new _pickables_items_Item__WEBPACK_IMPORTED_MODULE_6__.ExpandLifeItem(),
-//       noticedByPlayer: false,
-//     });
-//   }
+  if (rng.chance(Constants.EXPAND_LIFE_ITEM_PROBABILITY)) {
+    const itemPos = findEmptyFloorTile(world);
+    if (itemPos) {
+      console.log("* heal", itemPos);
+      const entity = EXPAND_HEALTH_BUNDLE.create(world);
+      posMgr.set(entity, itemPos.x, itemPos.y);
+    }
+  }
 
-//   if (
-//     rot_js__WEBPACK_IMPORTED_MODULE_0__.RNG.getPercentage() <
-//     Constants.REINFORCE_ITEM_PROBABILITY
-//   ) {
-//     items.push({
-//       position: (0, _State__WEBPACK_IMPORTED_MODULE_7__.findEmptyTileForSpawn)(
-//         {
-//           world: world,
-//           pickables: items,
-//         },
-//         otherForbiddenPos
-//       ),
-//       object:
-//         new _pickables_items_Item__WEBPACK_IMPORTED_MODULE_6__.ReinforceItem(),
-//       noticedByPlayer: false,
-//     });
-//   }
+  if (rng.chance(Constants.REINFORCE_ITEM_PROBABILITY)) {
+    const itemPos = findEmptyFloorTile(world);
+    if (itemPos) {
+      console.log("* powerup", itemPos);
+      const entity = POWERUP_BUNDLE.create(world);
+      posMgr.set(entity, itemPos.x, itemPos.y);
+    }
+  }
 
-//   if (depth % 4 === 0) {
-//     items.push({
-//       position: (0, _State__WEBPACK_IMPORTED_MODULE_7__.findEmptyTileForSpawn)(
-//         {
-//           world: world,
-//           pickables: items,
-//         },
-//         otherForbiddenPos
-//       ),
-//       object:
-//         new _pickables_items_Item__WEBPACK_IMPORTED_MODULE_6__.AddChromosomeItem(),
-//       noticedByPlayer: false,
-//     });
-//   }
-
-//   return items;
-// }
+  if (depth % 4 === 0) {
+    const itemPos = findEmptyFloorTile(world);
+    if (itemPos) {
+      console.log("* add slot", itemPos);
+      const entity = ADDSLOT_BUNDLE.create(world);
+      posMgr.set(entity, itemPos.x, itemPos.y);
+    }
+  }
+}
 
 //# sourceURL=webpack://7drl-2021-blob-genes/./src/state/world/nextLevel.ts?

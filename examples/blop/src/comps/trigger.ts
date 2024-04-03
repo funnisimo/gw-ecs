@@ -16,6 +16,7 @@ import { EntityInfo } from "./entityInfo";
 export type TriggerFn = (event: GameEvent, owner: Entity) => boolean;
 
 export class Trigger {
+  // TODO - Move trigger name+description to EntityInfo
   name: string;
   description: string;
 
@@ -180,11 +181,12 @@ export class HurtTrigger extends Trigger {
   }
 }
 
-// turnaround
-// swap
-// ontrigger  // ????
-// onstepnearally // updated(pos).with(dna)
-// onallydeath    // added(killed).with(ally).without(hero)
+// turnaround ???
+// turn ???
+// swap // ?!?!?!
+// ontrigger  // event.entity === owner && triggered effect already ?!?!?
+// onstepnearally // ??? expensive!!!  type === 'move' && DIRS4.some( (d) => posMgr.hasAt(plus(d, myPos), ALLY_ASPECT))
+// onallydeath    // ??? type === 'kill' && target.has(Ally)
 
 export const triggerClasses = [
   WaitTrigger,
@@ -207,7 +209,7 @@ export function createRandomTrigger(world: World, rng?: Random): Entity {
     TriggerSprite,
     trigger,
     new Pickup(pickupTrigger),
-    new EntityInfo(trigger.name, "INTERRUPT_WHEN_SEEN")
+    new EntityInfo(trigger.name, "INTERRUPT_WHEN_SEEN, OBSERVE")
   );
 }
 

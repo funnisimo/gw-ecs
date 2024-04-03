@@ -3,6 +3,7 @@ import * as Grid from "gw-utils/grid";
 import type { World } from "gw-ecs/world";
 import { Tile } from "../comps";
 import { Pos } from "gw-ecs/common";
+import type { XY } from "gw-utils/xy";
 
 export { FovFlags };
 

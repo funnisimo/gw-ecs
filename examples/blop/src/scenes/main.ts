@@ -29,7 +29,7 @@ import { DNA } from "../comps/dna";
 import { Aspect, Entity } from "gw-ecs/entity";
 import { Mixer } from "gw-utils/sprite";
 import { Log } from "../uniques";
-import { coloredName, pathFromToUsingFov } from "../utils";
+import { coloredName, heroPathTo, pathFromToUsingFov } from "../utils";
 import { FocusHelper } from "../uniques/focusHelper";
 import { BLACK } from "gw-utils/color";
 
@@ -65,13 +65,7 @@ export const mainScene = {
         const x = ev.x;
         const y = ev.y - Constants.MAP_TOP;
         game.changed = !focus.pos || focus.pos.x !== x || focus.pos.y !== y;
-        focus.focusAt(
-          { x, y },
-          pathFromToUsingFov(world, game.hero!.fetch(Pos)!, {
-            x,
-            y,
-          })
-        );
+        focus.focusAt({ x, y }, heroPathTo(world, { x, y }));
         return;
       }
     }
@@ -102,17 +96,27 @@ export const mainScene = {
       logs.makeLogsOld();
       focus.clearFocus();
       game.changed = true;
+    } else if (ev.key == "Enter") {
+      if (focus.pos) {
+        game.hero!.set(new TravelTo(focus.pos));
+      }
     } else if (ev.key === "Tab") {
       if (!focus.pos) {
         focus.focusAt(game.hero!.fetch(Pos)!);
       }
-      focus.next(world);
+      const e = focus.next(world);
+      if (e) {
+        focus.setPath(heroPathTo(world, e.fetch(Pos)!));
+      }
       game.changed = true;
     } else if (ev.key === "TAB") {
       if (!focus.pos) {
         focus.focusAt(game.hero!.fetch(Pos)!);
       }
-      focus.prev(world);
+      const e = focus.prev(world);
+      if (e) {
+        focus.setPath(heroPathTo(world, e.fetch(Pos)!));
+      }
       game.changed = true;
     } else if (ev.key == "Backspace") {
       logs.makeLogsOld();
