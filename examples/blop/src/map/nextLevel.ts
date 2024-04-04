@@ -8,15 +8,7 @@ import {
   findEmptyFloorTileFarFrom,
   setTileType,
 } from "./utils";
-import {
-  Hero,
-  EntityInfo,
-  STAIRS_BUNDLE,
-  TILE_ASPECT,
-  Tile,
-  createRandomEffect,
-  createRandomTrigger,
-} from "../comps";
+import { Hero, EntityInfo, STAIRS_BUNDLE } from "../comps";
 import { makeRandomWorld } from "./randomWorld";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Game } from "../uniques";
@@ -26,6 +18,8 @@ import { SPAWN_TABLE } from "../blops";
 import { calculateFov, updateVisibility } from "../systems";
 import { ADDSLOT_BUNDLE, EXPAND_HEALTH_BUNDLE, POWERUP_BUNDLE } from "../drops";
 import { Random } from "gw-utils/rng";
+import { createRandomTrigger } from "../triggers";
+import { createRandomEffect } from "../effects";
 
 export function nextLevel(world: World) {
   const game = world.getUnique(Game);

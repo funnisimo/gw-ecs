@@ -1,18 +1,11 @@
 import type { Entity } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world";
-import {
-  Actor,
-  Blop,
-  DNA,
-  HealEffect,
-  Hero,
-  EntityInfo,
-  Sprite,
-  WaitTrigger,
-} from "./comps";
+import { Actor, Blop, DNA, Hero, EntityInfo, Sprite } from "./comps";
 import { Collider } from "gw-ecs/common";
 import { BLOP_TYPE } from "./blops";
 import { aiTravel } from "./ai";
+import { WaitTrigger } from "./triggers";
+import { HealEffect } from "./effects";
 
 export function createHero(world: World): Entity {
   const dna = new DNA(2);

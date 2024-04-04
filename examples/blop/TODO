@@ -31,7 +31,8 @@ Path Following:
         [X] make it a Trigger
 
 Game Over:
-    [] Detect and Notify (UI)
+    [X] Detect and Notify (UI)
+    [] Change Help at top of screen
     [] Allow restart (Enter to restart)
 
 Stairs:
