@@ -38,6 +38,9 @@ export class GameTurnSystem extends ScheduleSystem {
     time: number,
     delta: number
   ): RunResult {
+    const game = world.getUnique(Game);
+    if (game.over) return RunResult.Ok; // We are done - ok to remove this entity
+
     const actor = entity.fetch(Actor);
     if (!actor) {
       // TODO - Exception?
@@ -59,7 +62,6 @@ export class GameTurnSystem extends ScheduleSystem {
     }
 
     // If our hero is acting then break so we can draw
-    const game = world.getUnique(Game);
     return entity === game.hero ? RunResult.Break : RunResult.Ok;
   }
 }

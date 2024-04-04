@@ -24,6 +24,7 @@ import { nextLevel } from "./map/nextLevel";
 import { CollisionManager } from "gw-ecs/common/collisions";
 import {
   FovSystem,
+  GameOverSystem,
   MoveSystem,
   PickupSystem,
   RescheduleSystem,
@@ -166,6 +167,7 @@ export const world = new World()
       .addSystem("act", new AttackSystem())
       .addSystem("act", new WaitSystem())
       .addSystem("events", new DnaSystem())
+      .addSystem("events", new GameOverSystem())
       .addSystem("post-events", new FovSystem().runIf(heroTeleported)) // So that teleport updates before next loop
       .addSystem("finish", new RescheduleSystem())
       .addSystem("finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish') -or- both of the following...

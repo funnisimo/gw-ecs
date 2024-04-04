@@ -1,20 +1,9 @@
 import type { Entity } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world";
 import { FOV, Game } from "./uniques";
-import { Pos, PosManager } from "gw-ecs/common";
-import {
-  Attack,
-  BLOP_ASPECT,
-  Interrupt,
-  Move,
-  TILE_ASPECT,
-  Tile,
-  TravelTo,
-  Wait,
-  addAction,
-} from "./comps";
+import { Pos } from "gw-ecs/common";
+import { Attack, Interrupt, Move, TravelTo, Wait, addAction } from "./comps";
 import * as XY from "gw-utils/xy";
-import { MoveCost, fromTo } from "gw-utils/path";
 import { Random, random } from "gw-utils/rng";
 import {
   BLOP_RANDOM_MOVE_CHANCE,
@@ -53,6 +42,7 @@ export const BLOP_AI = [
 export function aiAttackHero(world: World, blop: Entity): boolean {
   const game = world.getUnique(Game);
   const hero = game.hero!;
+  if (!hero || !hero.isAlive()) return false;
 
   // [X] Next to Hero - Attack Hero
   const myPos = blop.fetch(Pos)!;
@@ -69,6 +59,7 @@ export function aiAttackHero(world: World, blop: Entity): boolean {
 export function aiChargeHero(world: World, blop: Entity): boolean {
   const game = world.getUnique(Game);
   const hero = game.hero!;
+  if (!hero || !hero.isAlive()) return false;
 
   // [X] Next to Hero - Attack Hero
   const myPos = blop.fetch(Pos)!;

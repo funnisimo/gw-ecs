@@ -30,6 +30,10 @@ Path Following:
         * at least the TravelTo aware part
         [X] make it a Trigger
 
+Game Over:
+    [] Detect and Notify (UI)
+    [] Allow restart (Enter to restart)
+
 Stairs:
     [] Prompt for usage?  Key for usage?: '>', 'Enter'?
     [] '>' to auto path to stairs
@@ -83,10 +87,6 @@ Blops:
 
 AI:
     [] Allow register + use string id
-
-Game Over:
-    [] Detect and Notify (UI)
-    [] Allow restart (Enter to restart)
 
 MoveSystem:
     [] Collide same team -> swap places as move?

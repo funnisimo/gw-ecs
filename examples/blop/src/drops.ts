@@ -10,6 +10,8 @@ import {
 import * as Constants from "./constants";
 import { flash } from "./fx/flash";
 import { Pos } from "gw-ecs/common";
+import { Log } from "./uniques";
+import { coloredName } from "./utils";
 
 // TODO - Make other drops
 
@@ -30,6 +32,7 @@ export const EXPAND_HEALTH_BUNDLE = new Bundle(
     );
 
     flash(world, actor.fetch(Pos)!, HealEffectSprite);
+    world.getUnique(Log).add(`${coloredName(actor)} is #{green healthier}.`);
     world.destroyNow(heal);
   }),
   new EntityInfo("Expand Health", "INTERRUPT_WHEN_SEEN")
@@ -46,6 +49,7 @@ export const POWERUP_BUNDLE = new Bundle(
     if (!blop) return;
     blop.power += 1;
     flash(world, actor.fetch(Pos)!, PowerupEffectSprite);
+    world.getUnique(Log).add(`${coloredName(actor)} is #{green stronger}.`);
     world.destroyNow(powerup);
   }),
   new EntityInfo("Powerup", "INTERRUPT_WHEN_SEEN")
@@ -62,6 +66,7 @@ export const ADDSLOT_BUNDLE = new Bundle(
     if (!dna) return;
     dna.addSlot();
     flash(world, actor.fetch(Pos)!, AddSlotEffectSprite);
+    world.getUnique(Log).add(`${coloredName(actor)} is more #{green capable}.`);
     world.destroyNow(addSlot);
   }),
   new EntityInfo("Add Dna Slot", "INTERRUPT_WHEN_SEEN")

@@ -7,3 +7,4 @@ export * from "./wait";
 export * from "./reschedule";
 export * from "./gameTurn";
 export * from "./wait";
+export * from "./gameOver";

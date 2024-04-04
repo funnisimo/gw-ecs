@@ -10,6 +10,7 @@ import {
   FX_ASPECT,
   HERO_ASPECT,
   Move,
+  PICKUP_ASPECT,
   Sprite,
   TILE_ASPECT,
   TRIGGER_ASPECT,
@@ -51,7 +52,10 @@ export const mainScene = {
         console.log("map click", x, y, entities);
 
         const game = world.getUnique(Game);
-        game.hero!.set(new TravelTo({ x, y }));
+        const hero = game.hero;
+        if (hero && hero.isAlive()) {
+          hero.set(new TravelTo({ x, y }));
+        }
         return;
       }
     }
@@ -60,6 +64,8 @@ export const mainScene = {
   mousemove(ev: Event) {
     const focus = world.getUnique(FocusHelper);
     const game = world.getUnique(Game);
+    const hero = game.hero;
+
     if (ev.x < Constants.MAP_WIDTH) {
       if (ev.y >= Constants.MAP_TOP && ev.y < Constants.LOG_TOP - 1) {
         const x = ev.x;
@@ -200,10 +206,7 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
       }
 
       if (!entity) {
-        entity =
-          TRIGGER_ASPECT.first(entities) ||
-          EFFECT_ASPECT.first(entities) ||
-          TILE_ASPECT.first(entities)!;
+        entity = PICKUP_ASPECT.first(entities) || TILE_ASPECT.first(entities)!;
       }
 
       let sprite: Mixer = new Mixer(entity.fetch(Sprite)!);
@@ -272,9 +275,15 @@ export function drawStatus(
   const game = world.getUnique(Game);
   const focus = world.getUnique(FocusHelper);
   const hero = game.hero!;
-  const xy = focus.pos || hero.fetch(Pos)!;
-  const fov = world.getUnique(FOV);
+  let xy = focus.pos;
+  if (!xy) {
+    if (hero && hero.isAlive()) {
+      xy = hero.fetch(Pos)!;
+    }
+  }
+  if (!xy) return;
 
+  const fov = world.getUnique(FOV);
   if (!fov.isRevealed(xy.x, xy.y)) return;
 
   const entity = focus.pos ? getBlopEntityAt(world, xy) : game.hero;

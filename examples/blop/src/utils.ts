@@ -126,6 +126,8 @@ export function pathFromToUsingFov(
 export function heroPathTo(world: World, pos: XY): Loc[] {
   const game = world.getUnique(Game);
   const hero = game.hero!;
+  if (!hero || !hero.isAlive()) return [];
+
   const heroPos = hero.fetch(Pos)!;
   return pathFromToUsingFov(world, heroPos, pos);
 }
