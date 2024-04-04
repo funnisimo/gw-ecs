@@ -3,7 +3,7 @@ import { Sprite, type SpriteConfig } from "./sprite";
 import { Bundle } from "gw-ecs/entity";
 import { Collider } from "gw-ecs/common";
 import { Actor, type AiFn } from "./actor";
-import { EntityFlags, EntityInfo } from "./entityInfo";
+import { EntityInfo } from "./entityInfo";
 
 export interface SpawnInfo {
   average: number;

@@ -231,6 +231,8 @@ export class Entities {
   }
 
   destroy(entity: Entity) {
+    if (!entity.isAlive()) return;
+
     const oldGen = entity.gen;
     this._all[entity.index] = oldGen;
     this._notify.forEach((h) => h.entityDestroyed && h.entityDestroyed(entity));

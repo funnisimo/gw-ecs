@@ -32,8 +32,8 @@ Path Following:
 
 Game Over:
     [X] Detect and Notify (UI)
-    [] Change Help at top of screen
-    [] Allow restart (Enter to restart)
+    [X] Change Help at top of screen
+    [X] Allow restart (Enter to restart)
 
 Stairs:
     [] Prompt for usage?  Key for usage?: '>', 'Enter'?
@@ -162,3 +162,4 @@ MultiWorld:
 App:
     [] Add splash screen/main menu?
 
+[] Auto-Explore - 'x'

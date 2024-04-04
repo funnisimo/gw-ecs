@@ -74,7 +74,7 @@ export function takeTurn(world: World, entity: Entity, actTime?: number) {
       actTime = actor.actTime;
     }
   }
-  console.log("- entity turn", actTime);
+  console.log("- entity turn", entity.index, actTime);
   const schedule = world.getUnique(Schedule);
   schedule.add(entity, actTime);
 

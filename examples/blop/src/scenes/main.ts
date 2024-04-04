@@ -1,6 +1,6 @@
 import { Event, Scene } from "gw-utils/app";
 import * as Constants from "../constants";
-import { nextLevel } from "../map/nextLevel";
+import { nextLevel, startNewGame } from "../map/nextLevel";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { FOV, Game } from "../uniques";
 import {
@@ -38,7 +38,7 @@ export const mainScene = {
   start() {
     const focus = world.getUniqueOr(FocusHelper, () => new FocusHelper());
     const game = world.getUniqueOr(Game, () => new Game());
-    nextLevel(world);
+    startNewGame(world);
     // focus.reset(world, game.hero!.fetch(Pos)!);
   },
   click(ev: Event) {
@@ -53,7 +53,7 @@ export const mainScene = {
 
         const game = world.getUnique(Game);
         const hero = game.hero;
-        if (hero && hero.isAlive()) {
+        if (hero && hero.isAlive() && !game.over) {
           hero.set(new TravelTo({ x, y }));
         }
         return;
@@ -82,6 +82,19 @@ export const mainScene = {
     const game = world.getUnique(Game);
     const focus = world.getUnique(FocusHelper);
     const logs = world.getUnique(Log);
+    if (game.over) {
+      if (ev.key == "Enter") {
+        game.depth = 0;
+        startNewGame(world);
+      } else if (ev.key === "Tab") {
+        focus.next(world);
+        game.changed = true;
+      } else if (ev.key === "TAB") {
+        focus.prev(world);
+        game.changed = true;
+      }
+      return;
+    }
     if (ev.dir) {
       logs.makeLogsOld();
       focus.clearFocus();
@@ -143,6 +156,8 @@ export const mainScene = {
 
     drawLines(buffer);
 
+    drawHelp(buffer, Constants.HELP_HEIGHT);
+
     drawMapHeader(
       buffer,
       Constants.MAP_LEFT,
@@ -168,6 +183,21 @@ export const mainScene = {
     );
   },
 };
+
+export function drawHelp(buffer: Buffer, h: number) {
+  const game = world.getUnique(Game);
+  if (game.over) {
+    buffer.drawText(0, 0, "#{red GAME OVER} - The #{yellow Hero} died");
+    buffer.drawText(0, 2, "Controls:");
+    buffer.drawText(0, 3, "#{green Enter}   - Start a new game");
+    buffer.drawText(0, 4, "#{green Tab/TAB} - Observation mode");
+  } else {
+    buffer.drawText(0, 0, "#{teal Bloplike 7DRL} - originally by Drestin");
+    buffer.drawText(0, 2, "Controls:");
+    buffer.drawText(0, 3, "#{green Arrows}  - Move/Attack");
+    buffer.drawText(0, 4, "#{green Tab/TAB} - Observation mode");
+  }
+}
 
 export function drawMapHeader(
   buffer: Buffer,

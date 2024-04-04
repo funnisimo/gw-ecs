@@ -35,7 +35,7 @@ export const EXPAND_HEALTH_BUNDLE = new Bundle(
     world.getUnique(Log).add(`${coloredName(actor)} is #{green healthier}.`);
     world.destroyNow(heal);
   }),
-  new EntityInfo("Expand Health", "INTERRUPT_WHEN_SEEN")
+  new EntityInfo("Expand Health", "INTERRUPT_WHEN_SEEN, OBSERVE")
 );
 
 // - PowerUp
@@ -52,7 +52,7 @@ export const POWERUP_BUNDLE = new Bundle(
     world.getUnique(Log).add(`${coloredName(actor)} is #{green stronger}.`);
     world.destroyNow(powerup);
   }),
-  new EntityInfo("Powerup", "INTERRUPT_WHEN_SEEN")
+  new EntityInfo("Powerup", "INTERRUPT_WHEN_SEEN, OBSERVE")
 );
 
 // - Add Slot
@@ -69,7 +69,7 @@ export const ADDSLOT_BUNDLE = new Bundle(
     world.getUnique(Log).add(`${coloredName(actor)} is more #{green capable}.`);
     world.destroyNow(addSlot);
   }),
-  new EntityInfo("Add Dna Slot", "INTERRUPT_WHEN_SEEN")
+  new EntityInfo("Add Dna Slot", "INTERRUPT_WHEN_SEEN, OBSERVE")
 );
 
 // - ???

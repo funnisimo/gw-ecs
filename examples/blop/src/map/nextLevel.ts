@@ -21,6 +21,19 @@ import { Random } from "gw-utils/rng";
 import { createRandomTrigger } from "../triggers";
 import { createRandomEffect } from "../effects";
 
+export function startNewGame(world: World) {
+  const game = world.getUnique(Game);
+  if (game.hero) {
+    world.destroyNow(game.hero);
+    game.hero = null;
+  }
+
+  game.over = false;
+  game.changed = true;
+
+  nextLevel(world);
+}
+
 export function nextLevel(world: World) {
   const game = world.getUnique(Game);
 
