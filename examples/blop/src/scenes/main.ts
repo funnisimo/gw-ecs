@@ -11,6 +11,7 @@ import {
   HERO_ASPECT,
   Move,
   PICKUP_ASPECT,
+  STAIRS,
   Sprite,
   TILE_ASPECT,
   TRIGGER_ASPECT,
@@ -22,6 +23,7 @@ import {
 import { type Buffer } from "gw-utils/buffer";
 import { gotoNextLevel, world } from "../world";
 import {
+  findClosestTileMatching,
   getBlopEntityAt,
   getPickupEntityAt,
   getTileEntityAt,
@@ -106,6 +108,18 @@ export const mainScene = {
       if (hero) {
         console.log("keypress - move", ev.dir);
         addAction(hero, new Move(ev.dir));
+      }
+    } else if (ev.key === ">") {
+      const hero = game.hero!;
+      const e = findClosestTileMatching(
+        world,
+        hero.fetch(Pos)!,
+        (e) => e.fetch(Tile)!.stairs
+      );
+      if (e) {
+        const pos = e.fetch(Pos)!;
+        focus.focusAt(pos, heroPathTo(world, pos));
+        game.changed = true;
       }
     } else if (ev.key === " ") {
       logs.makeLogsOld();

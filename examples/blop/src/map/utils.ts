@@ -1,4 +1,5 @@
 import * as XY from "gw-utils/xy";
+import * as Grid from "gw-utils/grid";
 import {
   BLOP_ASPECT,
   FLOOR,
@@ -10,9 +11,10 @@ import {
 } from "../comps";
 import { PosManager } from "gw-ecs/common/positions";
 import { Random, random } from "gw-utils/rng";
-import { Collider } from "gw-ecs/common/collisions";
 import type { World } from "gw-ecs/world";
 import { Aspect, type Bundle, type Entity } from "gw-ecs/entity";
+import { FOV } from "../uniques";
+import * as Constants from "../constants";
 
 class RandomXY {
   _indexes: number[];
@@ -117,6 +119,53 @@ export function findDropPosNear(world: World, pos: XY.XY): XY.XY | undefined {
   const rng = world.getUnique(Random) || random;
   const loc = rng.item(locs);
   return XY.asXY(loc);
+}
+
+export function findClosestTileMatching(
+  world: World,
+  pos: XY.XY,
+  match: (e: Entity, x: number, y: number) => boolean
+): Entity | undefined {
+  const fov = world.getUnique(FOV);
+  const posMgr = world.getUnique(PosManager);
+  const grid = Grid.alloc(Constants.MAP_WIDTH, Constants.MAP_HEIGHT, 0);
+  const rng = world.getUnique(Random) || random;
+
+  let dist = 999;
+  let found: Entity[] = [];
+
+  grid.walkFrom(pos.x, pos.y, false, (x, y, _v, d) => {
+    if (d > dist) {
+      grid.set(x, y, 99);
+      return false;
+    }
+    if (!fov.isRevealed(x, y)) {
+      grid.set(x, y, 7);
+      return false;
+    }
+    grid.set(x, y, 1);
+    const e = posMgr.firstAt(x, y, TILE_ASPECT);
+    if (e) {
+      if (match(e, x, y)) {
+        console.log(">>> success", x, y);
+        dist = d;
+        found.push(e);
+      }
+      const tile = e.fetch(Tile)!;
+      return !tile.blocksMove && found.length == 0;
+    }
+    // TODO - throw?  Something is wrong if we are here
+    console.warn("no tile @", x, y);
+    return found.length == 0;
+  });
+
+  if (found.length == 0) {
+    grid.dump();
+  }
+
+  Grid.free(grid);
+
+  return rng.item(found);
 }
 
 export function setTileType(world: World, xy: XY.XY, bundle: Bundle): void {

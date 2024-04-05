@@ -1,7 +1,7 @@
 
 Stairs:
     [] Prompt for usage?  Key for usage?: '>', 'Enter'?
-    [] '>' to auto path to stairs
+    [X] '>' to auto path to stairs
     [] Brogue style alcove in wall?
         * ###
         * #>#
