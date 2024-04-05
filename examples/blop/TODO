@@ -1,10 +1,10 @@
 
 Effects:
     [] Add more Effects
-    [] DestroyWalls - radius 2
-        [] notifyFovWhenTilesChange? -or-
-        [] via trigger?  TilesChanged(XY[]) -or- TilesChanged()
-        [] No destroy outer walls - EntityInfo flag?  Different Sprite?
+    [X] DestroyWalls - radius 2
+        [-] notifyFovWhenTilesChange? -or-
+        [X] via trigger - MapChanged()
+        [X] No destroy outer walls - Tile flag & Different Sprite
     [] Whirl - old Cleave: N,S,E,W attack
     [] Extend # - attack additional squares towards target: A-->
         * Need to track last direction moved (facing)
