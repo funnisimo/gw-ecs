@@ -1,19 +1,13 @@
 import { type RunIfFn, EntitySystem } from "gw-ecs/system";
 import { World } from "gw-ecs/world";
-import {
-  Attack,
-  Blop,
-  DamageSprite,
-  Interrupt,
-  TravelTo,
-  removeAction,
-} from "../comps";
+import { Attack, Blop, DamageSprite, removeAction } from "../comps";
 import { Aspect, Entity } from "gw-ecs/entity";
 import { GameEvent } from "../queues";
 import { flash } from "../fx/flash";
 import { Pos } from "gw-ecs/common";
 import { Log } from "../uniques";
 import { coloredName } from "../utils";
+import { Interrupt } from "../triggers";
 
 export class AttackSystem extends EntitySystem {
   constructor(runIf?: RunIfFn) {

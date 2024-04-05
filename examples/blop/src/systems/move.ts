@@ -13,16 +13,15 @@ import { FOV, FocusHelper, Game, Log } from "../uniques";
 import {
   AppearSprite,
   EntityInfo,
-  Interrupt,
   TILE_ASPECT,
   Tile,
-  TravelTo,
   removeAction,
 } from "../comps";
 import { GameEvent } from "../queues";
 import * as XY from "gw-utils/xy";
 import { coloredName } from "../utils";
 import { flash } from "../fx/flash";
+import { Interrupt } from "../triggers";
 
 export class MoveSystem extends EntitySystem {
   constructor() {

@@ -1,36 +1,11 @@
 import * as GWU from "gw-utils";
 
 //////////////////////////////////////////////////////
-// LOGIC
+// MAP
 //////////////////////////////////////////////////////
 
 export const WORLD_HEIGHT = 20;
 export const WORLD_WIDTH = 20;
-export const FLASH_DURATION_MS = 300;
-export const MOTION_TRAIL_DURATION_MS = 700;
-export const MOTION_TRAIL_DELTA_MS = 200;
-export const IMPORTANT_TURN_SLEEP_MS = FLASH_DURATION_MS - 50;
-export const CHROMOSOME_FLASH_DURATION_MS = 600;
-export const ATTACK_ANIMATION_DURATION_MS = 150;
-export const ATTACK_ANIMATION_OFFSET = 0.2; // in number of tile
-
-export const MOVE_ANIMATION_DURATION_MS = 150;
-export const CANT_ACT_SLEEP_MS = 300; // Events passed this count on one action will stop triggering genes
-
-export const STOP_TRIGGERING_AT_EVENT_COUNT = 200;
-export const STARTING_PLAYER_HEALTH = 20;
-export const STARTING_PLAYER_DNA_SIZE = 2;
-export const STARTING_PLAYER_ATTACK_DAMAGE = 2;
-export const PLAYER_VISIBILITY_RADIUS = 6;
-export const STAIRS_MIN_DISTANCE = 15;
-export const MIN_BLOP_DISTANCE_AT_START = 7; // Per-world probability
-
-export const ADD_CHROMOSOME_ITEM_PROBABILITY = 30;
-export const LOCK_CHROMOSOME_ITEM_PROBABILITY = 10;
-export const EXPAND_LIFE_ITEM_PROBABILITY = 10;
-export const REINFORCE_ITEM_PROBABILITY = 10;
-export const BLOP_NUMBER_STDDEV = 3;
-export const BLOP_GENE_PROBABILITY = 100;
 export const WORLD_PATCHES_MIN_NUMBER = 4;
 export const WORLD_PATCHES_MAX_NUMBER = 10;
 export const WORLD_BIG_PATCHES_MIN_SIZE = 2;
@@ -38,6 +13,41 @@ export const WORLD_BIG_PATCHES_MAX_SIZE = 7;
 export const WORLD_SMALL_PATCHES_MIN_SIZE = 1;
 export const WORLD_SMALL_PATCHES_MAX_SIZE = 4;
 export const END_DEPTH = 11;
+export const STAIRS_MIN_DISTANCE = 15;
+export const MIN_BLOP_DISTANCE_AT_START = 7;
+
+// Per-world probability
+export const ADD_CHROMOSOME_ITEM_PROBABILITY = 30;
+export const LOCK_CHROMOSOME_ITEM_PROBABILITY = 10;
+export const EXPAND_LIFE_ITEM_PROBABILITY = 10;
+export const REINFORCE_ITEM_PROBABILITY = 10;
+
+export const BLOP_NUMBER_STDDEV = 3;
+
+//////////////////////////////////////////////////////
+// FX
+//////////////////////////////////////////////////////
+
+export const FLASH_DURATION_MS = 300;
+export const MOTION_TRAIL_DURATION_MS = 700;
+export const MOTION_TRAIL_DELTA_MS = 200;
+export const IMPORTANT_TURN_SLEEP_MS = FLASH_DURATION_MS - 50;
+export const CHROMOSOME_FLASH_DURATION_MS = 600;
+export const ATTACK_ANIMATION_DURATION_MS = 150;
+export const ATTACK_ANIMATION_OFFSET = 0.2; // in number of tile
+export const MOVE_ANIMATION_DURATION_MS = 150;
+export const CANT_ACT_SLEEP_MS = 300;
+// Events passed this count on one action will stop triggering genes
+export const STOP_TRIGGERING_AT_EVENT_COUNT = 200;
+
+//////////////////////////////////////////////////////
+// HERO
+//////////////////////////////////////////////////////
+
+export const STARTING_PLAYER_HEALTH = 20;
+export const STARTING_PLAYER_DNA_SIZE = 2;
+export const STARTING_PLAYER_ATTACK_DAMAGE = 2;
+export const PLAYER_VISIBILITY_RADIUS = 6;
 
 //////////////////////////////////////////////////////
 // AI
@@ -46,6 +56,7 @@ export const END_DEPTH = 11;
 export const BLOP_RANDOM_MOVE_CHANCE = 20; // Every 5 idle turns
 export const BLOP_WANDER_CHANCE = 10; // Every 10 idle turns
 export const BLOP_WANDER_DISTANCE = 10;
+export const BLOP_DROP_CHANCE = 100; // Drop chance: BLOP_GENE_PROBABILITY
 
 //////////////////////////////////////////////////////
 // EFFECTS

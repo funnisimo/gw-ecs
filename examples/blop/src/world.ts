@@ -18,7 +18,6 @@ import {
   noTurn,
   takeTurn,
   EntityInfo,
-  Interrupt,
 } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { CollisionManager } from "gw-ecs/common/collisions";
@@ -32,7 +31,7 @@ import {
   heroMoved,
   heroTeleported,
 } from "./systems";
-import { FOV, Game } from "./uniques";
+import { FOV, FocusHelper, Game } from "./uniques";
 import { GameEvent } from "./queues";
 import { DnaSystem } from "./systems/dna";
 import { DNA } from "./comps/dna";
@@ -49,6 +48,8 @@ import { coloredName } from "./utils";
 import { AttackSystem } from "./systems/attack";
 import { GameTurnSystem } from "./systems/gameTurn";
 import { Random } from "gw-utils/rng";
+import { DropSystem } from "./systems/drops";
+import { Interrupt, MapChanged } from "./triggers";
 
 function blockedMove(actor: Entity, target: Entity, world: World) {
   if (actor.has(Hero)) {
@@ -120,6 +121,14 @@ function interruptEntity(world: World, interrupt: Interrupt) {
   entity.remove(TravelTo);
 }
 
+function updateFocusHelper(world: World) {
+  const focus = world.getUnique(FocusHelper);
+  const game = world.getUnique(Game);
+  if (!game.hero || game.over) return;
+
+  focus.reset(world, game.hero.fetch(Pos)!);
+}
+
 export const world = new World()
   .registerComponent(FX)
   .registerComponent(Sprite)
@@ -138,6 +147,7 @@ export const world = new World()
   .registerComponent(EntityInfo)
   .registerQueue(GameEvent)
   .registerTrigger(Interrupt)
+  .registerTrigger(MapChanged)
   .setUnique(new Log(Constants.LOG_HEIGHT, Constants.LOG_WIDTH))
   .setUnique(new Game())
   .setUnique(new Timers())
@@ -168,6 +178,7 @@ export const world = new World()
       .addSystem("act", new WaitSystem())
       .addSystem("events", new DnaSystem())
       .addSystem("events", new GameOverSystem())
+      .addSystem("events", new DropSystem())
       .addSystem("post-events", new FovSystem().runIf(heroTeleported)) // So that teleport updates before next loop
       .addSystem("finish", new RescheduleSystem())
       .addSystem("finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish') -or- both of the following...
@@ -177,6 +188,7 @@ export const world = new World()
   .addSystem(new TimerSystem())
   .addSystem(new GameTurnSystem("game").runIf(gameReady)) // TODO - addRunSystemSet('game', gameReady)
   .addTrigger(Interrupt, interruptEntity)
+  .addTrigger(MapChanged, updateFocusHelper)
   .start();
 
 declare global {

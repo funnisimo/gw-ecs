@@ -24,6 +24,20 @@ export class FocusHelper implements WorldInit {
         this.entities = this.entities.filter((e) => e !== entity);
       },
     });
+
+    // TODO - queue a trigger/queue to reset entities?
+
+    // TODO - Watch EntityInfo
+    // set
+    // - If has pos, add to list?  FOV?
+    // remove
+    // - Remove from list?
+
+    // TODO - Watch Pos
+    // set
+    // - if observable, add to list?  FOV?
+    // remove
+    // - remove from list?
   }
 
   get pos(): XY | null {

@@ -122,10 +122,15 @@ Entity:
     [] Should `tags` be a standard part of `Entity`?
     [] Could be integrated into `Aspect`
         * If separate, then this isn't realistic
+    [] Track `createTick` instead of `gen`
+        [] Rebase as necessary
+    [-] Track `deleteTick` - too complicated with releasing components
 
 Aspect:
     [] Allow test functions in `with`, `without`, `one`, and `some`.
         * (entity) => boolean
+    [] Allow: .created() to test `createTick` vs sinceTick
+        * Systems can find new entities    
 
 Collisions:
     [] callback - (actor, target, world) -> (world, actor, target)

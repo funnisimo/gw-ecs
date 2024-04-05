@@ -1,10 +1,18 @@
 import * as XY from "gw-utils/xy";
-import { BLOP_ASPECT, FLOOR, PICKUP_ASPECT, TILE_ASPECT, Tile } from "../comps";
+import {
+  BLOP_ASPECT,
+  FLOOR,
+  Hero,
+  PICKUP_ASPECT,
+  Pickup,
+  TILE_ASPECT,
+  Tile,
+} from "../comps";
 import { PosManager } from "gw-ecs/common/positions";
 import { Random, random } from "gw-utils/rng";
 import { Collider } from "gw-ecs/common/collisions";
 import type { World } from "gw-ecs/world";
-import type { Bundle, Entity } from "gw-ecs/entity";
+import { Aspect, type Bundle, type Entity } from "gw-ecs/entity";
 
 class RandomXY {
   _indexes: number[];
@@ -45,6 +53,7 @@ class RandomXY {
 }
 
 // TODO - Should this allow undefined return instead of throwing?
+// TODO - Should use walk logic
 export function findClosestEmptyFloor(world: World, pos: XY.XY): XY.XY {
   const mgr = world.getUnique(PosManager);
   const locs = XY.closestMatchingLocs(pos.x, pos.y, (x, y) => {
@@ -90,6 +99,24 @@ export function findEmptyFloorTileFarFrom(
   });
 
   return pos;
+}
+
+const PICKUP_OR_HERO_ASPECT = new Aspect().someOf(Hero, Pickup);
+
+// TODO - Should use walk logic instead of circle logic
+export function findDropPosNear(world: World, pos: XY.XY): XY.XY | undefined {
+  const mgr = world.getUnique(PosManager);
+  const locs = XY.closestMatchingLocs(pos.x, pos.y, (x, y) => {
+    if (mgr.hasAt(x, y, PICKUP_OR_HERO_ASPECT)) return false;
+
+    const tileEntity = mgr.firstAt(x, y, TILE_ASPECT)!;
+    const tile = tileEntity.fetch(Tile)!;
+    return !tile.blocksMove;
+  });
+  if (!locs || !locs.length) throw new Error("Failed to find open drop tile.");
+  const rng = world.getUnique(Random) || random;
+  const loc = rng.item(locs);
+  return XY.asXY(loc);
 }
 
 export function setTileType(world: World, xy: XY.XY, bundle: Bundle): void {

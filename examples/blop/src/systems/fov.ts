@@ -8,13 +8,13 @@ import {
   ENTITY_INFO_ASPECT,
   EntityInfo,
   Hero,
-  Interrupt,
   TILE_ASPECT,
   Tile,
 } from "../comps";
 import { Aspect, Entity } from "gw-ecs/entity";
 import { coloredName } from "../utils";
 import { flash } from "../fx/flash";
+import { Interrupt } from "../triggers";
 
 export function heroMoved(
   world: World,

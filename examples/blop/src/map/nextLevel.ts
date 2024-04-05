@@ -18,8 +18,8 @@ import { SPAWN_TABLE } from "../blops";
 import { calculateFov, updateVisibility } from "../systems";
 import { ADDSLOT_BUNDLE, EXPAND_HEALTH_BUNDLE, POWERUP_BUNDLE } from "../drops";
 import { Random } from "gw-utils/rng";
-import { createRandomTrigger } from "../triggers";
-import { createRandomEffect } from "../effects";
+import { createRandomTrigger } from "../dnaTriggers";
+import { createRandomEffect } from "../dnaEffects";
 
 export function startNewGame(world: World) {
   const game = world.getUnique(Game);

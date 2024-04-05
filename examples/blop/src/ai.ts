@@ -2,7 +2,7 @@ import type { Entity } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world";
 import { FOV, Game } from "./uniques";
 import { Pos } from "gw-ecs/common";
-import { Attack, Interrupt, Move, TravelTo, Wait, addAction } from "./comps";
+import { Attack, Move, TravelTo, Wait, addAction } from "./comps";
 import * as XY from "gw-utils/xy";
 import { Random, random } from "gw-utils/rng";
 import {
@@ -12,6 +12,7 @@ import {
 } from "./constants";
 import { findEmptyFloorTileFarFrom } from "./map/utils";
 import { pathFromTo } from "./utils";
+import { Interrupt } from "./triggers";
 
 ////////////////////////////////////////////
 // AI

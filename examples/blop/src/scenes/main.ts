@@ -38,6 +38,10 @@ export const mainScene = {
   start() {
     const focus = world.getUniqueOr(FocusHelper, () => new FocusHelper());
     const game = world.getUniqueOr(Game, () => new Game());
+
+    world.getUnique(Log).add("Welcome to #{teal Bloplike}");
+    world.getUnique(Log).add("Can you find the #{pink Blopulet}?");
+
     startNewGame(world);
     // focus.reset(world, game.hero!.fetch(Pos)!);
   },
