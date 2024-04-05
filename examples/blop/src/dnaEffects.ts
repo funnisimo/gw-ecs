@@ -12,13 +12,20 @@ import {
   DamageSprite,
   EntityInfo,
   Effect,
+  TILE_ASPECT,
+  Tile,
+  FLOOR,
+  FLOOR_BUNDLE,
+  Sprite,
 } from "./comps";
 import { type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
 import { flash } from "./fx/flash";
-import { Log } from "./uniques";
+import { Game, Log } from "./uniques";
 import { coloredName } from "./utils";
+import { forCircle } from "gw-utils/xy";
+import { MapChanged } from "./triggers";
 
 export class TeleportEffect extends Effect {
   constructor() {
@@ -81,7 +88,34 @@ export class HurtSelfEffect extends Effect {
   }
 }
 
+export const DestroyWallsSprite = new Sprite("%", "yellow", "cyan");
+
 // destroywalls
+export class DestroyWallsEffect extends Effect {
+  constructor() {
+    super("DestroyWalls", "destroys surrounding walls.");
+  }
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
+    const posMgr = world.getUnique(PosManager);
+    const pos = owner.fetch(Pos)!;
+
+    forCircle(pos.x, pos.y, 2, (x, y) => {
+      const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT);
+      if (!tileEntity) return; // Out of bounds
+      const tile = tileEntity.fetch(Tile)!;
+      if (tile.blocksMove && !tile.permanent) {
+        FLOOR_BUNDLE.applyTo(tileEntity, world);
+      }
+      flash(world, { x, y }, DestroyWallsSprite);
+    });
+
+    world.emitTrigger(new MapChanged()); // Need fov recalc
+    world.getUnique(Game).changed = true;
+
+    return true;
+  }
+}
+
 // shock
 // cleave
 // summonally
@@ -90,7 +124,12 @@ export class HurtSelfEffect extends Effect {
 // gaincharge
 // shootlaser
 
-export const effectClasses = [TeleportEffect, HealEffect, HurtSelfEffect];
+export const effectClasses = [
+  TeleportEffect,
+  HealEffect,
+  HurtSelfEffect,
+  DestroyWallsEffect,
+];
 
 export function createRandomEffect(world: World, rng?: Random): Entity {
   rng = rng || random;

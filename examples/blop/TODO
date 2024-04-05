@@ -1,42 +1,4 @@
 
-Stairs:
-    [] Prompt for usage?  Key for usage?: '>', 'Enter'?
-    [X] '>' to auto path to stairs
-    [] Brogue style alcove in wall?
-        * ###
-        * #>#
-        * ...
-
-Messages:
-    [] 'A Stairs appears.'?
-    [] 'A Every7Turns appears.'
-
-EntityInfo:
-    [X] Combine with `Name`
-    [] Add text format info - describeA, describeThe, conjugate, ...
-    [] Move description+name here from `Trigger` and `Effect`
-
-Blops:
-    Drops:
-        [X] Drop DNA
-        [X] Most of the time?
-        [-] More than one?
-    Smarts:
-        [] Avoid Ember?
-        [] Avoid Ice?
-    DNA:
-        [] Spawn with DNA
-    Other:
-        [] Vary Blop speeds
-        [] Vary Blop AI
-
-AI:
-    [] Allow register + use string id
-
-MoveSystem:
-    [] Collide same team -> swap places as move?
-    [] Mark Hero friends with Ally component
-
 Effects:
     [] Add more Effects
     [] DestroyWalls - radius 2
@@ -64,6 +26,45 @@ Triggers:
     [] AllyDeath
     [] StepNearBlop?
 
+
+Stairs:
+    [] Prompt for usage?  Key for usage?: '>', 'Enter'?
+    [X] '>' to auto path to stairs
+    [] Brogue style alcove in wall?
+        * ###
+        * #>#
+        * ...
+
+Action Keys:
+    [] 'g' for pickup
+    [] '>' to use stairs
+
+EntityInfo:
+    [X] Combine with `Name`
+    [] Add text format info - describeA, describeThe, conjugate, ...
+    [] Move description+name here from `Trigger` and `Effect`
+
+Blops:
+    Drops:
+        [X] Drop DNA
+        [X] Most of the time?
+        [-] More than one?
+    Smarts:
+        [] Avoid Ember?
+        [] Avoid Ice?
+    DNA:
+        [] Spawn with DNA
+    Other:
+        [] Vary Blop speeds
+        [] Vary Blop AI
+
+AI:
+    [] Allow register + use string id
+
+MoveSystem:
+    [] Collide same team -> swap places as move?
+    [] Mark Hero friends with Ally component
+
 Tiles:
     [] Lava damages blops and hero
 
@@ -86,6 +87,11 @@ TravelTo:
     [] When traveling - auto update FocusHelper Path on each step
     [] -Or- should it be on each hero turn?
     [] Trigger?  Queue?
+
+Messages:
+    [] 'A Stairs appears.'?
+    [] 'A Every7Turns appears.'
+
 
 # Future
 

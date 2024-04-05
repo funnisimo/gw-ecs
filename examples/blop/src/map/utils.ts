@@ -174,6 +174,8 @@ export function setTileType(world: World, xy: XY.XY, bundle: Bundle): void {
   if (!entity)
     throw new Error("Failed to find tile at pos: " + xy.x + "," + xy.y);
   bundle.applyTo(entity, world);
+
+  // TODO - Update FOV blocks cache?
 }
 
 export function getTileType(world: World, xy: XY.XY): Tile {

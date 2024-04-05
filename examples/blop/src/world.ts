@@ -28,8 +28,10 @@ import {
   PickupSystem,
   RescheduleSystem,
   WaitSystem,
+  calculateFov,
   heroMoved,
   heroTeleported,
+  updateVisibility,
 } from "./systems";
 import { FOV, FocusHelper, Game } from "./uniques";
 import { GameEvent } from "./queues";
@@ -129,6 +131,14 @@ function updateFocusHelper(world: World) {
   focus.reset(world, game.hero.fetch(Pos)!);
 }
 
+function updateFov(world: World) {
+  const game = world.getUnique(Game);
+  if (!game.hero || game.over) return;
+
+  updateVisibility(world);
+  calculateFov(world, game.hero, true);
+}
+
 export const world = new World()
   .registerComponent(FX)
   .registerComponent(Sprite)
@@ -186,9 +196,10 @@ export const world = new World()
     // TODO - addMaintainQueue(GameEvent, 'game', 'finish') -or- addMaintainQueues('game', 'finish')
   )
   .addSystem(new TimerSystem())
-  .addSystem(new GameTurnSystem("game").runIf(gameReady)) // TODO - addRunSystemSet('game', gameReady)
+  .addSystem(new GameTurnSystem("game").runIf(gameReady))
   .addTrigger(Interrupt, interruptEntity)
   .addTrigger(MapChanged, updateFocusHelper)
+  .addTrigger(MapChanged, updateFov)
   .start();
 
 declare global {

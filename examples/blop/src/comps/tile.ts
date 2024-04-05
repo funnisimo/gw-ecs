@@ -12,6 +12,7 @@ export interface TileConfig {
   shock?: boolean;
   hurt?: number;
   stairs?: boolean;
+  permanent?: boolean;
 }
 
 export class Tile {
@@ -22,6 +23,7 @@ export class Tile {
   shock: boolean;
   hurt: number;
   stairs: boolean;
+  permanent: boolean;
 
   constructor(name: string, opts: Omit<TileConfig, "name"> = {}) {
     this.name = name;
@@ -31,6 +33,7 @@ export class Tile {
     this.shock = opts.shock || false;
     this.hurt = opts.hurt || 0;
     this.stairs = opts.stairs || false;
+    this.permanent = opts.permanent || false;
   }
 }
 
@@ -78,6 +81,16 @@ export const WALL = new Tile("Wall", {
 export const WALL_BUNDLE = tileBundle(WALL, {
   ch: "#",
   fg: "grey",
+});
+
+export const PERMANENT = new Tile("Wall", {
+  blocksVision: true,
+  blocksMove: true,
+  permanent: true,
+});
+export const PERMANENT_BUNDLE = tileBundle(PERMANENT, {
+  ch: "#",
+  fg: "dark_gray",
 });
 
 export const FOG = new Tile("Fog", {

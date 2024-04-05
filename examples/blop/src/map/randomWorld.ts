@@ -12,6 +12,8 @@ import {
   GRASS_BUNDLE,
   ICE,
   ICE_BUNDLE,
+  PERMANENT,
+  PERMANENT_BUNDLE,
   TILE_ASPECT,
   Tile,
   WALL,
@@ -22,7 +24,7 @@ import {
 import type { World } from "gw-ecs/world";
 import { PosManager } from "gw-ecs/common/positions";
 import * as Constants from "../constants";
-import { forRect } from "gw-utils/xy";
+import { forBorder, forRect } from "gw-utils/xy";
 import { setTileType } from "./utils";
 import type { Bundle } from "gw-ecs/entity/bundle";
 import { Random } from "gw-utils/rng";
@@ -38,6 +40,10 @@ export function randomPatchTileType() {
 export function makeRandomWorld(world: World) {
   const mgr = new PosManager(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
   mgr.fill(() => WALL_BUNDLE.create(world));
+  forBorder(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT, (x, y) => {
+    const e = mgr.firstAt(x, y)!;
+    PERMANENT_BUNDLE.applyTo(e, world);
+  });
   world.setUnique(mgr);
 
   dig(world);
