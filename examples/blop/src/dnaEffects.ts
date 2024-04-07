@@ -22,7 +22,7 @@ import {
 import { type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
-import { flash } from "./fx/flash";
+import { delayedFlash, flash } from "./fx/flash";
 import { Game, Log } from "./uniques";
 import { coloredName, facingDir } from "./utils";
 import { DIRS4, dirSpread, forCircle } from "gw-utils/xy";
@@ -44,6 +44,7 @@ export class TeleportEffect extends Effect {
     }
 
     posMgr.set(owner, newXY.x, newXY.y);
+    // TODO - Blink?
     flash(world, newXY, TeleportSprite);
 
     // TODO - emit teleport event?
@@ -100,14 +101,14 @@ export class DestroyWallsEffect extends Effect {
     const posMgr = world.getUnique(PosManager);
     const pos = owner.fetch(Pos)!;
 
-    forCircle(pos.x, pos.y, 2, (x, y) => {
+    forCircle(pos.x, pos.y, 2, (x, y, d) => {
       const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT);
       if (!tileEntity) return; // Out of bounds
       const tile = tileEntity.fetch(Tile)!;
       if (tile.blocksMove && !tile.permanent) {
         FLOOR_BUNDLE.applyTo(tileEntity, world);
       }
-      flash(world, { x, y }, DestroyWallsSprite);
+      delayedFlash(world, { x, y }, DestroyWallsSprite, 25 * d);
     });
 
     world.emitTrigger(new MapChanged()); // Need fov recalc
@@ -128,17 +129,15 @@ export class SwirlEffect extends Effect {
     const pos = owner.fetch(Pos)!;
 
     // TODO - start with dir after dir to target
-    //      - space flashes by 50 ms
     //      - end back at starting spot with last swirl attack
-    //      - use Timers.setTimeout(50, () => { ... });
-    DIRS4.forEach(([dx, dy]) => {
+    DIRS4.forEach(([dx, dy], i) => {
       const x = pos.x + dx;
       const y = pos.y + dy;
       const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
       if (blopEntity) {
         applyAttack(world, owner, blopEntity, 2, "swirls");
       }
-      flash(world, { x, y }, SwirlSprite);
+      delayedFlash(world, { x, y }, SwirlSprite, 25 * i);
     });
 
     return true;
@@ -180,7 +179,6 @@ export class SwipeEffect extends Effect {
     const dirs = dirSpread(dir);
 
     // TODO - go from one side to the other, indexes: (1,0,2)
-    //      - space flashes by 50 ms
     //      - use Timers.setTimeout(50, () => { ... });
     dirs.forEach(([dx, dy]) => {
       const x = pos.x + dx;
@@ -205,7 +203,7 @@ export const ExtendSpriteDiagDown = new Sprite("\\", "green", "light_blue");
 export class ExtendEffect extends Effect {
   dist: number;
   constructor(dist = 4) {
-    super("Swipe", "attacks all cells in front of owner.");
+    super("Extend", "attacks all cells in front of owner.");
     this.dist = dist;
   }
 
@@ -238,7 +236,7 @@ export class ExtendEffect extends Effect {
       if (blopEntity) {
         applyAttack(world, owner, blopEntity, 2, "extends");
       }
-      flash(world, { x, y }, sprite);
+      delayedFlash(world, { x, y }, sprite, i * 25);
     }
 
     return true;

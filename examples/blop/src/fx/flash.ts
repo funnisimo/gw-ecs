@@ -19,3 +19,26 @@ export function flash(world: World, pos: XY, sprite: Sprite, ms: number = 150) {
     game.changed = true;
   }, ms);
 }
+
+export function delayedFlash(
+  world: World,
+  pos: XY,
+  sprite: Sprite,
+  delay: number,
+  ms: number = 150
+) {
+  const posMgr = world.getUnique(PosManager);
+  const timers = world.getUnique(Timers);
+  const game = world.getUnique(Game);
+
+  timers.setTimeout(() => {
+    const entity = world.create(sprite, new FX());
+    posMgr.set(entity, pos.x, pos.y);
+    game.changed = true;
+
+    timers.setTimeout(() => {
+      world.destroyNow(entity);
+      game.changed = true;
+    }, ms);
+  }, delay);
+}

@@ -98,6 +98,9 @@ TravelTo:
     [] When traveling - auto update FocusHelper Path on each step
     [] -Or- should it be on each hero turn?
     [] Trigger?  Queue?
+    Test moving into unexplored void:
+        [] updating focushelper path
+        [] not revealing too much about the map unintentionally
 
 Messages:
     [] 'A Stairs appears.'?

@@ -9,8 +9,8 @@ import { DestroyWallsEffect, ExtendEffect, SwipeEffect } from "./dnaEffects";
 
 export function createHero(world: World): Entity {
   const dna = new DNA(2);
-  dna.triggers[0] = new AttackTrigger();
-  dna.effects[0] = new ExtendEffect();
+  dna.triggers[0] = new WaitTrigger();
+  dna.effects[0] = new DestroyWallsEffect();
 
   return world.create(
     new Hero(),
