@@ -6,15 +6,12 @@ import { FOV, Game } from "../uniques";
 import {
   BLOP_ASPECT,
   Blop,
-  EFFECT_ASPECT,
   FX_ASPECT,
   HERO_ASPECT,
   Move,
   PICKUP_ASPECT,
-  STAIRS,
   Sprite,
   TILE_ASPECT,
-  TRIGGER_ASPECT,
   Tile,
   TravelTo,
   Wait,
@@ -35,6 +32,7 @@ import { Log } from "../uniques";
 import { coloredName, heroPathTo, pathFromToUsingFov } from "../utils";
 import { FocusHelper } from "../uniques/focusHelper";
 import { BLACK } from "gw-utils/color";
+import { Interrupt } from "../triggers";
 
 export const mainScene = {
   start() {
@@ -132,6 +130,7 @@ export const mainScene = {
     } else if (ev.key === "Escape") {
       logs.makeLogsOld();
       focus.clearFocus();
+      world.emitTrigger(new Interrupt(game.hero!));
       game.changed = true;
     } else if (ev.key == "Enter") {
       if (focus.pos) {

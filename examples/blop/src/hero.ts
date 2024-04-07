@@ -11,12 +11,13 @@ import {
   ExtendEffect,
   ShockEffect,
   SwipeEffect,
+  SwirlEffect,
 } from "./dnaEffects";
 
 export function createHero(world: World): Entity {
   const dna = new DNA(2);
   dna.triggers[0] = new WaitTrigger();
-  dna.effects[0] = new DestroyWallsEffect();
+  dna.effects[0] = new SwipeEffect();
 
   return world.create(
     new Hero(),

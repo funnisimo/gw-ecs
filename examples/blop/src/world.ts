@@ -49,7 +49,7 @@ import { Log } from "./uniques/log";
 import { coloredName } from "./utils";
 import { AttackSystem } from "./systems/attack";
 import { GameTurnSystem } from "./systems/gameTurn";
-import { Random } from "gw-utils/rng";
+import { Random, random } from "gw-utils/rng";
 import { DropSystem } from "./systems/drops";
 import { Interrupt, MapChanged } from "./triggers";
 
@@ -163,7 +163,6 @@ export const world = new World()
   .setUnique(new Timers())
   .setUnique(new Schedule())
   .setUnique(new FOV(Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT)) // , notifyFovWhenTilesChange
-  .setUnique(new Random()) // for testing add a seed
   .setUnique(
     new CollisionManager()
       // Hero swap with ally (incl dummy)

@@ -7,14 +7,14 @@ Effects:
         [X] Improve animation
         [x] Leave behind different sprite - Rubble
     [X] Whirl - old Cleave: N,S,E,W attack
-        [] Improve animation (end with attack pos)
+        [X] Improve animation (end with attack pos)
     [X] Extend # - attack additional squares towards target: A-->
         [x] Need to track last direction moved (facing)
         [X] Improve animation
         [X] Do not go into walls (stop at first)
     [X] Swipe - attack in arc of 3 dirs centered on target
         [x] Need to track facing direction
-        [] Improve animation (L to R)
+        [X] Improve animation (L to R)
     [X] Shock - chain to all attached shockables (water tiles and blops in/next to)
         [X] Improve animation
     [X] Explode - big explosion (radius 3)
@@ -97,6 +97,7 @@ Log:
 
 Etc:
     [] There is a double Tab stop at each blop in Game Over mode
+    [] Some random new levels have bugs where you cannot move.  Failed to remove all tiles?
 
 TravelTo:
     [] When traveling - auto update FocusHelper Path on each step

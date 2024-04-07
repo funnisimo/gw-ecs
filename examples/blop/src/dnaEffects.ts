@@ -23,7 +23,7 @@ import { App } from "gw-utils/app";
 import { delayedFlash, flash } from "./fx/flash";
 import { Game, Log } from "./uniques";
 import { coloredName, facingDir } from "./utils";
-import { DIRS4, dirSpread, forCircle } from "gw-utils/xy";
+import { DIRS4, dirSpread, equals, forCircle } from "gw-utils/xy";
 import { MapChanged } from "./triggers";
 import { applyAttack } from "./systems/attack";
 import * as Grid from "gw-utils/grid";
@@ -129,17 +129,23 @@ export class SwirlEffect extends Effect {
     const posMgr = world.getUnique(PosManager);
     const pos = owner.fetch(Pos)!;
 
+    let index = DIRS4.findIndex((l) => equals(l, pos.facing()));
+    if (index < 0) index = 0;
+
     // TODO - start with dir after dir to target
     //      - end back at starting spot with last swirl attack
-    DIRS4.forEach(([dx, dy], i) => {
+    for (let i = 1; i < 5; ++i) {
+      const ix = (index + i) % 4;
+      const [dx, dy] = DIRS4[ix];
       const x = pos.x + dx;
       const y = pos.y + dy;
       const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
-      if (blopEntity) {
-        applyAttack(world, owner, blopEntity, 2, "swirls");
-      }
-      delayedFlash(world, { x, y }, SwirlSprite, 25 * i);
-    });
+      delayedFlash(world, { x, y }, SwirlSprite, 25 * i).then(() => {
+        if (blopEntity) {
+          applyAttack(world, owner, blopEntity, 2, "swirls");
+        }
+      });
+    }
 
     return true;
   }
@@ -177,18 +183,19 @@ export class SwipeEffect extends Effect {
     const pos = owner.fetch(Pos)!;
 
     const dir = pos.facing();
-    const dirs = dirSpread(dir);
+    let dirs = dirSpread(dir);
+    dirs = [dirs[1], dirs[0], dirs[2]];
 
     // TODO - go from one side to the other, indexes: (1,0,2)
-    //      - use Timers.setTimeout(50, () => { ... });
-    dirs.forEach(([dx, dy]) => {
+    dirs.forEach(([dx, dy], i) => {
       const x = pos.x + dx;
       const y = pos.y + dy;
       const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
-      if (blopEntity) {
-        applyAttack(world, owner, blopEntity, 2, "swipes");
-      }
-      flash(world, { x, y }, SwipeSprite);
+      delayedFlash(world, { x, y }, SwipeSprite, 25 * i).then(() => {
+        if (blopEntity) {
+          applyAttack(world, owner, blopEntity, 2, "swipes");
+        }
+      });
     });
 
     return true;
@@ -239,10 +246,11 @@ export class ExtendEffect extends Effect {
       if (tile.blocksMove) break;
 
       const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
-      if (blopEntity) {
-        applyAttack(world, owner, blopEntity, 2, "extends");
-      }
-      delayedFlash(world, { x, y }, sprite, i * 25);
+      delayedFlash(world, { x, y }, sprite, i * 25).then(() => {
+        if (blopEntity) {
+          applyAttack(world, owner, blopEntity, 2, "extends");
+        }
+      });
     }
 
     return true;
@@ -268,11 +276,12 @@ export class ExplodeEffect extends Effect {
       const tile = tileEntity.fetch(Tile)!;
 
       const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
-      if (blopEntity) {
-        applyAttack(world, owner, blopEntity, 3, "explodes, damaging");
-      }
 
-      delayedFlash(world, { x, y }, ExplodeSprite, 25 * d);
+      delayedFlash(world, { x, y }, ExplodeSprite, 25 * d).then(() => {
+        if (blopEntity) {
+          applyAttack(world, owner, blopEntity, 3, "explodes, damaging");
+        }
+      });
       return !tile.blocksMove;
     });
 
@@ -297,13 +306,14 @@ export class ShockEffect extends Effect {
       if (!tileEntity) return false; // Out of bounds
 
       const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
-      if (blopEntity && blopEntity !== owner) {
-        applyAttack(world, owner, blopEntity, 1, "shocks");
-      }
 
       const tile = tileEntity.fetch(Tile)!;
       if (tile.shock || !!blopEntity) {
-        delayedFlash(world, { x, y }, ShockSprite, 25 * d);
+        delayedFlash(world, { x, y }, ShockSprite, 25 * d).then(() => {
+          if (blopEntity && blopEntity !== owner) {
+            applyAttack(world, owner, blopEntity, 1, "shocks");
+          }
+        });
       }
 
       return tile.shock || !!blopEntity;
