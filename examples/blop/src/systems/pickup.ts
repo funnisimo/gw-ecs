@@ -5,6 +5,7 @@ import { Aspect } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world/world";
 import { Hero, PICKUP_ASPECT, Pickup, TravelTo } from "../comps";
 
+// TODO - Convert to action from keypress - 'g'
 export class PickupSystem extends EntitySystem {
   constructor() {
     // Do not run if the hero is traveling to another location

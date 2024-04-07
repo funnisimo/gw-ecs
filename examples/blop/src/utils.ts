@@ -13,6 +13,7 @@ import type { World } from "gw-ecs/world";
 import { MoveCost, fromTo } from "gw-utils/path";
 import { Pos, PosManager } from "gw-ecs/common";
 import { FOV, Game } from "./uniques";
+import { dirBetween } from "gw-utils/xy";
 
 const SQRT_2_PI = Math.sqrt(2 * Math.PI);
 // https://www.math.net/gaussian-distribution
@@ -130,4 +131,10 @@ export function heroPathTo(world: World, pos: XY): Loc[] {
 
   const heroPos = hero.fetch(Pos)!;
   return pathFromToUsingFov(world, heroPos, pos);
+}
+
+// TODO - Facing dir must be on Actor
+export function facingDir(pos: Pos): Loc {
+  // NOTE - If you teleport, you will be facing a random direction (seems fair)
+  return dirBetween(pos.lastX, pos.lastY, pos.x, pos.y);
 }

@@ -20,13 +20,15 @@ describe("Positions", () => {
     expect(e1.has(Pos)).toBeTrue();
     expect(e1.isAddedSince(Pos, 0)).toBeTrue();
 
-    const pos = e1.update(Pos)!;
+    const pos = e1.fetch(Pos)!;
+    expect(pos.facing()).toEqual([0, 0]);
     expect(pos).toMatchObject({ x: 1, y: 2 });
     expect(mgr.getFor(e1)).toBe(pos);
 
     mgr.set(e1, 2, 3);
     expect(mgr.getAt(1, 2)).toEqual([]);
     expect(mgr.getAt(2, 3)).toEqual([e1]);
+    expect(pos.facing()).toEqual([1, 1]);
 
     // // pos.set(3, 4);
     // // expect(mgr.getAt(2, 3)).toEqual([]);

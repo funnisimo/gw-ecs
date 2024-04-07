@@ -246,6 +246,7 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
     if (entities.length == 0) {
       buffer.draw(x + x0, y + y0, "?", "red");
     } else {
+      // TODO - Charge effect
       let entity = HERO_ASPECT.first(entities);
 
       // Blops have to be visible

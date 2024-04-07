@@ -8,6 +8,7 @@ export class Trigger {
   // TODO - Move trigger name+description to EntityInfo
   name: string;
   description: string;
+  // TODO - track lastTick?  Only fire once per tick cycle?  Constructor option?
 
   constructor(name: string, description: string) {
     this.name = name;

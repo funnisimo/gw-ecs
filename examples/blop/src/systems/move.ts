@@ -40,6 +40,7 @@ export class MoveSystem extends EntitySystem {
     const pos = entity.fetch(Pos)!;
 
     const dxy = removeAction(entity, Move)!.dir;
+    pos.setFacing(dxy);
 
     let slide = false;
 

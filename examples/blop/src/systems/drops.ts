@@ -2,13 +2,13 @@ import { QueueSystem, type RunIfFn } from "gw-ecs/system";
 import { GameEvent } from "../queues";
 import type { Bundle, Entity } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world";
-import { Hero } from "../comps";
+import { EntityInfo, Hero } from "../comps";
 import { Random, random } from "gw-utils/rng";
 import * as Constants from "../constants";
 import { Pos, PosManager } from "gw-ecs/common";
 import { createRandomTrigger } from "../dnaTriggers";
 import { createRandomEffect } from "../dnaEffects";
-import { Game, Log } from "../uniques";
+import { FOV, Game, Log } from "../uniques";
 import { coloredName } from "../utils";
 import { findDropPosNear } from "../map/utils";
 import type { XY } from "gw-utils";
@@ -36,24 +36,19 @@ export class DropSystem extends QueueSystem<GameEvent> {
 
       const rng = world.getUnique(Random) || random;
       if (rng.chance(Constants.BLOP_DROP_CHANCE)) {
-        if (rng.chance(50)) {
-          // Trigger
-          const entity = createRandomTrigger(world, rng);
-          posMgr.set(entity, pos.x, pos.y);
-          world
-            .getUnique(Log)
-            .add(
-              `${coloredName(event.target!)} drops an ${coloredName(entity)}.`
-            );
-        } else {
-          // Effect
-          const entity = createRandomEffect(world, rng);
-          posMgr.set(entity, pos.x, pos.y);
-          world
-            .getUnique(Log)
-            .add(
-              `${coloredName(event.target!)} drops an ${coloredName(entity)}.`
-            );
+        // Trigger
+        const entity = rng.chance(50)
+          ? createRandomTrigger(world, rng)
+          : createRandomEffect(world, rng);
+        posMgr.set(entity, pos.x, pos.y);
+        world
+          .getUnique(Log)
+          .add(
+            `${coloredName(event.target!)} drops an ${coloredName(entity)}.`
+          );
+        const fov = world.getUnique(FOV);
+        if (fov && fov.isDirectlyVisible(pos.x, pos.y)) {
+          entity.fetch(EntityInfo)!.seen();
         }
 
         // Need to update UI

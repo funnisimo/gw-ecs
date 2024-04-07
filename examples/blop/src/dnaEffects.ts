@@ -17,15 +17,17 @@ import {
   FLOOR,
   FLOOR_BUNDLE,
   Sprite,
+  BLOP_ASPECT,
 } from "./comps";
 import { type World } from "gw-ecs/world";
 import { random, type Random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
 import { flash } from "./fx/flash";
 import { Game, Log } from "./uniques";
-import { coloredName } from "./utils";
-import { forCircle } from "gw-utils/xy";
+import { coloredName, facingDir } from "./utils";
+import { DIRS4, dirSpread, forCircle } from "gw-utils/xy";
 import { MapChanged } from "./triggers";
+import { applyAttack } from "./systems/attack";
 
 export class TeleportEffect extends Effect {
   constructor() {
@@ -88,9 +90,8 @@ export class HurtSelfEffect extends Effect {
   }
 }
 
-export const DestroyWallsSprite = new Sprite("%", "yellow", "cyan");
-
 // destroywalls
+export const DestroyWallsSprite = new Sprite("%", "yellow", "cyan");
 export class DestroyWallsEffect extends Effect {
   constructor() {
     super("DestroyWalls", "destroys surrounding walls.");
@@ -116,21 +117,151 @@ export class DestroyWallsEffect extends Effect {
   }
 }
 
-// shock
-// cleave
-// summonally
-// summondummy
-// explode
+// swirl - aka cleave
+export const SwirlSprite = new Sprite("@", "white", "light_cyan");
+export class SwirlEffect extends Effect {
+  constructor() {
+    super("Swirl", "attacks all surrounding cells.");
+  }
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
+    const posMgr = world.getUnique(PosManager);
+    const pos = owner.fetch(Pos)!;
+
+    // TODO - start with dir after dir to target
+    //      - space flashes by 50 ms
+    //      - end back at starting spot with last swirl attack
+    //      - use Timers.setTimeout(50, () => { ... });
+    DIRS4.forEach(([dx, dy]) => {
+      const x = pos.x + dx;
+      const y = pos.y + dy;
+      const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
+      if (blopEntity) {
+        applyAttack(world, owner, blopEntity, 2, "swirls");
+      }
+      flash(world, { x, y }, SwirlSprite);
+    });
+
+    return true;
+  }
+}
+
 // gaincharge
-// shootlaser
+export const ChargeEffectSprite = new Sprite("↑", "white", "light_orange");
+export class ChargeEffect extends Effect {
+  constructor() {
+    super("Charge", "charges the owner.");
+  }
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
+    if (!owner.has(Blop)) return false;
+    const blop = owner.update(Blop)!;
+
+    blop.charge = blop.charge + 1;
+    if (blop.charge > blop.maxCharge) {
+      blop.charge = blop.maxCharge;
+      return true;
+    }
+    flash(world, owner.fetch(Pos)!, ChargeEffectSprite);
+    world.getUnique(Log).add(`${coloredName(owner)} is charged.`);
+    return true;
+  }
+}
+
+// swipe
+export const SwipeSprite = new Sprite("/", "green", "light_blue");
+export class SwipeEffect extends Effect {
+  constructor() {
+    super("Swipe", "attacks all cells in front of owner.");
+  }
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
+    const posMgr = world.getUnique(PosManager);
+    const pos = owner.fetch(Pos)!;
+
+    const dir = pos.facing();
+    const dirs = dirSpread(dir);
+
+    // TODO - go from one side to the other, indexes: (1,0,2)
+    //      - space flashes by 50 ms
+    //      - use Timers.setTimeout(50, () => { ... });
+    dirs.forEach(([dx, dy]) => {
+      const x = pos.x + dx;
+      const y = pos.y + dy;
+      const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
+      if (blopEntity) {
+        applyAttack(world, owner, blopEntity, 2, "swipes");
+      }
+      flash(world, { x, y }, SwipeSprite);
+    });
+
+    return true;
+  }
+}
+
+// extend - aka shootlaser
+export const ExtendSpriteVert = new Sprite("|", "green", "light_blue");
+export const ExtendSpriteHoriz = new Sprite("-", "green", "light_blue");
+export const ExtendSpriteDiagUp = new Sprite("/", "green", "light_blue");
+export const ExtendSpriteDiagDown = new Sprite("\\", "green", "light_blue");
+
+export class ExtendEffect extends Effect {
+  dist: number;
+  constructor(dist = 4) {
+    super("Swipe", "attacks all cells in front of owner.");
+    this.dist = dist;
+  }
+
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
+    const posMgr = world.getUnique(PosManager);
+    const pos = owner.fetch(Pos)!;
+
+    const dir = pos.facing();
+
+    let sprite = ExtendSpriteDiagUp;
+    if (dir[0] == 0) {
+      sprite = ExtendSpriteVert;
+    } else if (dir[1] == 0) {
+      sprite = ExtendSpriteHoriz;
+    } else if (dir[0] * dir[1] < 0) {
+      sprite = ExtendSpriteDiagDown;
+    }
+
+    let x = pos.x;
+    let y = pos.y;
+
+    // TODO - go out one step at a time
+    //      - space flashes by 50 ms
+    //      - use Timers.setTimeout(50, () => { ... });
+    for (let i = 0; i < this.dist; ++i) {
+      x += dir[0];
+      y += dir[1];
+
+      const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
+      if (blopEntity) {
+        applyAttack(world, owner, blopEntity, 2, "extends");
+      }
+      flash(world, { x, y }, sprite);
+    }
+
+    return true;
+  }
+}
+
+// shock
+// explode
+// summon dummy
+// summon ally
 
 export const effectClasses = [
   TeleportEffect,
   HealEffect,
   HurtSelfEffect,
   DestroyWallsEffect,
+  SwirlEffect,
+  ChargeEffect,
+  SwipeEffect,
+  ExtendEffect,
 ];
 
+// TODO - Different weights
 export function createRandomEffect(world: World, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(effectClasses);

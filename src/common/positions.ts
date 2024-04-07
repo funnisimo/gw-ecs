@@ -6,13 +6,23 @@ export class Pos {
   _y: number;
   _lastX: number;
   _lastY: number;
+  _facing: [number, number];
   //   _mgr: PosManager;
 
-  constructor(/* mgr: PosManager, */ x = 0, y = 0, lastX = 0, lastY = 0) {
+  constructor(
+    /* mgr: PosManager, */ x = 0,
+    y = 0,
+    lastX?: number,
+    lastY?: number
+  ) {
     this._x = x;
     this._y = y;
-    this._lastX = lastX;
-    this._lastY = lastY;
+    this._lastX = lastX || 0;
+    this._lastY = lastY || 0;
+    this._facing = [0, 0];
+    if (lastY !== undefined && lastX !== undefined) {
+      this.setFacing(x - lastX, y - lastY);
+    }
     // this._mgr = mgr;
   }
 
@@ -21,6 +31,7 @@ export class Pos {
     this._lastY = this._y;
     this._x = x;
     this._y = y;
+    this.setFacing(x - this._lastX, y - this._lastY);
   }
 
   get x(): number {
@@ -43,6 +54,25 @@ export class Pos {
 
   lastXY(): { x: number; y: number } {
     return { x: this._lastX, y: this._lastY };
+  }
+
+  facing(): [number, number] {
+    return this._facing;
+  }
+
+  setFacing(xy: { x: number; y: number }): void;
+  setFacing(dir: [number, number]): void;
+  setFacing(x: number, y: number): void;
+  setFacing(...args: any[]): void {
+    if (args.length == 2) {
+      this._facing = [Math.sign(args[0]), Math.sign(args[1])];
+      return;
+    }
+    if (Array.isArray(args[0])) {
+      this.setFacing(args[0][0], args[0][1]);
+      return;
+    }
+    this.setFacing(args[0].x, args[0].y);
   }
 
   // copy(pos: { x: number; y: number }): void {
