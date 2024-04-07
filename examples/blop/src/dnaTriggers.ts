@@ -4,12 +4,13 @@ import type { GameEvent } from "./queues";
 import { Entity } from "gw-ecs/entity";
 import { NAMED_DIRS, type Loc } from "gw-utils/xy";
 import { Pos, PosManager } from "gw-ecs/common/positions";
-import { PATCH_TILES, TILE_ASPECT, Tile } from "./comps";
+import { TILE_ASPECT, Tile } from "./comps";
 import { capitalize } from "gw-utils/text";
 import { Trigger, TriggerSprite } from "./comps";
 import { Pickup, EntityInfo, Hero } from "./comps";
 import { type World } from "gw-ecs/world";
 import { App } from "gw-utils/app";
+import { PATCH_TILES } from "./tiles";
 
 export class WaitTrigger extends Trigger {
   constructor() {
@@ -180,6 +181,7 @@ export const triggerClasses = [
   HurtTrigger,
 ];
 
+// TODO - Different weights
 export function createRandomTrigger(world: World, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(triggerClasses);

@@ -1,26 +1,16 @@
 import { random, grid } from "gw-utils";
-// import { Blob } from "gw-utils/blob";
 import { carve } from "gw-dig";
 import {
-  EMBER,
   EMBER_BUNDLE,
   FLOOR,
   FLOOR_BUNDLE,
-  FOG,
   FOG_BUNDLE,
-  GRASS,
   GRASS_BUNDLE,
-  ICE,
   ICE_BUNDLE,
-  PERMANENT,
   PERMANENT_BUNDLE,
-  TILE_ASPECT,
-  Tile,
-  WALL,
   WALL_BUNDLE,
-  WATER,
   WATER_BUNDLE,
-} from "../comps/tile";
+} from "../tiles";
 import type { World } from "gw-ecs/world";
 import { PosManager } from "gw-ecs/common/positions";
 import * as Constants from "../constants";
@@ -28,6 +18,7 @@ import { forBorder, forRect } from "gw-utils/xy";
 import { setTileType } from "./utils";
 import type { Bundle } from "gw-ecs/entity/bundle";
 import { Random } from "gw-utils/rng";
+import { TILE_ASPECT, Tile } from "../comps";
 
 const SMALL_PATCHES = [EMBER_BUNDLE, FOG_BUNDLE, ICE_BUNDLE];
 const BIG_PATCHES = [GRASS_BUNDLE, WATER_BUNDLE];

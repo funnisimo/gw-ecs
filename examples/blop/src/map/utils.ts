@@ -2,7 +2,6 @@ import * as XY from "gw-utils/xy";
 import * as Grid from "gw-utils/grid";
 import {
   BLOP_ASPECT,
-  FLOOR,
   Hero,
   PICKUP_ASPECT,
   Pickup,
@@ -15,6 +14,7 @@ import type { World } from "gw-ecs/world";
 import { Aspect, type Bundle, type Entity } from "gw-ecs/entity";
 import { FOV } from "../uniques";
 import * as Constants from "../constants";
+import { FLOOR } from "../tiles";
 
 class RandomXY {
   _indexes: number[];

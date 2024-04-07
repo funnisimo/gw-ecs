@@ -39,6 +39,8 @@ export function applyAttack(
   const attackBlop = actor.fetch(Blop)!;
   const targetBlop = target.update(Blop)!;
 
+  if (!target.isAlive() || targetBlop.health <= 0) return;
+
   targetBlop.health = Math.max(0, targetBlop.health - damage);
   world.emitTrigger(new Interrupt(target));
 

@@ -8,7 +8,7 @@ import {
   findEmptyFloorTileFarFrom,
   setTileType,
 } from "./utils";
-import { Hero, EntityInfo, STAIRS_BUNDLE } from "../comps";
+import { Hero, EntityInfo } from "../comps";
 import { makeRandomWorld } from "./randomWorld";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { Game } from "../uniques";
@@ -20,6 +20,7 @@ import { ADDSLOT_BUNDLE, EXPAND_HEALTH_BUNDLE, POWERUP_BUNDLE } from "../drops";
 import { Random } from "gw-utils/rng";
 import { createRandomTrigger } from "../dnaTriggers";
 import { createRandomEffect } from "../dnaEffects";
+import { STAIRS_BUNDLE } from "../tiles";
 
 export function startNewGame(world: World) {
   const game = world.getUnique(Game);

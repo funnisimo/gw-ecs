@@ -36,10 +36,10 @@ export class DropSystem extends QueueSystem<GameEvent> {
 
       const rng = world.getUnique(Random) || random;
       if (rng.chance(Constants.BLOP_DROP_CHANCE)) {
-        // Trigger
         const entity = rng.chance(50)
           ? createRandomTrigger(world, rng)
           : createRandomEffect(world, rng);
+
         posMgr.set(entity, pos.x, pos.y);
         world
           .getUnique(Log)

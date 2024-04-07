@@ -1,5 +1,5 @@
 import type { GameEvent } from "./queues";
-import { Aspect, Entity } from "gw-ecs/entity";
+import { Entity } from "gw-ecs/entity";
 import { Pos, PosManager } from "gw-ecs/common/positions";
 import { findEmptyFloorTile } from "./map/utils";
 import {
@@ -14,8 +14,6 @@ import {
   Effect,
   TILE_ASPECT,
   Tile,
-  FLOOR,
-  FLOOR_BUNDLE,
   Sprite,
   BLOP_ASPECT,
 } from "./comps";
@@ -28,6 +26,9 @@ import { coloredName, facingDir } from "./utils";
 import { DIRS4, dirSpread, forCircle } from "gw-utils/xy";
 import { MapChanged } from "./triggers";
 import { applyAttack } from "./systems/attack";
+import * as Grid from "gw-utils/grid";
+import * as Constants from "./constants";
+import { FLOOR_BUNDLE, RUBBLE_BUNDLE } from "./tiles";
 
 export class TeleportEffect extends Effect {
   constructor() {
@@ -106,7 +107,7 @@ export class DestroyWallsEffect extends Effect {
       if (!tileEntity) return; // Out of bounds
       const tile = tileEntity.fetch(Tile)!;
       if (tile.blocksMove && !tile.permanent) {
-        FLOOR_BUNDLE.applyTo(tileEntity, world);
+        RUBBLE_BUNDLE.applyTo(tileEntity, world);
       }
       delayedFlash(world, { x, y }, DestroyWallsSprite, 25 * d);
     });
@@ -232,6 +233,11 @@ export class ExtendEffect extends Effect {
       x += dir[0];
       y += dir[1];
 
+      const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT)!;
+      const tile = tileEntity.fetch(Tile)!;
+      // TODO - Do we flash the first wall we hit?
+      if (tile.blocksMove) break;
+
       const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
       if (blopEntity) {
         applyAttack(world, owner, blopEntity, 2, "extends");
@@ -243,8 +249,70 @@ export class ExtendEffect extends Effect {
   }
 }
 
-// shock
 // explode
+export const ExplodeSprite = new Sprite("%", "red", "yellow");
+export class ExplodeEffect extends Effect {
+  constructor() {
+    super("Explode", "explodes, damaging all around.");
+  }
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
+    const posMgr = world.getUnique(PosManager);
+    const pos = owner.fetch(Pos)!;
+
+    const grid = Grid.alloc(Constants.MAP_WIDTH, Constants.MAP_HEIGHT, 0);
+
+    grid.walkFrom(pos.x, pos.y, (x, y, v, d) => {
+      if (d > 3) return false;
+      const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT);
+      if (!tileEntity) return false; // Out of bounds
+      const tile = tileEntity.fetch(Tile)!;
+
+      const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
+      if (blopEntity) {
+        applyAttack(world, owner, blopEntity, 3, "explodes, damaging");
+      }
+
+      delayedFlash(world, { x, y }, ExplodeSprite, 25 * d);
+      return !tile.blocksMove;
+    });
+
+    return true;
+  }
+}
+
+// shock
+export const ShockSprite = new Sprite("!", "white", "light_teal");
+export class ShockEffect extends Effect {
+  constructor() {
+    super("Shock", "shocks any connected blops and travels through water.");
+  }
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
+    const posMgr = world.getUnique(PosManager);
+    const pos = owner.fetch(Pos)!;
+
+    const grid = Grid.alloc(Constants.MAP_WIDTH, Constants.MAP_HEIGHT, 0);
+
+    grid.walkFrom(pos.x, pos.y, false, (x, y, v, d) => {
+      const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT);
+      if (!tileEntity) return false; // Out of bounds
+
+      const blopEntity = posMgr.firstAt(x, y, BLOP_ASPECT);
+      if (blopEntity && blopEntity !== owner) {
+        applyAttack(world, owner, blopEntity, 1, "shocks");
+      }
+
+      const tile = tileEntity.fetch(Tile)!;
+      if (tile.shock || !!blopEntity) {
+        delayedFlash(world, { x, y }, ShockSprite, 25 * d);
+      }
+
+      return tile.shock || !!blopEntity;
+    });
+
+    return true;
+  }
+}
+
 // summon dummy
 // summon ally
 
@@ -257,6 +325,8 @@ export const effectClasses = [
   ChargeEffect,
   SwipeEffect,
   ExtendEffect,
+  ExplodeEffect,
+  ShockEffect,
 ];
 
 // TODO - Different weights

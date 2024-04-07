@@ -4,21 +4,21 @@ Effects:
         [-] notifyFovWhenTilesChange? -or-
         [X] via trigger - MapChanged()
         [X] No destroy outer walls - Tile flag & Different Sprite
-        [] Improve animation
-        [] Leave behind different sprite - Rubble
+        [X] Improve animation
+        [x] Leave behind different sprite - Rubble
     [X] Whirl - old Cleave: N,S,E,W attack
-        [] Improve animation
+        [] Improve animation (end with attack pos)
     [X] Extend # - attack additional squares towards target: A-->
-        * Need to track last direction moved (facing)
-        [] Improve animation
-        [] Do not go into walls (stop at first)
+        [x] Need to track last direction moved (facing)
+        [X] Improve animation
+        [X] Do not go into walls (stop at first)
     [X] Swipe - attack in arc of 3 dirs centered on target
-        * Need to track facing direction
-        [] Improve animation
-    [] Shock - chain to all attached shockables (water tiles and blops in/next to)
-        [] Improve animation
-    [] Explode - big explosion (radius 3)
-        [] Improve animation
+        [x] Need to track facing direction
+        [] Improve animation (L to R)
+    [X] Shock - chain to all attached shockables (water tiles and blops in/next to)
+        [X] Improve animation
+    [X] Explode - big explosion (radius 3)
+        [X] Improve animation
     [] SummonMini
     [] SummonDummy
 
@@ -89,10 +89,14 @@ Items:
     [] Ensure certain number/type (ala Brogue)
     [] Increasing probability each level?
         * Reset to 0 with each spawn
-    [] Drops should be marked as seen if they are in the FOV
+    [X] Drops should be marked as seen if they are in the FOV
+    [] Log adding to DNA
 
 Log:
     [] Combine logic into/with gw-utils/message
+
+Etc:
+    [] There is a double Tab stop at each blop in Game Over mode
 
 TravelTo:
     [] When traveling - auto update FocusHelper Path on each step

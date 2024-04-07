@@ -5,7 +5,13 @@ import { Collider } from "gw-ecs/common";
 import { BLOP_TYPE } from "./blops";
 import { aiTravel } from "./ai";
 import { AttackTrigger, WaitTrigger } from "./dnaTriggers";
-import { DestroyWallsEffect, ExtendEffect, SwipeEffect } from "./dnaEffects";
+import {
+  DestroyWallsEffect,
+  ExplodeEffect,
+  ExtendEffect,
+  ShockEffect,
+  SwipeEffect,
+} from "./dnaEffects";
 
 export function createHero(world: World): Entity {
   const dna = new DNA(2);
