@@ -73,4 +73,13 @@ describe("bundle", () => {
     expect(entity.has(B)).toBeTrue();
     expect(entity.has(C)).toBeTrue();
   });
+
+  test("create with args", () => {
+    const cb = jest.fn();
+    const world = new World().registerComponents(A, B, C);
+    const bundle = new Bundle(cb);
+
+    const entity = bundle.create(world, 1, 2);
+    expect(cb).toHaveBeenCalledWith(world, entity, 1, 2);
+  });
 });

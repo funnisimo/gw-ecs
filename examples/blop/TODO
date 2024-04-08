@@ -20,12 +20,13 @@ Effects:
     [X] Explode - big explosion (radius 3)
         [X] Improve animation
     [] SummonMini
-    [] SummonDummy
+    [X] SummonDummy
 
 Triggers:
     [] Only allow to fire once per actor turn?
         [] Can we use tick for this?
         * Mostly this is for OnHurt
+        * Do we even want it?
     [] StepNearWall
     [] StepNearAlly
     [] SwapPlaces
@@ -65,6 +66,8 @@ Blops:
     Other:
         [] Vary Blop speeds
         [] Vary Blop AI
+        [X] Blops attack any nearby dummy 
+            [x] Probably should be any neighboring
 
 AI:
     [] Allow register + use string id
@@ -91,6 +94,7 @@ Items:
         * Reset to 0 with each spawn
     [X] Drops should be marked as seen if they are in the FOV
     [] Log adding to DNA
+    [X] Dummy blops do not drop items
 
 Log:
     [] Combine logic into/with gw-utils/message
@@ -128,6 +132,8 @@ MultiWorld:
 
 App:
     [] Add splash screen/main menu?
+    [] Better help screen
+    [] Better victory screen
 
 [] Auto-Explore - 'x'
 
@@ -137,4 +143,3 @@ Observation Mode:
         * will require cloning an item in some fashion
             * How to track Pos?
 
-    

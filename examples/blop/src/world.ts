@@ -41,7 +41,7 @@ import { Timers } from "gw-utils/app";
 import { TimerSystem } from "./systems/timers";
 import { flash } from "./fx/flash";
 import type { Entity } from "gw-ecs/entity";
-import { Pos } from "gw-ecs/common/positions";
+import { Pos, PosManager } from "gw-ecs/common/positions";
 import { MaintainWorld, Schedule } from "gw-ecs/common";
 import { EntitySystemSet } from "gw-ecs/system";
 import * as Constants from "./constants";
@@ -100,7 +100,12 @@ function sayHello(actor: Entity, target: Entity, world: World) {
 }
 
 function attackBlop(actor: Entity, target: Entity, world: World) {
-  // TODO - If same team - return false;
+  const actorBlop = actor.fetch(Blop);
+  const targetBlop = target.fetch(Blop);
+  if (!actorBlop || !targetBlop || actorBlop.team === targetBlop.team) {
+    return false;
+  }
+
   addAction(actor, new Attack(target));
   return true; // We handled it
 }
@@ -139,6 +144,27 @@ function updateFov(world: World) {
   calculateFov(world, game.hero, true);
 }
 
+function collideDummy(actor: Entity, target: Entity, world: World) {
+  const actorBlop = actor.fetch(Blop);
+  const targetBlop = target.fetch(Blop);
+  if (!actorBlop || !targetBlop) return false;
+  if (actorBlop.team == targetBlop.team) {
+    // swap places
+    const actorPos = actor.fetch(Pos)!;
+    const targetPos = target.fetch(Pos)!;
+
+    const posMgr = world.getUnique(PosManager);
+    posMgr.set(actor, targetPos.x, targetPos.y);
+    posMgr.set(target, actorPos.lastX, actorPos.lastY);
+    takeTurn(world, actor);
+    return true;
+
+    // TODO - How to force a wait onto a blop?
+  } else {
+    return attackBlop(actor, target, world);
+  }
+}
+
 export const world = new World()
   .registerComponent(FX)
   .registerComponent(Sprite)
@@ -166,12 +192,12 @@ export const world = new World()
   .setUnique(
     new CollisionManager()
       // Hero swap with ally (incl dummy)
-      // .register('hero', 'blop', swapPlacesSameTeam)
+      .register("hero", "dummy", collideDummy)
       .register("hero", "blop", attackBlop)
 
       .register("blop", "hero", attackBlop)
       // Blop swap with dummy ally
-      // .register('blop', 'dummy', swapPlacesSameTeam)
+      .register("blop", "dummy", collideDummy)
       .register("blop", "blop", pushChargeSameTeam) // TODO - What about swaps? or summoned allies?
       // .register('blop', 'blop', attackBlop)  // if not same team
 

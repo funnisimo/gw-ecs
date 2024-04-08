@@ -2,7 +2,11 @@ import { SimpleComponent } from "../component";
 import { type World } from "../world";
 import { Entity } from "./entity";
 
-export type ComponentFn<T> = (world: World, entity: Entity) => T | undefined;
+export type ComponentFn<T> = (
+  world: World,
+  entity: Entity,
+  ...args: any[]
+) => T | undefined;
 export type AnyComponentFn = ComponentFn<any>;
 
 export type ComponentArg<T> = T | SimpleComponent<T> | ComponentFn<T>;
@@ -32,20 +36,20 @@ export class Bundle {
     return bundle;
   }
 
-  create(world: World): Entity {
+  create(world: World, ...args: any[]): Entity {
     const entity = world.create();
-    this.applyTo(entity, world);
+    this.applyTo(entity, world, ...args);
     return entity;
   }
 
-  applyTo(entity: Entity, world: World) {
+  applyTo(entity: Entity, world: World, ...args: any[]) {
     for (let c of this._comps) {
       if (typeof c === "function") {
         if (world.hasStore(c)) {
           const comp = new c();
           entity.set(comp);
         } else {
-          const comp = c(world, entity);
+          const comp = c(world, entity, ...args);
           if (comp) {
             entity.set(comp);
           }

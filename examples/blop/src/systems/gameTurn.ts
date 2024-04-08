@@ -48,6 +48,11 @@ export class GameTurnSystem extends ScheduleSystem {
       return RunResult.Ok; // Removes this entity from the schedule
     }
 
+    if (!actor.ai.length) {
+      console.log("game turn for entity with no ai functions!");
+      return RunResult.Ok; // Remove this entity from the schedule
+    }
+
     if (
       !actor.ready &&
       !actor.ai.some((aiFn) => aiFn(world, entity, time, delta))

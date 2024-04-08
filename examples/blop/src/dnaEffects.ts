@@ -18,17 +18,18 @@ import {
   BLOP_ASPECT,
 } from "./comps";
 import { type World } from "gw-ecs/world";
-import { random, type Random } from "gw-utils/rng";
+import { Random, random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
 import { delayedFlash, flash } from "./fx/flash";
 import { Game, Log } from "./uniques";
 import { coloredName, facingDir } from "./utils";
-import { DIRS4, dirSpread, equals, forCircle } from "gw-utils/xy";
+import { DIRS, DIRS4, dirSpread, equals, forCircle } from "gw-utils/xy";
 import { MapChanged } from "./triggers";
 import { applyAttack } from "./systems/attack";
 import * as Grid from "gw-utils/grid";
 import * as Constants from "./constants";
 import { FLOOR_BUNDLE, RUBBLE_BUNDLE } from "./tiles";
+import { HERO_DUMMY_BUNDLE } from "./blops";
 
 export class TeleportEffect extends Effect {
   constructor() {
@@ -324,6 +325,45 @@ export class ShockEffect extends Effect {
 }
 
 // summon dummy
+export class SummonDummyEffect extends Effect {
+  constructor() {
+    super("SummonDummy", "summons a dummy blop.");
+  }
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
+    const posMgr = world.getUnique(PosManager);
+    const pos = owner.fetch(Pos)!;
+
+    const choices = DIRS.filter((dir) => {
+      const x = pos.x + dir[0];
+      const y = pos.y + dir[1];
+
+      // No spawn in walls
+      const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT)!;
+      const tile = tileEntity.fetch(Tile)!;
+      if (tile.blocksMove) return false;
+
+      // Only spawn if no other blop there
+      return !posMgr.hasAt(x, y, BLOP_ASPECT);
+    });
+
+    if (choices.length == 0) return false;
+
+    const rng = world.getUnique(Random) || random;
+    const dir = rng.item(choices);
+
+    const dummyEntity = HERO_DUMMY_BUNDLE.create(world);
+    posMgr.set(dummyEntity, pos.x + dir[0], pos.y + dir[1]);
+
+    world
+      .getUnique(Log)
+      .add(`${coloredName(owner)} summons a ${coloredName(dummyEntity)}.`);
+
+    world.getUnique(Game).changed = true;
+
+    return true;
+  }
+}
+
 // summon ally
 
 export const effectClasses = [
@@ -337,6 +377,7 @@ export const effectClasses = [
   ExtendEffect,
   ExplodeEffect,
   ShockEffect,
+  SummonDummyEffect,
 ];
 
 // TODO - Different weights

@@ -1,8 +1,16 @@
 import type { Entity } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world";
 import { FOV, Game } from "./uniques";
-import { Pos } from "gw-ecs/common";
-import { Attack, Move, TravelTo, Wait, addAction } from "./comps";
+import { Pos, PosManager } from "gw-ecs/common";
+import {
+  Attack,
+  BLOP_ASPECT,
+  Blop,
+  Move,
+  TravelTo,
+  Wait,
+  addAction,
+} from "./comps";
 import * as XY from "gw-utils/xy";
 import { Random, random } from "gw-utils/rng";
 import {
@@ -24,6 +32,7 @@ export function blopAi(
   delta: number
 ): boolean {
   if (aiAttackHero(world, blop)) return true;
+  if (aiAttackDummy(world, blop)) return true;
   if (aiChargeHero(world, blop)) return true;
   if (aiTravel(world, blop)) return true;
   if (aiStartWander(world, blop)) return true;
@@ -33,12 +42,37 @@ export function blopAi(
 
 export const BLOP_AI = [
   aiAttackHero,
+  aiAttackDummy,
   aiChargeHero,
   aiTravel,
   aiStartWander,
   aiRandomMove,
   aiWait,
 ];
+
+export function aiAttackDummy(world: World, blop: Entity): boolean {
+  // [X] Next to Dummy, attack Dummy
+  const myPos = blop.fetch(Pos)!;
+  const myBlop = blop.fetch(Blop)!;
+  const posMgr = world.getUnique(PosManager);
+
+  const targets = XY.DIRS4.map(([dx, dy]) => {
+    const x = myPos.x + dx;
+    const y = myPos.y + dy;
+
+    const entity = posMgr.firstAt(x, y, BLOP_ASPECT);
+    if (!entity) return undefined;
+    const blop = entity.fetch(Blop)!;
+    return blop.team !== myBlop.team ? entity : undefined;
+  }).filter((e) => e !== undefined);
+
+  if (targets.length === 0) return false;
+
+  const rng = world.getUnique(Random) || random;
+  const target = rng.item(targets)!;
+  addAction(blop, new Attack(target));
+  return true;
+}
 
 export function aiAttackHero(world: World, blop: Entity): boolean {
   const game = world.getUnique(Game);

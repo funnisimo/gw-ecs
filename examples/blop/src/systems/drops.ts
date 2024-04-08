@@ -2,7 +2,7 @@ import { QueueSystem, type RunIfFn } from "gw-ecs/system";
 import { GameEvent } from "../queues";
 import type { Bundle, Entity } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world";
-import { EntityInfo, Hero } from "../comps";
+import { Blop, EntityInfo, Hero } from "../comps";
 import { Random, random } from "gw-utils/rng";
 import * as Constants from "../constants";
 import { Pos, PosManager } from "gw-ecs/common";
@@ -35,7 +35,9 @@ export class DropSystem extends QueueSystem<GameEvent> {
       if (!pos) return;
 
       const rng = world.getUnique(Random) || random;
-      if (rng.chance(Constants.BLOP_DROP_CHANCE)) {
+      const blop = event.target!.fetch(Blop)!;
+
+      if (rng.chance(blop.dropChance)) {
         const entity = rng.chance(50)
           ? createRandomTrigger(world, rng)
           : createRandomEffect(world, rng);
