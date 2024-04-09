@@ -3,6 +3,7 @@ import type { World } from "gw-ecs/world";
 import { FOV, Game } from "./uniques";
 import { Pos, PosManager } from "gw-ecs/common";
 import {
+  Actor,
   Attack,
   BLOP_ASPECT,
   Blop,
@@ -32,7 +33,7 @@ export function blopAi(
   delta: number
 ): boolean {
   if (aiAttackHero(world, blop)) return true;
-  if (aiAttackDummy(world, blop)) return true;
+  if (aiAttackNeighbor(world, blop)) return true;
   if (aiChargeHero(world, blop)) return true;
   if (aiTravel(world, blop)) return true;
   if (aiStartWander(world, blop)) return true;
@@ -42,7 +43,7 @@ export function blopAi(
 
 export const BLOP_AI = [
   aiAttackHero,
-  aiAttackDummy,
+  aiAttackNeighbor,
   aiChargeHero,
   aiTravel,
   aiStartWander,
@@ -50,7 +51,7 @@ export const BLOP_AI = [
   aiWait,
 ];
 
-export function aiAttackDummy(world: World, blop: Entity): boolean {
+export function aiAttackNeighbor(world: World, blop: Entity): boolean {
   // [X] Next to Dummy, attack Dummy
   const myPos = blop.fetch(Pos)!;
   const myBlop = blop.fetch(Blop)!;
@@ -175,9 +176,10 @@ export function aiStartWander(world: World, blop: Entity): boolean {
 
 export function aiRandomMove(world: World, blop: Entity): boolean {
   const rng = world.getUnique(Random) || random;
-
-  // [] Random Move - 20%
-  if (!rng.chance(BLOP_RANDOM_MOVE_CHANCE)) return false;
+  const actor = blop.fetch(Actor)!;
+  const chance = actor.getConfigOr("moveRandomly", BLOP_RANDOM_MOVE_CHANCE);
+  // [X] Random Move - 20%
+  if (!rng.chance(chance)) return false;
 
   const dir = rng.item(XY.DIRS4);
   // [] There is no smarts in this action

@@ -1,6 +1,6 @@
 import type { Bundle, Entity } from "gw-ecs/entity";
 import { blopBundle } from "./comps/blop";
-import { BLOP_AI, aiWait } from "./ai";
+import { BLOP_AI, aiAttackNeighbor, aiRandomMove, aiWait } from "./ai";
 
 ////////////////////////////////////////////
 // TYPES
@@ -66,7 +66,6 @@ export const COMPLEX_BLOP_BUNDLE = blopBundle(BLOP_TYPE.COMPLEX, {
 
 // TODO - BLOP_DUMMY
 
-// TODO - HERO_DUMMY
 export const HERO_DUMMY_BUNDLE = blopBundle(BLOP_TYPE.HERO_DUMMY, {
   name: "Dummy",
   health: 5,
@@ -74,12 +73,24 @@ export const HERO_DUMMY_BUNDLE = blopBundle(BLOP_TYPE.HERO_DUMMY, {
   ch: "d",
   fg: "green",
   team: "hero",
-  colliderTags: ["dummy"],
-  flags: "OBSERVE",
+  colliderTags: ["dummy", "ally"],
+  flags: "OBSERVE", // No "appears" messages
   dropChance: 0,
 });
 
-// TODO - HERO_MINI
+export const HERO_MINI_BUNDLE = blopBundle(BLOP_TYPE.HERO_MINI, {
+  name: "Mini",
+  health: 4,
+  power: 1,
+  ch: "m",
+  fg: "green",
+  team: "hero",
+  dropChance: 0,
+  colliderTags: ["ally", "actor"],
+  ai: [aiAttackNeighbor, aiRandomMove, aiWait],
+  flags: "OBSERVE", // No "appears" messages
+  config: { moveRandomly: 50 },
+});
 
 export const BLOP_BUNDLES = [
   MINI_BLOP_BUNDLE,

@@ -60,18 +60,21 @@ export interface BlopBundleConfig extends SpriteConfig, BlopConfig {
   ai?: AiFn[];
   colliderTags?: string[];
   flags?: FlagBase;
+  config?: Record<string, any>;
 }
 
 export function blopBundle(type: string, config: BlopBundleConfig): Bundle {
   const ai = config.ai || [];
   const tags = config.colliderTags || ["actor"];
   const flags = config.flags || "ALWAYS_INTERRUPT, OBSERVE";
+  const actor = new Actor(...ai);
+  const aiConfig = config.config || {};
 
   const bundle = new Bundle(() => new Blop(type, config))
     .with(new Sprite(config.ch, config.fg, config.bg))
     .with(new Collider("blop", ...tags))
     // TODO - AI?
-    .with(new Actor(...ai))
+    .with(() => new Actor(...ai).withConfig(aiConfig))
     // TODO - Drops
     // TODO - DNA
     .with(new EntityInfo(config.name, flags));

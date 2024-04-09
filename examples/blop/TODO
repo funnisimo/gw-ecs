@@ -20,6 +20,10 @@ Effects:
     [X] Explode - big explosion (radius 3)
         [X] Improve animation
     [] SummonMini
+        [] What is Mini AI?
+            [] Attack neighbors (different team)
+            [] Move Randomly (50%?)
+            [] Wait
     [X] SummonDummy
 
 Triggers:
@@ -74,9 +78,10 @@ AI:
     [] Detect Ice pathfinding problems
 
 MoveSystem:
-    [] Collide same team -> swap places as move?
-    [] Mark Hero friends with Ally component
+    [X] Collide same team -> swap places as move?
+    [X] Mark Hero friends with Ally component
     [] Log slides?
+    [] Pathfinding - swapable entities have cost 2, not AVOID
 
 Tiles:
     [] Lava damages blops and hero
@@ -112,7 +117,7 @@ TravelTo:
         [] not revealing too much about the map unintentionally
 
 Messages:
-    [] 'A Stairs appears.'?
+    [] 'A Stairs appears.'
     [] 'A Every7Turns appears.'
 
 Draw:

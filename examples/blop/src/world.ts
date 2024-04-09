@@ -145,6 +145,13 @@ function updateFov(world: World) {
 }
 
 function collideDummy(actor: Entity, target: Entity, world: World) {
+  if (swapPlaces(actor, target, world)) {
+    return true;
+  }
+  return attackBlop(actor, target, world);
+}
+
+function swapPlaces(actor: Entity, target: Entity, world: World) {
   const actorBlop = actor.fetch(Blop);
   const targetBlop = target.fetch(Blop);
   if (!actorBlop || !targetBlop) return false;
@@ -157,12 +164,10 @@ function collideDummy(actor: Entity, target: Entity, world: World) {
     posMgr.set(actor, targetPos.x, targetPos.y);
     posMgr.set(target, actorPos.lastX, actorPos.lastY);
     takeTurn(world, actor);
+    addAction(target, new Wait()); // Force a wait so that we don't just re-swap
     return true;
-
-    // TODO - How to force a wait onto a blop?
-  } else {
-    return attackBlop(actor, target, world);
   }
+  return false;
 }
 
 export const world = new World()
@@ -192,12 +197,15 @@ export const world = new World()
   .setUnique(
     new CollisionManager()
       // Hero swap with ally (incl dummy)
-      .register("hero", "dummy", collideDummy)
+      .register("hero", "ally", swapPlaces)
+      .register("ally", "hero", swapPlaces)
       .register("hero", "blop", attackBlop)
+      .register("ally", "blop", attackBlop)
 
       .register("blop", "hero", attackBlop)
+      .register("blop", "ally", attackBlop)
       // Blop swap with dummy ally
-      .register("blop", "dummy", collideDummy)
+      .register("blop", "dummy", swapPlaces)
       .register("blop", "blop", pushChargeSameTeam) // TODO - What about swaps? or summoned allies?
       // .register('blop', 'blop', attackBlop)  // if not same team
 

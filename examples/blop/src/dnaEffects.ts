@@ -29,7 +29,7 @@ import { applyAttack } from "./systems/attack";
 import * as Grid from "gw-utils/grid";
 import * as Constants from "./constants";
 import { FLOOR_BUNDLE, RUBBLE_BUNDLE } from "./tiles";
-import { HERO_DUMMY_BUNDLE } from "./blops";
+import { HERO_DUMMY_BUNDLE, HERO_MINI_BUNDLE } from "./blops";
 
 export class TeleportEffect extends Effect {
   constructor() {
@@ -351,6 +351,7 @@ export class SummonDummyEffect extends Effect {
     const rng = world.getUnique(Random) || random;
     const dir = rng.item(choices);
 
+    // TODO - pick bundle based on team
     const dummyEntity = HERO_DUMMY_BUNDLE.create(world);
     posMgr.set(dummyEntity, pos.x + dir[0], pos.y + dir[1]);
 
@@ -365,6 +366,45 @@ export class SummonDummyEffect extends Effect {
 }
 
 // summon ally
+export class SummonAllyEffect extends Effect {
+  constructor() {
+    super("SummonAlly", "summons a mini blop.");
+  }
+  apply(world: World, event: GameEvent, owner: Entity): boolean {
+    const posMgr = world.getUnique(PosManager);
+    const pos = owner.fetch(Pos)!;
+
+    const choices = DIRS.filter((dir) => {
+      const x = pos.x + dir[0];
+      const y = pos.y + dir[1];
+
+      // No spawn in walls
+      const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT)!;
+      const tile = tileEntity.fetch(Tile)!;
+      if (tile.blocksMove) return false;
+
+      // Only spawn if no other blop there
+      return !posMgr.hasAt(x, y, BLOP_ASPECT);
+    });
+
+    if (choices.length == 0) return false;
+
+    const rng = world.getUnique(Random) || random;
+    const dir = rng.item(choices);
+
+    // TODO - pick bundle based on team
+    const dummyEntity = HERO_MINI_BUNDLE.create(world);
+    posMgr.set(dummyEntity, pos.x + dir[0], pos.y + dir[1]);
+
+    world
+      .getUnique(Log)
+      .add(`${coloredName(owner)} summons a ${coloredName(dummyEntity)}.`);
+
+    world.getUnique(Game).changed = true;
+
+    return true;
+  }
+}
 
 export const effectClasses = [
   TeleportEffect,
@@ -378,6 +418,7 @@ export const effectClasses = [
   ExplodeEffect,
   ShockEffect,
   SummonDummyEffect,
+  SummonAllyEffect,
 ];
 
 // TODO - Different weights

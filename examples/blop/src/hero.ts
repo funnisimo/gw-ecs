@@ -10,6 +10,7 @@ import {
   ExplodeEffect,
   ExtendEffect,
   ShockEffect,
+  SummonAllyEffect,
   SummonDummyEffect,
   SwipeEffect,
   SwirlEffect,
@@ -18,7 +19,7 @@ import {
 export function createHero(world: World): Entity {
   const dna = new DNA(2);
   dna.triggers[0] = new WaitTrigger();
-  dna.effects[0] = new SummonDummyEffect();
+  dna.effects[0] = new SummonAllyEffect();
 
   return world.create(
     new Hero(),
