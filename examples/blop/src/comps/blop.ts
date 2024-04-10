@@ -6,6 +6,11 @@ import { Actor, type AiFn } from "./actor";
 import { EntityInfo } from "./entityInfo";
 import * as Constants from "../constants";
 import type { FlagBase } from "gw-utils/flag";
+import { DNA } from "./dna";
+import type { World } from "gw-ecs/world";
+import { Random, random } from "gw-utils/rng";
+import { triggerClasses } from "../dnaTriggers";
+import { effectClasses } from "../dnaEffects";
 
 export interface SpawnInfo {
   average: number;
@@ -54,29 +59,3 @@ export class Blop {
 }
 
 export const BLOP_ASPECT = new Aspect(Blop);
-
-export interface BlopBundleConfig extends SpriteConfig, BlopConfig {
-  name: string;
-  ai?: AiFn[];
-  colliderTags?: string[];
-  flags?: FlagBase;
-  config?: Record<string, any>;
-}
-
-export function blopBundle(type: string, config: BlopBundleConfig): Bundle {
-  const ai = config.ai || [];
-  const tags = config.colliderTags || ["actor"];
-  const flags = config.flags || "ALWAYS_INTERRUPT, OBSERVE";
-  const actor = new Actor(...ai);
-  const aiConfig = config.config || {};
-
-  const bundle = new Bundle(() => new Blop(type, config))
-    .with(new Sprite(config.ch, config.fg, config.bg))
-    .with(new Collider("blop", ...tags))
-    // TODO - AI?
-    .with(() => new Actor(...ai).withConfig(aiConfig))
-    // TODO - Drops
-    // TODO - DNA
-    .with(new EntityInfo(config.name, flags));
-  return bundle;
-}

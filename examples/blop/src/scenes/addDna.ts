@@ -8,6 +8,7 @@ import { DNA } from "../comps/dna";
 import { coloredName } from "../utils";
 import { drawLines, drawLog, drawMap, drawMapHeader } from "./main";
 import { Log } from "../uniques";
+import { PosManager } from "gw-ecs/common";
 
 interface MyData {
   world: World;
@@ -33,38 +34,40 @@ export const addDna: SceneCreateOpts = {
     this.data.trigger = opts.chromosome.fetch(Trigger);
     this.data.effect = opts.chromosome.fetch(Effect);
     this.data.index = this.data.trigger
-      ? dna.triggers.indexOf(null)
-      : dna.effects.indexOf(null);
+      ? dna.firstEmptyTrigger()
+      : dna.firstEmptyEffect();
   },
   keypress(this: Scene, ev: Event) {
+    const data = this.data as MyData;
     this.needsDraw = true;
     if (ev.key === "Escape") {
       this.stop();
     } else if (ev.key === "Enter") {
-      if (this.data.index >= 0) {
-        if (this.data.trigger) {
-          this.data.dna.triggers[this.data.index] = this.data.trigger;
+      if (data.index >= 0) {
+        if (data.trigger) {
+          data.dna.setTrigger(data.index, data.trigger);
         } else {
-          this.data.dna.effects[this.data.index] = this.data.effect;
+          data.dna.setEffect(data.index, data.effect);
         }
-        this.data.world.destroyNow(this.data.chromosome);
+        data.world.destroyNow(data.chromosome);
       }
       this.stop();
     } else if (ev.dir) {
       if (ev.dir[0] > 0 || ev.dir[1] > 0) {
-        this.data.index += 1;
+        data.index += 1;
       } else if (ev.dir[0] < 0 || ev.dir[1] < 0) {
-        if (this.data.index < 0) {
-          this.data.index = this.data.dna.length - 1;
+        if (data.index < 0) {
+          data.index = data.dna.length - 1;
         } else {
-          this.data.index -= 1;
+          data.index -= 1;
         }
       }
     }
   },
   update(this: Scene) {
-    if (this.data.index < -1 || this.data.index >= this.data.dna.length) {
-      this.data.index = -1;
+    const data = this.data as MyData;
+    if (data.index < -1 || data.index >= data.dna.length) {
+      data.index = -1;
     }
   },
   draw(buffer: Buffer) {
@@ -171,8 +174,8 @@ export function drawAddDnaStatus(buffer: Buffer, data: MyData) {
   buffer.drawText(x0, y0 + 4, "DNA:");
   const dna = data.dna;
   for (let i = 0; i < dna.length; ++i) {
-    let trigger = dna.triggers[i];
-    let effect = dna.effects[i];
+    let trigger = dna.getTrigger(i);
+    let effect = dna.getEffect(i);
 
     let triggerText = `#{green ${trigger ? trigger.name : "..."}}`;
     let effectText = `#{teal ${effect ? effect.name : "..."}}`;

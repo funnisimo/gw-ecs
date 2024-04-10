@@ -392,10 +392,13 @@ export function drawBlopStatus(
   buffer.drawText(x0, y0 + 4, "DNA:");
   const dna = entity.fetch(DNA);
   if (dna) {
+    if (dna.length == 0) {
+      buffer.drawText(x0, y0 + 5, "  #{green None}");
+    }
     for (let i = 0; i < dna.length; ++i) {
-      const trigger = dna.triggers[i];
+      const trigger = dna.getTrigger(i);
       const triggerText = trigger ? trigger.name : "...";
-      const effect = dna.effects[i];
+      const effect = dna.getEffect(i);
       const effectText = effect ? effect.name : "...";
       buffer.drawText(
         x0,

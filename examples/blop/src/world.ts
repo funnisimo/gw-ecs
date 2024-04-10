@@ -126,6 +126,9 @@ function interruptEntity(world: World, interrupt: Interrupt) {
   console.log("-- interrupt --");
   const entity = interrupt.entity;
   entity.remove(TravelTo);
+  entity.remove(Move);
+  entity.remove(Wait);
+  entity.remove(Attack); // ??
 }
 
 function updateFocusHelper(world: World) {

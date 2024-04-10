@@ -29,7 +29,12 @@ import { applyAttack } from "./systems/attack";
 import * as Grid from "gw-utils/grid";
 import * as Constants from "./constants";
 import { FLOOR_BUNDLE, RUBBLE_BUNDLE } from "./tiles";
-import { HERO_DUMMY_BUNDLE, HERO_MINI_BUNDLE } from "./blops";
+import {
+  BLOP_DUMMY_BUNDLE,
+  HERO_DUMMY_BUNDLE,
+  HERO_MINI_BUNDLE,
+  MINI_BLOP_BUNDLE,
+} from "./blops";
 
 export class TeleportEffect extends Effect {
   constructor() {
@@ -351,8 +356,9 @@ export class SummonDummyEffect extends Effect {
     const rng = world.getUnique(Random) || random;
     const dir = rng.item(choices);
 
-    // TODO - pick bundle based on team
-    const dummyEntity = HERO_DUMMY_BUNDLE.create(world);
+    const blop = owner.fetch(Blop)!;
+    const bundle = blop.team === "hero" ? HERO_DUMMY_BUNDLE : BLOP_DUMMY_BUNDLE;
+    const dummyEntity = bundle.create(world);
     posMgr.set(dummyEntity, pos.x + dir[0], pos.y + dir[1]);
 
     world
@@ -392,8 +398,9 @@ export class SummonAllyEffect extends Effect {
     const rng = world.getUnique(Random) || random;
     const dir = rng.item(choices);
 
-    // TODO - pick bundle based on team
-    const dummyEntity = HERO_MINI_BUNDLE.create(world);
+    const blop = owner.fetch(Blop)!;
+    const bundle = blop.team === "hero" ? HERO_MINI_BUNDLE : MINI_BLOP_BUNDLE;
+    const dummyEntity = bundle.create(world);
     posMgr.set(dummyEntity, pos.x + dir[0], pos.y + dir[1]);
 
     world
@@ -426,6 +433,10 @@ export function createRandomEffect(world: World, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(effectClasses);
   const effect = new cls();
+  return createEffectEntity(world, effect);
+}
+
+export function createEffectEntity(world: World, effect: Effect): Entity {
   return world.create(
     EffectSprite,
     effect,
@@ -440,5 +451,4 @@ export function pickupEffect(world: World, actor: Entity, item: Entity) {
 
   const app = world.getUnique(App);
   app.show("add_dna", { world, entity: actor, chromosome: item });
-  // TODO - run 'add_to_dna' scene
 }

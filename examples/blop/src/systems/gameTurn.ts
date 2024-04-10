@@ -24,7 +24,8 @@ export class GameTurnSystem extends ScheduleSystem {
 
     blops.notify({
       compSet: (entity, comp) => {
-        schedule.add(entity, comp.actTime); // TODO - Randomize a little
+        // NOTE - Using 2x because we want newly created blops to have 1 turn pause before acting.
+        schedule.add(entity, comp.actTime * 2); // TODO - Randomize a little
       },
       compRemoved(entity, _comp) {
         schedule.remove(entity);

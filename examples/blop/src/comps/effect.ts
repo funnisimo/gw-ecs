@@ -12,6 +12,13 @@ export class Effect {
     this.description = description;
   }
 
+  /**
+   * Applies the effect to the world
+   * @param world
+   * @param event
+   * @param owner
+   * @returns - Returns whether or not it actually fired.
+   */
   apply(world: World, event: GameEvent, owner: Entity): boolean {
     return false;
   }

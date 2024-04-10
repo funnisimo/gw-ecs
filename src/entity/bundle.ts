@@ -10,7 +10,7 @@ export type ComponentFn<T> = (
 export type AnyComponentFn = ComponentFn<any>;
 
 export type ComponentArg<T> = T | SimpleComponent<T> | ComponentFn<T>;
-export type AnyComponentArg = any | ComponentFn<any>;
+export type AnyComponentArg = ComponentArg<any>;
 
 export interface ComponentObj {
   [key: string]: AnyComponentArg;

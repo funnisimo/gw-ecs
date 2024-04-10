@@ -186,6 +186,10 @@ export function createRandomTrigger(world: World, rng?: Random): Entity {
   rng = rng || random;
   const cls = rng.item(triggerClasses);
   const trigger = new cls();
+  return createTriggerEntity(world, trigger);
+}
+
+export function createTriggerEntity(world: World, trigger: Trigger): Entity {
   return world.create(
     TriggerSprite,
     trigger,

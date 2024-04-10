@@ -4,7 +4,7 @@ import { Actor, Blop, DNA, Hero, EntityInfo, Sprite } from "./comps";
 import { Collider } from "gw-ecs/common";
 import { BLOP_TYPE } from "./blops";
 import { aiTravel } from "./ai";
-import { AttackTrigger, WaitTrigger } from "./dnaTriggers";
+import { AttackTrigger, WaitTrigger, createTriggerEntity } from "./dnaTriggers";
 import {
   DestroyWallsEffect,
   ExplodeEffect,
@@ -14,12 +14,13 @@ import {
   SummonDummyEffect,
   SwipeEffect,
   SwirlEffect,
+  createEffectEntity,
 } from "./dnaEffects";
 
 export function createHero(world: World): Entity {
   const dna = new DNA(2);
-  dna.triggers[0] = new WaitTrigger();
-  dna.effects[0] = new SummonAllyEffect();
+  dna.setTrigger(0, new WaitTrigger());
+  dna.setEffect(0, new SummonAllyEffect());
 
   return world.create(
     new Hero(),

@@ -19,11 +19,11 @@ Effects:
         [X] Improve animation
     [X] Explode - big explosion (radius 3)
         [X] Improve animation
-    [] SummonMini
-        [] What is Mini AI?
-            [] Attack neighbors (different team)
-            [] Move Randomly (50%?)
-            [] Wait
+    [X] SummonMini
+        What is Mini AI?:
+            [X] Attack neighbors (different team)
+            [X] Move Randomly (50%?)
+            [X] Wait
     [X] SummonDummy
 
 Triggers:
@@ -67,15 +67,22 @@ Blops:
         [] Avoid Ice?
     DNA:
         [] Spawn with DNA
+        [] Spawn with drop as part of DNA
+            * If no full slots, drop is half of dna line
+        [] Allow config of full DNA slots
     Other:
         [] Vary Blop speeds
         [] Vary Blop AI
         [X] Blops attack any nearby dummy 
             [x] Probably should be any neighboring
+        [] Corpse
+        [] Timeout mini Blops + dummies?
+        [] Keep DNA information secret until fired while in FOV?
 
 AI:
     [] Allow register + use string id
     [] Detect Ice pathfinding problems
+    [] Ally Blops cannot swap with player - only player with allies
 
 MoveSystem:
     [X] Collide same team -> swap places as move?
@@ -122,6 +129,7 @@ Messages:
 
 Draw:
     [] Show 'charge' with color (bg or fg)
+    [] Do not draw FX if !revealed
 
 
 # Future

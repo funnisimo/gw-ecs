@@ -35,9 +35,9 @@ export class DnaSystem extends QueueSystem<GameEvent> {
     console.log("- event: " + event.type);
     let dna = entity.fetch(DNA)!;
     for (let i = 0; i < dna.length; ++i) {
-      const trigger = dna.triggers[i];
+      const trigger = dna.getTrigger(i);
       if (trigger && trigger.matches(world, event, entity)) {
-        const effect = dna.effects[i];
+        const effect = dna.getEffect(i);
         if (effect) {
           world
             .getUnique(Log)

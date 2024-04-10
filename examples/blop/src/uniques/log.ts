@@ -68,6 +68,7 @@ export class Log {
   makeLogsOld() {
     for (let i = this.oldLogsIndex; i > 0; --i) {
       const log = this.logs[i - 1];
+      if (!log) continue;
       log.msg = removeColors(log.msg);
       if (this.logs.length > i) {
         if (log.msg === this.logs[i].msg) {
