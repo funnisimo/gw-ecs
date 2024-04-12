@@ -85,7 +85,6 @@ export class SystemSet extends System {
           "]"
       );
     }
-    // @ts-ignore
     step.addSystem(system, order, enabled);
     return this;
   }
@@ -164,17 +163,19 @@ export class SystemSet extends System {
 }
 
 export class EntitySystemSet extends SystemSet {
-  // @ts-ignore
   declare steps: EntitySystemStep[];
 
-  // @ts-ignore
-  _createStep(name: string): EntitySystemStep {
+  _createStep(name: string): SystemStep {
     return new EntitySystemStep(name);
   }
 
-  // @ts-ignore
-  addStep(name: string | EntitySystemStep, opts: AddStepOpts = {}): this {
-    super.addStep(name as unknown as SystemStep, opts);
+  addStep(name: string | SystemStep, opts: AddStepOpts = {}): this {
+    if (name instanceof SystemStep) {
+      if (!(name instanceof EntitySystemStep)) {
+        throw new Error("Steps must be EntitySystemSteps");
+      }
+    }
+    return super.addStep(name, opts);
   }
 
   run(world: World, time: number, delta: number): void {
@@ -189,7 +190,6 @@ export class EntitySystemSet extends SystemSet {
 }
 
 export class QueueSystemSet<T> extends SystemSet {
-  // @ts-ignore
   declare steps: QueueSystemStep<T>[];
   _comp: Queue<T>;
   _reader!: QueueReader<T>;
@@ -203,19 +203,19 @@ export class QueueSystemSet<T> extends SystemSet {
     }
   }
 
-  // @ts-ignore
-  _createStep(name: string): QueueSystemStep<T> {
+  _createStep(name: string): SystemStep {
     return new QueueSystemStep<T>(name, this._comp);
   }
 
-  // @ts-ignore
-  addStep(name: string | QueueSystemStep, opts: AddStepOpts = {}): this {
+  addStep(name: string | SystemStep, opts: AddStepOpts = {}): this {
     if (name instanceof QueueSystemStep) {
       if (name._queue !== this._comp) {
         throw new Error("Steps must have same component as step.");
       }
+    } else if (typeof name !== "string") {
+      throw new Error("You must supply a queue step.");
     }
-    super.addStep(name as unknown as SystemStep, opts);
+    return super.addStep(name, opts);
   }
 
   start(world: World) {

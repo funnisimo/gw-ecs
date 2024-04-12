@@ -107,14 +107,9 @@ export class EntitySystemStep extends SystemStep {
 
   // TODO - Add optional Aspect?
 
-  // @ts-ignore
-  addSystem(
-    sys: System | EntitySystemFn,
-    order?: SystemOrder,
-    enabled = true
-  ): this {
+  addSystem(sys: System | SystemFn, order?: SystemOrder, enabled = true): this {
     if (typeof sys === "function") {
-      sys = new EntityFunctionSystem(sys);
+      sys = new EntityFunctionSystem(sys as unknown as EntitySystemFn);
     }
     // if (!(sys instanceof EntitySystem)) {
     //   throw new Error("Must be EntitySystem");
@@ -159,8 +154,8 @@ export class EntitySystemStep extends SystemStep {
     return true;
   }
 
-  forEach(fn: (sys: EntitySystem, order: SystemOrder) => void) {
-    // @ts-ignore
+  // TODO - Wish this could be EntitySytem
+  forEach(fn: (sys: System, order: string) => void) {
     super.forEach(fn);
   }
 }
@@ -182,14 +177,12 @@ export class QueueSystemStep<T> extends SystemStep {
     super.start(world);
   }
 
-  // @ts-ignore
-  addSystem(
-    sys: System | QueueSystem<T> | QueueSystemFn<T>,
-    order?: SystemOrder,
-    enabled = true
-  ): this {
+  addSystem(sys: System | SystemFn, order?: SystemOrder, enabled = true): this {
     if (typeof sys === "function") {
-      sys = new QueueFunctionSystem<T>(this._queue, sys);
+      sys = new QueueFunctionSystem<T>(
+        this._queue,
+        sys as unknown as QueueSystemFn<T>
+      );
     } else if ("_queue" in sys && this._queue !== sys._queue) {
       throw new Error("System has wrong component type.");
     }
@@ -236,8 +229,8 @@ export class QueueSystemStep<T> extends SystemStep {
     return true;
   }
 
-  forEach(fn: (sys: QueueSystem<any>, order: SystemOrder) => void) {
-    // @ts-ignore
+  // TODO - Wish this could be QueueSystem<T>
+  forEach(fn: (sys: System, order: string) => void) {
     super.forEach(fn);
   }
 }

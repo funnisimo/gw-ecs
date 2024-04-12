@@ -182,6 +182,7 @@ export class PosManager implements EntityWatcher, WorldInit {
   }
 
   worldInit(world: World): void {
+    // TODO - Make this a temp object instead of implementing the interface
     world.entities().notify(this); // Register interest in destroy events
   }
 
