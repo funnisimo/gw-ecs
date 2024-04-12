@@ -19,16 +19,16 @@ import {
   EntityInfo,
   PickupItem,
   takeTurn,
+  Action,
 } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { CollisionManager } from "gw-ecs/common/collisions";
 import {
+  ActionSystem,
   FovSystem,
   GameOverSystem,
   MoveSystem,
-  PickupSystem,
   RescheduleSystem,
-  WaitSystem,
   calculateFov,
   heroMoved,
   heroTeleported,
@@ -49,9 +49,7 @@ import { EntitySystemSet } from "gw-ecs/system";
 import * as Constants from "./constants";
 import { Log } from "./uniques/log";
 import { coloredName } from "./utils";
-import { AttackSystem } from "./systems/attack";
 import { GameTurnSystem } from "./systems/gameTurn";
-import { Random, random } from "gw-utils/rng";
 import { DropSystem } from "./systems/drops";
 import { Interrupt, MapChanged } from "./triggers";
 
@@ -184,13 +182,12 @@ export const world = new World()
   .registerComponent(DNA)
   .registerComponent(Trigger)
   .registerComponent(Effect)
-  .registerComponents(Pickup, PickupItem)
+  .registerComponents(Pickup)
   .registerComponent(Actor)
-  .registerComponent(Wait)
   .registerComponent(Move)
-  .registerComponent(Attack)
   .registerComponent(TravelTo)
   .registerComponent(EntityInfo)
+  .registerComponent(Action)
   .registerQueue(GameEvent)
   .registerTrigger(Interrupt)
   .registerTrigger(MapChanged)
@@ -221,9 +218,10 @@ export const world = new World()
     new EntitySystemSet("game", ["start", "move", "act", "events", "finish"])
       .addSystem("move", new MoveSystem())
       .addSystem("post-move", new FovSystem().runIf(heroMoved)) // So that FOV is accurate for act, events
-      .addSystem("act", new AttackSystem())
-      .addSystem("act", new WaitSystem())
-      .addSystem("act", new PickupSystem())
+      // .addSystem("act", new AttackSystem())
+      // .addSystem("act", new WaitSystem())
+      // .addSystem("act", new PickupSystem())
+      .addSystem("act", new ActionSystem())
       .addSystem("events", new DnaSystem())
       .addSystem("events", new GameOverSystem())
       .addSystem("events", new DropSystem())

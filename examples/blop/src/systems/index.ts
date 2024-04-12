@@ -1,10 +1,11 @@
 export * from "./move";
 export * from "./timers";
-export * from "./pickup";
+// export * from "./pickup";
 export * from "./dna";
 export * from "./fov";
-export * from "./wait";
+// export * from "./wait";
 export * from "./reschedule";
 export * from "./gameTurn";
-export * from "./wait";
+// export * from "./wait";
 export * from "./gameOver";
+export * from "./action";

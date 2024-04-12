@@ -124,6 +124,7 @@ export const mainScene = {
       const hero = game.hero!;
       const heroPos = hero.fetch(Pos)!;
       if (posMgr.hasAt(heroPos.x, heroPos.y, STAIRS_ASPECT)) {
+        // TODO - addAction(hero, new Climb());
         nextLevel(world);
       } else {
         const e = findClosestTileMatching(
@@ -152,6 +153,7 @@ export const mainScene = {
       game.changed = true;
     } else if (ev.key == "Enter") {
       if (focus.pos) {
+        // TODO - addAction(hero, new TravelTo(focus.pos));
         game.hero!.set(new TravelTo(focus.pos));
       }
     } else if (ev.key === "Tab") {

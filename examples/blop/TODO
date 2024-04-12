@@ -136,6 +136,8 @@ Draw:
     [] Show 'charge' with color (bg or fg)
     [] Do not draw FX if !revealed
 
+Flash:
+    [] Do nothing if NOT visible
 
 # Future
 

@@ -22,13 +22,13 @@ import { Random, random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
 import { delayedFlash, flash } from "./fx/flash";
 import { Game, Log } from "./uniques";
-import { coloredName, facingDir } from "./utils";
+import { coloredName } from "./utils";
 import { DIRS, DIRS4, dirSpread, equals, forCircle } from "gw-utils/xy";
 import { MapChanged } from "./triggers";
-import { applyAttack } from "./systems/attack";
+import { applyAttack } from "./comps";
 import * as Grid from "gw-utils/grid";
 import * as Constants from "./constants";
-import { FLOOR_BUNDLE, RUBBLE_BUNDLE } from "./tiles";
+import { RUBBLE_BUNDLE } from "./tiles";
 import {
   BLOP_DUMMY_BUNDLE,
   HERO_DUMMY_BUNDLE,
