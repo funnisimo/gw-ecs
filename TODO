@@ -140,3 +140,10 @@ Queues:
     [] world.maintainQueue(comp)
     [] world.maintainQueues()
 
+Rollup:
+    [] Rollup to gw-ecs.*
+
+Docs:
+    [] Examples 
+    [] interactive manual
+    [] typedoc?

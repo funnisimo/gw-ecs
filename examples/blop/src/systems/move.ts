@@ -16,6 +16,7 @@ import {
   TILE_ASPECT,
   Tile,
   removeAction,
+  takeTurn,
 } from "../comps";
 import { GameEvent } from "../queues";
 import * as XY from "gw-utils/xy";
@@ -99,7 +100,7 @@ export class MoveSystem extends EntitySystem {
       // trigger tile change (StepOn...)
     } while (slide);
 
-    world.pushQueue(new GameEvent(entity, "turn", { time: 0 }));
+    takeTurn(world, entity);
   }
 }
 

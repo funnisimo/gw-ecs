@@ -16,8 +16,9 @@ import {
   TravelTo,
   addAction,
   noTurn,
-  takeTurn,
   EntityInfo,
+  PickupItem,
+  takeTurn,
 } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { CollisionManager } from "gw-ecs/common/collisions";
@@ -31,6 +32,7 @@ import {
   calculateFov,
   heroMoved,
   heroTeleported,
+  rescheduleEntity,
   updateVisibility,
 } from "./systems";
 import { FOV, FocusHelper, Game } from "./uniques";
@@ -73,7 +75,7 @@ export function gotoNextLevel(world: World, hero: Entity) {
 
   // hero moves to stairs loc
   // TODO - set hero pos to stairs pos
-  takeTurn(world, hero); // counts as a step
+  rescheduleEntity(world, hero); // counts as a step
 
   // TODO - prompt - do you want to take the stairs?
   //      - allows you to pass stairs in hall with arrow moves
@@ -182,7 +184,7 @@ export const world = new World()
   .registerComponent(DNA)
   .registerComponent(Trigger)
   .registerComponent(Effect)
-  .registerComponent(Pickup)
+  .registerComponents(Pickup, PickupItem)
   .registerComponent(Actor)
   .registerComponent(Wait)
   .registerComponent(Move)
@@ -218,10 +220,10 @@ export const world = new World()
   .addSystemSet(
     new EntitySystemSet("game", ["start", "move", "act", "events", "finish"])
       .addSystem("move", new MoveSystem())
-      .addSystem("post-move", new PickupSystem())
       .addSystem("post-move", new FovSystem().runIf(heroMoved)) // So that FOV is accurate for act, events
       .addSystem("act", new AttackSystem())
       .addSystem("act", new WaitSystem())
+      .addSystem("act", new PickupSystem())
       .addSystem("events", new DnaSystem())
       .addSystem("events", new GameOverSystem())
       .addSystem("events", new DropSystem())

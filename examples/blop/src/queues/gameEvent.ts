@@ -18,7 +18,7 @@ export class GameEvent {
   dir?: Loc;
   pos?: Pos;
   target?: Entity;
-  time: number;
+  time?: number;
   damage: number;
 
   constructor(entity: Entity, type: GameEventType, opts: GameEventOpts = {}) {
@@ -27,7 +27,7 @@ export class GameEvent {
     this.dir = opts.dir;
     this.target = opts.target;
     this.pos = opts.pos;
-    this.time = opts.time || 0;
+    this.time = opts.time;
     this.damage = opts.damage || 0;
   }
 }

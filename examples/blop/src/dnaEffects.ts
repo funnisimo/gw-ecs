@@ -451,4 +451,5 @@ export function pickupEffect(world: World, actor: Entity, item: Entity) {
 
   const app = world.getUnique(App);
   app.show("add_dna", { world, entity: actor, chromosome: item });
+  return false; // We will handle the 'turn'
 }

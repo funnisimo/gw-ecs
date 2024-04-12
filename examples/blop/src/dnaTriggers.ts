@@ -204,5 +204,5 @@ export function pickupTrigger(world: World, actor: Entity, item: Entity) {
 
   const app = world.getUnique(App);
   app.show("add_dna", { world, entity: actor, chromosome: item });
-  // TODO - run 'add_to_dna' scene
+  return false; // We will handle the 'turn'
 }

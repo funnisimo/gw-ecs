@@ -1,6 +1,6 @@
 import { type RunIfFn, EntitySystem } from "gw-ecs/system";
 import { World } from "gw-ecs/world";
-import { Attack, Blop, DamageSprite, removeAction } from "../comps";
+import { Attack, Blop, DamageSprite, removeAction, takeTurn } from "../comps";
 import { Aspect, Entity } from "gw-ecs/entity";
 import { GameEvent } from "../queues";
 import { flash } from "../fx/flash";
@@ -25,7 +25,7 @@ export class AttackSystem extends EntitySystem {
 
     applyAttack(world, entity, target, damage);
 
-    world.pushQueue(new GameEvent(entity, "turn", { time: 0 }));
+    takeTurn(world, entity);
   }
 }
 

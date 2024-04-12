@@ -3,6 +3,7 @@ import type { Component } from "gw-ecs/component";
 import type { Entity } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world";
 import { getPath, setPath } from "gw-utils/object";
+import { GameEvent } from "../queues";
 
 export type AiFn = (
   world: World,
@@ -77,33 +78,34 @@ export function removeAction<T>(
 }
 
 export function noTurn(world: World, entity: Entity) {
+  const actor = entity.fetch(Actor);
+  if (actor && actor.scheduled) {
+    console.warn("Actor already scheduled.");
+  }
+
+  console.log("- entity NO_TURN", entity.index);
+
   const schedule = world.getUnique(Schedule);
   schedule.restore(entity);
 
   // To help find actors that are not being rescheduled
-  // TODO - Remove once things are working
-  const actor = entity.fetch(Actor);
   if (actor) {
     actor.scheduled = true;
-    // TODO : actor.ready = false; ?????
   }
 }
 
 export function takeTurn(world: World, entity: Entity, actTime?: number) {
-  if (actTime === undefined || actTime < 0) {
-    const actor = entity.fetch(Actor);
-    if (actor) {
-      actTime = actor.actTime;
-    }
-  }
-  console.log("- entity turn", entity.index, actTime);
-  const schedule = world.getUnique(Schedule);
-  schedule.add(entity, actTime);
-
-  // To help find actors that are not being rescheduled
-  // TODO - Remove once things are working
   const actor = entity.fetch(Actor);
   if (actor) {
-    actor.scheduled = true;
+    if (actor.scheduled) {
+      console.warn("Actor already scheduled.");
+    }
+    if (actor.ready) {
+      console.warn("Actor is ready?");
+    }
   }
+
+  // Will cause reschedule to occur
+  world.pushQueue(new GameEvent(entity, "turn", { time: actTime }));
+  console.log("- entity takeTurn", entity.index);
 }

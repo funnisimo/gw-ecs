@@ -35,7 +35,8 @@ Triggers:
     [] StepNearAlly
     [] SwapPlaces
     [] AllyDeath
-    [] StepNearBlop?
+    [] StepNearEnemy?
+    [] OnTrigger ????? How?
 
 
 Stairs:
@@ -110,6 +111,8 @@ Items:
 
 Log:
     [] Combine logic into/with gw-utils/message
+    [] Visible and not visible - different messages
+    [] Logs that are too far away should be silent (what range?)
 
 Etc:
     [] There is a double Tab stop at each blop in Game Over mode
@@ -138,6 +141,11 @@ Main Scene:
     [] Use keymap
     [] Make drawing more reusable
     [] Click on messages to expand up to height of screen (like Brogue)
+    [] ? For Help Screen
+        [] Shrink Help section at top
+        [] Put pickup dna info into log section
+    [] ? Separate help screen for add_dna screen
+        [] Talks about how dna works
 
 MultiWorld:
     [] Allow up+down stairs

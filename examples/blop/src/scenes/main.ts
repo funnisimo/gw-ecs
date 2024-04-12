@@ -10,6 +10,7 @@ import {
   HERO_ASPECT,
   Move,
   PICKUP_ASPECT,
+  PickupItem,
   Sprite,
   TILE_ASPECT,
   Tile,
@@ -107,7 +108,17 @@ export const mainScene = {
         console.log("keypress - move", ev.dir);
         addAction(hero, new Move(ev.dir));
       }
+    } else if (ev.key === "g") {
+      // Try pickup item
+      logs.makeLogsOld();
+      focus.clearFocus();
+      const hero = game.hero;
+      if (hero) {
+        console.log("keypress - pickup");
+        addAction(hero, new PickupItem());
+      }
     } else if (ev.key === ">") {
+      // If on top of stairs - take stairs
       const hero = game.hero!;
       const e = findClosestTileMatching(
         world,
@@ -211,8 +222,16 @@ export function drawHelp(buffer: Buffer, h: number) {
   } else {
     buffer.drawText(0, 0, "#{teal Bloplike 7DRL} - originally by Drestin");
     buffer.drawText(0, 2, "Controls:");
-    buffer.drawText(0, 3, "#{green Arrows}  - Move/Attack");
-    buffer.drawText(0, 4, "#{green Tab/TAB} - Observation mode");
+    buffer.drawText(
+      0,
+      3,
+      "#{green Arrows}  - Move/Attack | #{green g} - Pickup item"
+    );
+    buffer.drawText(
+      0,
+      4,
+      "#{green Tab/TAB} - Observe     | #{green >} - Find/Use stairs"
+    );
   }
 }
 
@@ -259,17 +278,15 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
 
       let sprite: Mixer = new Mixer(entity.fetch(Sprite)!);
 
-      const fx = FX_ASPECT.first(entities);
-      if (fx) {
-        sprite.drawSprite(fx.fetch(Sprite)!);
-      }
-
-      if (!fov.isVisible(x, y)) {
-        if (fov.isRevealed(x, y)) {
-          sprite.mix(BLACK, 50, 50);
-        } else {
-          sprite.mix(BLACK, 100, 100);
+      if (fov.isVisible(x, y)) {
+        const fx = FX_ASPECT.first(entities);
+        if (fx) {
+          sprite.drawSprite(fx.fetch(Sprite)!);
         }
+      } else if (fov.isRevealed(x, y)) {
+        sprite.mix(BLACK, 50, 50);
+      } else {
+        sprite.mix(BLACK, 100, 100);
       }
 
       buffer.draw(x + x0, y + y0, sprite.ch, sprite.fg, sprite.bg);

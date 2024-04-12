@@ -3,12 +3,22 @@ import * as Constants from "../constants";
 import type { Scene, Event, SceneCreateOpts } from "gw-utils/app";
 import type { World } from "gw-ecs/world";
 import type { Entity } from "gw-ecs/entity";
-import { Trigger, Effect, Blop } from "../comps";
+import {
+  Trigger,
+  Effect,
+  Blop,
+  noTurn,
+  takeTurn,
+  addAction,
+  Wait,
+  TakeTurn,
+} from "../comps";
 import { DNA } from "../comps/dna";
 import { coloredName } from "../utils";
 import { drawLines, drawLog, drawMap, drawMapHeader } from "./main";
 import { Log } from "../uniques";
 import { PosManager } from "gw-ecs/common";
+import { GameEvent } from "../queues";
 
 interface MyData {
   world: World;
@@ -50,6 +60,8 @@ export const addDna: SceneCreateOpts = {
           data.dna.setEffect(data.index, data.effect);
         }
         data.world.destroyNow(data.chromosome);
+
+        addAction(data.entity, new TakeTurn());
       }
       this.stop();
     } else if (ev.dir) {

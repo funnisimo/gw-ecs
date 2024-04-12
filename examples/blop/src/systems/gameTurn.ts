@@ -60,11 +60,13 @@ export class GameTurnSystem extends ScheduleSystem {
     ) {
       return RunResult.Retry; // Will be unshifted back onto schedule and remain as first entity
     }
+    game.changed = true;
     actor.ready = false;
     actor.scheduled = false;
     super.runEntity(world, entity, time, delta);
     if (!actor.scheduled) {
-      console.warn("Entity not rescheduled.");
+      console.log(" - Entity will retry", entity.index);
+      return RunResult.Retry;
     }
 
     // If our hero is acting then break so we can draw
