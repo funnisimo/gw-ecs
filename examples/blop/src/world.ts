@@ -200,7 +200,7 @@ export const world = new World()
     new CollisionManager()
       // Hero swap with ally (incl dummy)
       .register("hero", "ally", swapPlaces)
-      .register("ally", "hero", swapPlaces)
+      // .register("ally", "hero", swapPlaces)  // Do not let blops move the hero
       .register("hero", "blop", attackBlop)
       .register("ally", "blop", attackBlop)
 
@@ -208,19 +208,14 @@ export const world = new World()
       .register("blop", "ally", attackBlop)
       // Blop swap with dummy ally
       .register("blop", "dummy", swapPlaces)
-      .register("blop", "blop", pushChargeSameTeam) // TODO - What about swaps? or summoned allies?
-      // .register('blop', 'blop', attackBlop)  // if not same team
+      .register("blop", "blop", pushChargeSameTeam)
 
       .register("actor", "wall", blockedMove)
-    // .register("hero", "stairs", (a, t, w) => gotoNextLevel(w, a))
   )
   .addSystemSet(
     new EntitySystemSet("game", ["start", "move", "act", "events", "finish"])
       .addSystem("move", new MoveSystem())
       .addSystem("post-move", new FovSystem().runIf(heroMoved)) // So that FOV is accurate for act, events
-      // .addSystem("act", new AttackSystem())
-      // .addSystem("act", new WaitSystem())
-      // .addSystem("act", new PickupSystem())
       .addSystem("act", new ActionSystem())
       .addSystem("events", new DnaSystem())
       .addSystem("events", new GameOverSystem())
