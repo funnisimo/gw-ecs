@@ -34,6 +34,7 @@ import { coloredName, heroPathTo, pathFromToUsingFov } from "../utils";
 import { FocusHelper } from "../uniques/focusHelper";
 import { BLACK } from "gw-utils/color";
 import { Interrupt } from "../triggers";
+import { STAIRS_ASPECT } from "../tiles";
 
 export const mainScene = {
   start() {
@@ -119,16 +120,22 @@ export const mainScene = {
       }
     } else if (ev.key === ">") {
       // If on top of stairs - take stairs
+      const posMgr = world.getUnique(PosManager);
       const hero = game.hero!;
-      const e = findClosestTileMatching(
-        world,
-        hero.fetch(Pos)!,
-        (e) => e.fetch(Tile)!.stairs
-      );
-      if (e) {
-        const pos = e.fetch(Pos)!;
-        focus.focusAt(pos, heroPathTo(world, pos));
-        game.changed = true;
+      const heroPos = hero.fetch(Pos)!;
+      if (posMgr.hasAt(heroPos.x, heroPos.y, STAIRS_ASPECT)) {
+        nextLevel(world);
+      } else {
+        const e = findClosestTileMatching(
+          world,
+          heroPos,
+          (e) => e.fetch(Tile)!.stairs
+        );
+        if (e) {
+          const pos = e.fetch(Pos)!;
+          focus.focusAt(pos, heroPathTo(world, pos));
+          game.changed = true;
+        }
       }
     } else if (ev.key === " ") {
       logs.makeLogsOld();

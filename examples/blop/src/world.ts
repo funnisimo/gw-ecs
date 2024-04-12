@@ -215,7 +215,7 @@ export const world = new World()
       // .register('blop', 'blop', attackBlop)  // if not same team
 
       .register("actor", "wall", blockedMove)
-      .register("hero", "stairs", (a, t, w) => gotoNextLevel(w, a))
+    // .register("hero", "stairs", (a, t, w) => gotoNextLevel(w, a))
   )
   .addSystemSet(
     new EntitySystemSet("game", ["start", "move", "act", "events", "finish"])

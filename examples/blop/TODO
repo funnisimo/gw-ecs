@@ -108,6 +108,7 @@ Items:
     [X] Drops should be marked as seen if they are in the FOV
     [] Log adding to DNA
     [X] Dummy blops do not drop items
+    [] Log Pickup
 
 Log:
     [] Combine logic into/with gw-utils/message
@@ -125,6 +126,7 @@ TravelTo:
     Test moving into unexplored void:
         [] updating focushelper path
         [] not revealing too much about the map unintentionally
+    [] Traveling over Ice can cause problems!!!
 
 Messages:
     [] 'A Stairs appears.'

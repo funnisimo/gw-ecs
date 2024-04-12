@@ -1,4 +1,4 @@
-import { Bundle, Entity } from "gw-ecs/entity";
+import { Aspect, Bundle, Entity } from "gw-ecs/entity";
 import {
   Tile,
   Sprite,
@@ -91,6 +91,11 @@ export const STAIRS = new Tile("Stairs", {
 export const STAIRS_BUNDLE = tileBundle(STAIRS, {
   ch: ">",
   fg: "white",
+});
+
+export const STAIRS_ASPECT = new Aspect().and((e) => {
+  const tile = e.fetch(Tile);
+  return tile === STAIRS; // TODO - return !!tile && tile.stairs?
 });
 
 export const PATCH_TILES = [GRASS, FOG, WATER, EMBER, ICE];

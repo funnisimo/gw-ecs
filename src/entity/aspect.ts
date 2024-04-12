@@ -2,7 +2,10 @@ import type { AnyComponent } from "../component/component.js";
 import { Entity } from "./entity.js";
 // import { World } from "./world.js";
 
+export type AspectTestFn = (entity: Entity, sinceTick: number) => boolean;
+
 export class Aspect {
+  // TODO - Convert all of these to AspectTestFns?
   _allComponents: AnyComponent[];
   _oneComponents: AnyComponent[][];
   _someComponents: AnyComponent[][];
@@ -10,6 +13,7 @@ export class Aspect {
   _addedComponents: AnyComponent[];
   _updatedComponents: AnyComponent[];
   _removedComponents: AnyComponent[];
+  _andFns: AspectTestFn[];
 
   constructor(...allComponents: AnyComponent[]) {
     this._allComponents = allComponents;
@@ -19,42 +23,48 @@ export class Aspect {
     this._addedComponents = [];
     this._updatedComponents = [];
     this._removedComponents = [];
+    this._andFns = [];
   }
 
-  with(...components: AnyComponent[]): Aspect {
+  with(...components: AnyComponent[]): this {
     this._allComponents = this._allComponents.concat(components);
     return this;
   }
 
-  oneOf(...components: AnyComponent[]): Aspect {
+  oneOf(...components: AnyComponent[]): this {
     if (components.length == 0) return this;
     this._oneComponents.push(components);
     return this;
   }
 
-  someOf(...components: AnyComponent[]): Aspect {
+  someOf(...components: AnyComponent[]): this {
     if (components.length == 0) return this;
     this._someComponents.push(components);
     return this;
   }
 
-  without(...components: AnyComponent[]): Aspect {
+  without(...components: AnyComponent[]): this {
     this._noneComponents = this._noneComponents.concat(components);
     return this;
   }
 
-  added(...components: AnyComponent[]): Aspect {
+  added(...components: AnyComponent[]): this {
     this._addedComponents = this._addedComponents.concat(components);
     return this;
   }
 
-  updated(...components: AnyComponent[]): Aspect {
+  updated(...components: AnyComponent[]): this {
     this._updatedComponents = this._updatedComponents.concat(components);
     return this;
   }
 
-  removed(...components: AnyComponent[]): Aspect {
+  removed(...components: AnyComponent[]): this {
     this._removedComponents = this._removedComponents.concat(components);
+    return this;
+  }
+
+  and(fn: AspectTestFn): this {
+    this._andFns.push(fn);
     return this;
   }
 
@@ -68,7 +78,8 @@ export class Aspect {
       this._checkSome(entity) &&
       this._checkAdded(entity, sinceTick) &&
       this._checkUpdated(entity, sinceTick) &&
-      this._checkRemoved(entity, sinceTick)
+      this._checkRemoved(entity, sinceTick) &&
+      this._checkAnd(entity, sinceTick)
     );
   }
 
@@ -216,5 +227,9 @@ export class Aspect {
         entity.isRemovedSince(comp, sinceTick)
       )
     );
+  }
+
+  protected _checkAnd(entity: Entity, sinceTick: number): boolean {
+    return this._andFns.every((fn) => fn(entity, sinceTick));
   }
 }
