@@ -1,6 +1,6 @@
 import { Aspect, Entity } from "gw-ecs/entity";
 import { EntitySystem, type RunIfFn } from "gw-ecs/system";
-import { Action } from "../comps";
+import { Action, removeAction } from "../comps";
 import type { World } from "gw-ecs/world";
 
 export class ActionSystem extends EntitySystem {
@@ -9,7 +9,7 @@ export class ActionSystem extends EntitySystem {
   }
 
   runEntity(world: World, entity: Entity, time: number, delta: number): void {
-    const action = entity.remove(Action);
+    const action = removeAction(entity, Action);
     action && action.act(world, entity);
   }
 }

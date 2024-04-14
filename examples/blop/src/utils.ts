@@ -1,6 +1,7 @@
 import type { Entity } from "gw-ecs/entity";
 import {
   BLOP_ASPECT,
+  Blop,
   EntityInfo,
   Sprite,
   TILE_ASPECT,
@@ -22,16 +23,6 @@ export function gaussian(mu: number, stddev: number, x: number): number {
     (1 / (stddev * SQRT_2_PI)) *
     Math.exp(-Math.pow(x - mu, 2) / (2 * stddev * stddev))
   );
-}
-
-export function coloredName(entity: Entity): string {
-  let sprite = entity.fetch(Sprite) || { fg: "white" };
-  let name = entity.fetch(EntityInfo);
-
-  if (!name) return `#{${sprite.fg} Entity}`;
-
-  // other items: powerup + heal + add dna slot + ...
-  return `#{${sprite.fg} ${name.name}}`;
 }
 
 export function quadInOut(input: number): number {
@@ -87,7 +78,8 @@ export function pathFromTo(world: World, fromPos: XY, toPos: XY): Loc[] {
 export function pathFromToUsingFov(
   world: World,
   fromPos: XY,
-  toPos: XY
+  toPos: XY,
+  team?: string
 ): Loc[] {
   const posMgr = world.getUnique(PosManager);
   const fov = world.getUnique(FOV);
@@ -97,7 +89,7 @@ export function pathFromToUsingFov(
     toPos,
     (x, y) => {
       if (!posMgr.hasXY(x, y)) return MoveCost.Obstruction;
-      if (!fov.isRevealed(x, y)) return MoveCost.Avoided;
+      if (!fov.isRevealed(x, y)) return MoveCost.Ok; // Assume you can go there
 
       // TODO - Cache tile travel info
       const tileEntity = posMgr.firstAt(x, y, TILE_ASPECT);
@@ -107,8 +99,13 @@ export function pathFromToUsingFov(
 
       // [x] Other blops in way - Blocked
       // TODO - (except dummy b/c swap)
-      if (posMgr.firstAt(x, y, BLOP_ASPECT)) {
-        return MoveCost.Blocked;
+      const entity = posMgr.firstAt(x, y, BLOP_ASPECT);
+      if (entity) {
+        const blop = entity.fetch(Blop)!;
+        if (!blop || !team || blop.team != team) {
+          return MoveCost.Blocked;
+        }
+        return 2; // Swap
       }
 
       // TODO - different move costs for water, etc...
@@ -130,11 +127,12 @@ export function heroPathTo(world: World, pos: XY): Loc[] {
   if (!hero || !hero.isAlive()) return [];
 
   const heroPos = hero.fetch(Pos)!;
-  return pathFromToUsingFov(world, heroPos, pos);
+  const heroBlop = hero.fetch(Blop)!;
+  return pathFromToUsingFov(world, heroPos, pos, heroBlop.team);
 }
 
-// TODO - Facing dir must be on Actor
-export function facingDir(pos: Pos): Loc {
-  // NOTE - If you teleport, you will be facing a random direction (seems fair)
-  return dirBetween(pos.lastX, pos.lastY, pos.x, pos.y);
-}
+// // TODO - Facing dir must be on Actor
+// export function facingDir(pos: Pos): Loc {
+//   // NOTE - If you teleport, you will be facing a random direction (seems fair)
+//   return dirBetween(pos.lastX, pos.lastY, pos.x, pos.y);
+// }

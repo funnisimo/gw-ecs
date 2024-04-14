@@ -17,6 +17,7 @@ import {
   TravelTo,
   Wait,
   addAction,
+  coloredName,
 } from "../comps";
 import { type Buffer } from "gw-utils/buffer";
 import { gotoNextLevel, world } from "../world";
@@ -30,15 +31,15 @@ import { DNA } from "../comps/dna";
 import { Aspect, Entity } from "gw-ecs/entity";
 import { Mixer } from "gw-utils/sprite";
 import { Log } from "../uniques";
-import { coloredName, heroPathTo, pathFromToUsingFov } from "../utils";
-import { FocusHelper } from "../uniques/focusHelper";
+import { heroPathTo } from "../utils";
+import { UiHelper } from "../uniques/uiHelper";
 import { BLACK } from "gw-utils/color";
 import { Interrupt } from "../triggers";
 import { STAIRS_ASPECT } from "../tiles";
 
 export const mainScene = {
   start() {
-    const focus = world.getUniqueOr(FocusHelper, () => new FocusHelper());
+    const focus = world.getUniqueOr(UiHelper, () => new UiHelper());
     const game = world.getUniqueOr(Game, () => new Game());
 
     world.getUnique(Log).add("Welcome to #{teal Bloplike}");
@@ -68,7 +69,7 @@ export const mainScene = {
     console.log("click", ev.x, ev.y);
   },
   mousemove(ev: Event) {
-    const focus = world.getUnique(FocusHelper);
+    const focus = world.getUnique(UiHelper);
     const game = world.getUnique(Game);
     const hero = game.hero;
 
@@ -86,7 +87,7 @@ export const mainScene = {
   },
   keypress(this: Scene, ev: Event) {
     const game = world.getUnique(Game);
-    const focus = world.getUnique(FocusHelper);
+    const focus = world.getUnique(UiHelper);
     const logs = world.getUnique(Log);
     if (game.over) {
       if (ev.key == "Enter") {
@@ -266,7 +267,7 @@ export function drawMapHeader(
 export function drawMap(buffer: Buffer, x0: number, y0: number) {
   const mgr = world.getUnique(PosManager);
   const game = world.getUnique(Game);
-  const focus = world.getUnique(FocusHelper);
+  const focus = world.getUnique(UiHelper);
   const fov = world.getUnique(FOV);
 
   mgr.everyXY((x, y, entities) => {
@@ -288,6 +289,10 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
       let sprite: Mixer = new Mixer(entity.fetch(Sprite)!);
 
       if (fov.isVisible(x, y)) {
+        const blop = entity.fetch(Blop);
+        if (blop && blop.charge > 0) {
+          sprite.mix("teal", 0, blop.charge * 10);
+        }
         const fx = FX_ASPECT.first(entities);
         if (fx) {
           sprite.drawSprite(fx.fetch(Sprite)!);
@@ -295,7 +300,7 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
       } else if (fov.isRevealed(x, y)) {
         sprite.mix(BLACK, 50, 50);
       } else {
-        sprite.mix(BLACK, 100, 100);
+        sprite.blackOut();
       }
 
       buffer.draw(x + x0, y + y0, sprite.ch, sprite.fg, sprite.bg);
@@ -347,7 +352,7 @@ export function drawStatus(
   h: number
 ) {
   const game = world.getUnique(Game);
-  const focus = world.getUnique(FocusHelper);
+  const focus = world.getUnique(UiHelper);
   const hero = game.hero!;
   let xy = focus.pos;
   if (!xy) {

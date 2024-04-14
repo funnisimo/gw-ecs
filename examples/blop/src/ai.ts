@@ -7,6 +7,7 @@ import {
   Attack,
   BLOP_ASPECT,
   Blop,
+  Hero,
   Move,
   TravelTo,
   Wait,
@@ -20,7 +21,7 @@ import {
   BLOP_WANDER_DISTANCE,
 } from "./constants";
 import { findEmptyFloorTileFarFrom } from "./map/utils";
-import { pathFromTo } from "./utils";
+import { pathFromTo, pathFromToUsingFov } from "./utils";
 import { Interrupt } from "./triggers";
 
 ////////////////////////////////////////////
@@ -136,7 +137,9 @@ export function aiTravel(world: World, blop: Entity): boolean {
   }
 
   // [X] Take next step
-  const nextSteps = pathFromTo(world, myPos, travelTo.goal);
+  const nextSteps = blop.has(Hero)
+    ? pathFromToUsingFov(world, myPos, travelTo.goal, blop.fetch(Blop)!.team)
+    : pathFromTo(world, myPos, travelTo.goal);
   console.log(
     "blop travel path",
     myPos.xy(),

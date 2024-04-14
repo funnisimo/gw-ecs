@@ -4,6 +4,7 @@ import type { Entity } from "gw-ecs/entity";
 import type { World } from "gw-ecs/world";
 import { getPath, setPath } from "gw-utils/object";
 import { GameEvent } from "../queues";
+import { Action } from "./action";
 
 export type AiFn = (
   world: World,
@@ -101,7 +102,7 @@ export function takeTurn(world: World, entity: Entity, actTime?: number) {
       console.warn("Actor already scheduled.");
     }
     if (actor.ready) {
-      console.warn("Actor is ready?");
+      console.warn("Actor has action at turn end?", entity.index);
     }
   }
 

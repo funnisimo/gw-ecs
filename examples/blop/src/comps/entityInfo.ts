@@ -1,5 +1,6 @@
-import { Aspect } from "gw-ecs/entity";
+import { Aspect, Entity } from "gw-ecs/entity";
 import { fl, from, type FlagBase } from "gw-utils/flag";
+import { Sprite } from "./sprite";
 
 export enum EntityFlags {
   ALWAYS_INTERRUPT = fl(0),
@@ -36,3 +37,13 @@ export class EntityInfo {
 }
 
 export const ENTITY_INFO_ASPECT = new Aspect(EntityInfo);
+
+export function coloredName(entity: Entity): string {
+  let sprite = entity.fetch(Sprite) || { fg: "white" };
+  let name = entity.fetch(EntityInfo);
+
+  if (!name) return `#{${sprite.fg} Entity}`;
+
+  // other items: powerup + heal + add dna slot + ...
+  return `#{${sprite.fg} ${name.name}}`;
+}

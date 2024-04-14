@@ -3,7 +3,7 @@ import type { XY } from "gw-utils";
 import { FX, Sprite } from "../comps";
 import { PosManager } from "gw-ecs/common/positions";
 import { Timers } from "gw-utils/app";
-import { Game } from "../uniques";
+import { FOV, Game } from "../uniques";
 
 export type ThenFn = (val: any) => any;
 
@@ -33,6 +33,12 @@ export function flash(
   const posMgr = world.getUnique(PosManager);
   const timers = world.getUnique(Timers);
   const game = world.getUnique(Game);
+  const fov = world.getUnique(FOV);
+
+  if (fov && !fov.isVisible(pos.x, pos.y)) {
+    console.log("** OFF SCREEN FX **");
+    ms = 0;
+  }
 
   const entity = world.create(sprite, new FX());
   posMgr.set(entity, pos.x, pos.y);

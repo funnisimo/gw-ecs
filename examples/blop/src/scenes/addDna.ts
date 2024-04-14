@@ -14,7 +14,7 @@ import {
   TakeTurn,
 } from "../comps";
 import { DNA } from "../comps/dna";
-import { coloredName } from "../utils";
+import { coloredName } from "../comps";
 import { drawLines, drawLog, drawMap, drawMapHeader } from "./main";
 import { Log } from "../uniques";
 import { PosManager } from "gw-ecs/common";
@@ -61,6 +61,7 @@ export const addDna: SceneCreateOpts = {
         }
         data.world.destroyNow(data.chromosome);
 
+        // TODO - Log
         addAction(data.entity, new TakeTurn());
       }
       this.stop();

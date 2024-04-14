@@ -20,6 +20,7 @@ import {
   PickupItem,
   takeTurn,
   Action,
+  TakeTurn,
 } from "./comps";
 import { nextLevel } from "./map/nextLevel";
 import { CollisionManager } from "gw-ecs/common/collisions";
@@ -35,7 +36,7 @@ import {
   rescheduleEntity,
   updateVisibility,
 } from "./systems";
-import { FOV, FocusHelper, Game } from "./uniques";
+import { FOV, UiHelper, Game } from "./uniques";
 import { GameEvent } from "./queues";
 import { DnaSystem } from "./systems/dna";
 import { DNA } from "./comps/dna";
@@ -48,7 +49,7 @@ import { MaintainWorld, Schedule } from "gw-ecs/common";
 import { EntitySystemSet } from "gw-ecs/system";
 import * as Constants from "./constants";
 import { Log } from "./uniques/log";
-import { coloredName } from "./utils";
+import { coloredName } from "./comps";
 import { GameTurnSystem } from "./systems/gameTurn";
 import { DropSystem } from "./systems/drops";
 import { Interrupt, MapChanged } from "./triggers";
@@ -114,10 +115,12 @@ function pushChargeSameTeam(actor: Entity, target: Entity, world: World) {
   // TODO - Should this be an action component?
   //      - addAction(actor, new ChargeBlop(target));
   const blop = actor.fetch(Blop)!;
-  world
-    .getUnique(Log)
-    .add(`${coloredName(actor)} charges ${coloredName(target)}!`);
-  blop.charge += 1;
+  if (blop.charge < blop.maxCharge) {
+    world
+      .getUnique(Log)
+      .add(`${coloredName(actor)} charges ${coloredName(target)}!`);
+    blop.charge = Math.min(blop.charge + 1, blop.maxCharge);
+  }
   addAction(actor, new Wait());
   return true;
 }
@@ -131,8 +134,9 @@ function interruptEntity(world: World, interrupt: Interrupt) {
   entity.remove(Attack); // ??
 }
 
-function updateFocusHelper(world: World) {
-  const focus = world.getUnique(FocusHelper);
+// Required b/c
+function updateUiHelper(world: World) {
+  const focus = world.getUnique(UiHelper);
   const game = world.getUnique(Game);
   if (!game.hero || game.over) return;
 
@@ -166,8 +170,9 @@ function swapPlaces(actor: Entity, target: Entity, world: World) {
     const posMgr = world.getUnique(PosManager);
     posMgr.set(actor, targetPos.x, targetPos.y);
     posMgr.set(target, actorPos.lastX, actorPos.lastY);
-    takeTurn(world, actor);
-    addAction(target, new Wait()); // Force a wait so that we don't just re-swap
+    addAction(actor, new TakeTurn());
+    addAction(target, new TakeTurn()); // Force a turn so that we don't just re-swap
+    console.log("- swap places", actor.index, target.index);
     return true;
   }
   return false;
@@ -215,11 +220,13 @@ export const world = new World()
   .addSystemSet(
     new EntitySystemSet("game", ["start", "move", "act", "events", "finish"])
       .addSystem("move", new MoveSystem())
+      // TODO - Trigger
       .addSystem("post-move", new FovSystem().runIf(heroMoved)) // So that FOV is accurate for act, events
       .addSystem("act", new ActionSystem())
       .addSystem("events", new DnaSystem())
       .addSystem("events", new GameOverSystem())
       .addSystem("events", new DropSystem())
+      // TODO - Trigger
       .addSystem("post-events", new FovSystem().runIf(heroTeleported)) // So that teleport updates before next loop
       .addSystem("finish", new RescheduleSystem())
       .addSystem("finish", new MaintainWorld()) // TODO - addMaintainWorld('game', 'finish') -or- both of the following...
@@ -229,7 +236,7 @@ export const world = new World()
   .addSystem(new TimerSystem())
   .addSystem(new GameTurnSystem("game").runIf(gameReady))
   .addTrigger(Interrupt, interruptEntity)
-  .addTrigger(MapChanged, updateFocusHelper)
+  .addTrigger(MapChanged, updateUiHelper)
   .addTrigger(MapChanged, updateFov)
   .start();
 

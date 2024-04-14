@@ -1,4 +1,4 @@
 export * from "./game";
-export * from "./focusHelper";
+export * from "./uiHelper";
 export * from "./log";
 export * from "./fov";

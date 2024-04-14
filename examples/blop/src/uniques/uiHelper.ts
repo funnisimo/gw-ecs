@@ -4,8 +4,9 @@ import { distanceFromTo, equals, type Loc, type XY } from "gw-utils/xy";
 import { BLOP_ASPECT, EntityFlags, EntityInfo, Tile } from "../comps";
 import { Pos } from "gw-ecs/common";
 import { FOV } from "./fov";
+import { Game } from "./game";
 
-export class FocusHelper implements WorldInit {
+export class UiHelper implements WorldInit {
   entities: Entity[];
   entityIndex = 0;
   _pos: XY | null;
@@ -23,6 +24,7 @@ export class FocusHelper implements WorldInit {
       entityDestroyed: (entity) => {
         this.entities = this.entities.filter((e) => e !== entity);
       },
+      // Can't do entityCreated because entity won't have position
     });
 
     // TODO - queue a trigger/queue to reset entities?
@@ -103,8 +105,11 @@ export class FocusHelper implements WorldInit {
       if (fov.isRevealed(pos.x, pos.y)) {
         // blops have to be visible to be seen
         if (!BLOP_ASPECT.match(e) || fov.isVisible(pos.x, pos.y)) {
-          this._pos = pos.xy();
-          return e;
+          if (!equals(pos, this._pos)) {
+            // Need to move to different pos
+            this._pos = pos.xy();
+            return e;
+          }
         }
       }
       tries += 1;
@@ -128,8 +133,11 @@ export class FocusHelper implements WorldInit {
       if (fov.isRevealed(pos.x, pos.y)) {
         // blops have to be visible to be seen
         if (!BLOP_ASPECT.match(e) || fov.isVisible(pos.x, pos.y)) {
-          this._pos = pos.xy();
-          return e;
+          if (!equals(pos, this._pos)) {
+            // Need to move to different pos
+            this._pos = pos.xy();
+            return e;
+          }
         }
       }
       tries += 1;

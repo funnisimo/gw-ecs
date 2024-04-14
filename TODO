@@ -36,6 +36,16 @@ Triggers:
         [] DeleteEntity
         [] CreateEntity
 
+Signals:
+    [] Allow register flag and services on flag
+    [] addSignal('taco' | Taco, [...steps])
+    [] addSignalService('taco' | Taco, 'step'?, new SignalService() | signalFn )
+    [] runSignal('taco' | Taco)
+    [] runSignals()
+    [] setSignal('taco', ...args: any[])
+    [] maintainSignals() - 
+    []
+
 System:
     [] System implements WorldInit
     [] Change 'start' to 'worldInit'
@@ -86,6 +96,11 @@ World:
 Uniques+Globals:
     [] track update?
     [] isUpdated(comp, ticks)?
+
+Entities:
+    [] attach + detach?
+        * To allow you to park entities in other places without them being accessible through normal channels
+        * Like adding an entity into inventory
 
 SystemSet:
     What is default step if you supply custom steps?:
@@ -147,3 +162,9 @@ Docs:
     [] Examples 
     [] interactive manual
     [] typedoc?
+
+Components:
+    [] Make component update a function:
+        [] update(Comp, (c) => {})
+        [] Trigger a notify event after update
+    [] fetch -> read

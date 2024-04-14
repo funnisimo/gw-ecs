@@ -9,7 +9,7 @@ import { Pos, PosManager } from "gw-ecs/common";
 import { createRandomTrigger, createTriggerEntity } from "../dnaTriggers";
 import { createEffectEntity, createRandomEffect } from "../dnaEffects";
 import { FOV, Game, Log } from "../uniques";
-import { coloredName } from "../utils";
+import { coloredName } from "../comps";
 import { findDropPosNear } from "../map/utils";
 import type { XY } from "gw-utils";
 import { MapChanged } from "../triggers";

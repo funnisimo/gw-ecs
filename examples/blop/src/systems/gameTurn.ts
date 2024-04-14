@@ -1,7 +1,7 @@
 import { RunResult, Schedule, ScheduleSystem } from "gw-ecs/common";
 import type { RunIfFn } from "gw-ecs/system";
 import type { World } from "gw-ecs/world";
-import { Actor } from "../comps";
+import { Action, Actor } from "../comps";
 import type { Entity } from "gw-ecs/entity";
 import { coloredName } from "../utils";
 import { Game, Log } from "../uniques";
@@ -49,19 +49,18 @@ export class GameTurnSystem extends ScheduleSystem {
       return RunResult.Ok; // Removes this entity from the schedule
     }
 
-    if (!actor.ai.length) {
-      console.log("game turn for entity with no ai functions!");
-      return RunResult.Ok; // Remove this entity from the schedule
-    }
+    if (!actor.ready) {
+      if (!actor.ai.length) {
+        console.log("game turn for entity with no ai functions!");
+        return RunResult.Ok; // Remove this entity from the schedule
+      }
 
-    if (
-      !actor.ready &&
-      !actor.ai.some((aiFn) => aiFn(world, entity, time, delta))
-    ) {
-      return RunResult.Retry; // Will be unshifted back onto schedule and remain as first entity
+      if (!actor.ai.some((aiFn) => aiFn(world, entity, time, delta))) {
+        return RunResult.Retry; // Will be unshifted back onto schedule and remain as first entity
+      }
     }
     game.changed = true;
-    actor.ready = false;
+    // actor.ready = false;
     actor.scheduled = false;
     super.runEntity(world, entity, time, delta);
     if (!actor.scheduled) {

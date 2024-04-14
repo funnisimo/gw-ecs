@@ -9,7 +9,7 @@ import {
   Collider,
   CollisionManager,
 } from "gw-ecs/common/collisions";
-import { FOV, FocusHelper, Game, Log } from "../uniques";
+import { FOV, UiHelper, Game, Log } from "../uniques";
 import {
   AppearSprite,
   EntityInfo,
@@ -20,7 +20,7 @@ import {
 } from "../comps";
 import { GameEvent } from "../queues";
 import * as XY from "gw-utils/xy";
-import { coloredName } from "../utils";
+import { coloredName } from "../comps";
 import { flash } from "../fx/flash";
 import { Interrupt } from "../triggers";
 
@@ -35,7 +35,7 @@ export class MoveSystem extends EntitySystem {
   // }
 
   runEntity(world: World, entity: Entity, time: number, delta: number): void {
-    const focus = world.getUnique(FocusHelper);
+    const focus = world.getUnique(UiHelper);
     const game = world.getUnique(Game);
     const posMgr = world.getUnique(PosManager);
     const pos = entity.fetch(Pos)!;

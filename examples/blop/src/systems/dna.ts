@@ -6,7 +6,7 @@ import { DNA } from "../comps/dna";
 import { Log } from "../uniques";
 import type { Entity } from "gw-ecs/entity";
 import { QueueSystem } from "gw-ecs/system";
-import { coloredName } from "../utils";
+import { coloredName } from "../comps";
 
 export class DnaSystem extends QueueSystem<GameEvent> {
   constructor(runIf?: RunIfFn) {

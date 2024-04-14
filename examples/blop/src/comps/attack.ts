@@ -6,7 +6,7 @@ import { GameEvent } from "../queues";
 import { takeTurn } from "./actor";
 import { Interrupt } from "../triggers";
 import { Log } from "../uniques";
-import { coloredName } from "../utils";
+import { coloredName } from "./entityInfo";
 import { flash } from "../fx/flash";
 import { Pos } from "gw-ecs/common";
 import { DamageSprite } from "./sprite";

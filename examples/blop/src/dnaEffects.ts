@@ -22,7 +22,7 @@ import { Random, random } from "gw-utils/rng";
 import { App } from "gw-utils/app";
 import { delayedFlash, flash } from "./fx/flash";
 import { Game, Log } from "./uniques";
-import { coloredName } from "./utils";
+import { coloredName } from "./comps";
 import { DIRS, DIRS4, dirSpread, equals, forCircle } from "gw-utils/xy";
 import { MapChanged } from "./triggers";
 import { applyAttack } from "./comps";

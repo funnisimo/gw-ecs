@@ -11,7 +11,7 @@ import * as Constants from "./constants";
 import { flash } from "./fx/flash";
 import { Pos } from "gw-ecs/common";
 import { Log } from "./uniques";
-import { coloredName } from "./utils";
+import { coloredName } from "./comps";
 
 // TODO - Make other drops
 

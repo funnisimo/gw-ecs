@@ -40,21 +40,22 @@ Triggers:
 
 
 Stairs:
-    [] Prompt for usage?  Key for usage?: '>', 'Enter'?
+    [X] Prompt for usage?  Key for usage?: '>', 'Enter'?
     [X] '>' to auto path to stairs
-    [] Brogue style alcove in wall?
+    [-] Brogue style alcove in wall? - Too hard to find locs with the way we are generating the map
         * ###
         * #>#
         * ...
 
 Action Keys:
-    [] 'g' for pickup
-    [] '>' to use stairs
+    [X] 'g' for pickup
+    [X] '>' to use stairs
 
 EntityInfo:
     [X] Combine with `Name`
     [] Add text format info - describeA, describeThe, conjugate, ...
-    [] Move description+name here from `Trigger` and `Effect`
+    [-] Move description+name here from `Trigger` and `Effect`
+        * Maybe when we do different levels
 
 Blops:
     Drops:
@@ -67,10 +68,10 @@ Blops:
         [] Avoid Ember?
         [] Avoid Ice?
     DNA:
-        [] Spawn with DNA
-        [] Spawn with drop as part of DNA
+        [X] Spawn with DNA
+        [X] Spawn with drop as part of DNA
             * If no full slots, drop is half of dna line
-        [] Allow config of full DNA slots
+        [X] Allow config of full DNA slots
     Other:
         [] Vary Blop speeds
         [] Vary Blop AI
@@ -83,7 +84,7 @@ Blops:
 AI:
     [] Allow register + use string id
     [] Detect Ice pathfinding problems
-    [] Ally Blops cannot swap with player - only player with allies
+    [X] Ally Blops cannot swap with player - only player with allies
 
 MoveSystem:
     [X] Collide same team -> swap places as move?
@@ -108,36 +109,37 @@ Items:
     [X] Drops should be marked as seen if they are in the FOV
     [] Log adding to DNA
     [X] Dummy blops do not drop items
-    [] Log Pickup
+    [X] Log Pickup
 
 Log:
     [] Combine logic into/with gw-utils/message
     [] Visible and not visible - different messages
     [] Logs that are too far away should be silent (what range?)
+    Messages:
+        [] 'A Stairs appears.'
+        [] 'A Every7Turns appears.'
 
 Etc:
-    [] There is a double Tab stop at each blop in Game Over mode
+    [X] There is a double Tab stop at each blop in Game Over mode
+        * UiHelper next/prev need to make sure pos changes
     [] Some random new levels have bugs where you cannot move.  Failed to remove all tiles?
 
 TravelTo:
-    [] When traveling - auto update FocusHelper Path on each step
+    [] When traveling - auto update UiHelper Path on each step
     [] -Or- should it be on each hero turn?
     [] Trigger?  Queue?
     Test moving into unexplored void:
         [] updating focushelper path
-        [] not revealing too much about the map unintentionally
+        [X] not revealing too much about the map unintentionally
     [] Traveling over Ice can cause problems!!!
 
-Messages:
-    [] 'A Stairs appears.'
-    [] 'A Every7Turns appears.'
-
 Draw:
-    [] Show 'charge' with color (bg or fg)
-    [] Do not draw FX if !revealed
+    [X] Show 'charge' with color (bg or fg)
+    [X] Do not draw FX if !revealed
 
 Flash:
-    [] Do nothing if NOT visible
+    [X] Do nothing if NOT visible (doesn't spend time flashing off screen)
+        * Ended up making timeout 0
 
 # Future
 
@@ -168,3 +170,5 @@ Observation Mode:
         * will require cloning an item in some fashion
             * How to track Pos?
 
+Oddities:
+    [] Hero dies triggers summonAlly - ally is not in uiHelper in GameOver mode (can't tab to it)

@@ -1,7 +1,7 @@
 import { World } from "gw-ecs/world";
 import { createHero } from "../hero";
 import * as Constants from "../constants";
-import { FOV, FocusHelper, Log } from "../uniques";
+import { FOV, UiHelper, Log } from "../uniques";
 import {
   findClosestEmptyFloor as findClosestSpawnTile,
   findEmptyFloorTile,
@@ -62,7 +62,7 @@ export function nextLevel(world: World) {
   calculateFov(world, game.hero!, false);
   game.changed = true;
 
-  const focus = world.getUnique(FocusHelper);
+  const focus = world.getUnique(UiHelper);
   focus.reset(world, game.hero!.fetch(Pos)!);
 }
 

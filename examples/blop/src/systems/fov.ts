@@ -12,7 +12,7 @@ import {
   Tile,
 } from "../comps";
 import { Aspect, Entity } from "gw-ecs/entity";
-import { coloredName } from "../utils";
+import { coloredName } from "../comps";
 import { flash } from "../fx/flash";
 import { Interrupt } from "../triggers";
 
