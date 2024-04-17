@@ -44,6 +44,7 @@ export const mainScene = {
 
     world.getUnique(Log).add("Welcome to #{teal Bloplike}");
     world.getUnique(Log).add("Can you find the #{pink Blopulet}?");
+    world.getUnique(Log).add("Press '?' for help.");
 
     startNewGame(world);
     // focus.reset(world, game.hero!.fetch(Pos)!);
@@ -102,7 +103,9 @@ export const mainScene = {
       }
       return;
     }
-    if (ev.dir) {
+    if (ev.key === "?") {
+      this.app.show("help");
+    } else if (ev.dir) {
       logs.makeLogsOld();
       focus.clearFocus();
       const hero = game.hero;
@@ -224,25 +227,7 @@ export const mainScene = {
 
 export function drawHelp(buffer: Buffer, h: number) {
   const game = world.getUnique(Game);
-  if (game.over) {
-    buffer.drawText(0, 0, "#{red GAME OVER} - The #{yellow Hero} died");
-    buffer.drawText(0, 2, "Controls:");
-    buffer.drawText(0, 3, "#{green Enter}   - Start a new game");
-    buffer.drawText(0, 4, "#{green Tab/TAB} - Observation mode");
-  } else {
-    buffer.drawText(0, 0, "#{teal Bloplike 7DRL} - originally by Drestin");
-    buffer.drawText(0, 2, "Controls:");
-    buffer.drawText(
-      0,
-      3,
-      "#{green Arrows}  - Move/Attack | #{green g} - Pickup item"
-    );
-    buffer.drawText(
-      0,
-      4,
-      "#{green Tab/TAB} - Observe     | #{green >} - Find/Use stairs"
-    );
-  }
+  buffer.drawText(0, 0, "#{teal Bloplike 7DRL} - originally by Drestin");
 }
 
 export function drawMapHeader(
@@ -443,7 +428,7 @@ export function drawBlopStatus(
 export function drawLines(buffer: Buffer) {
   buffer.drawLineH(
     0,
-    Constants.HELP_HEIGHT + 1,
+    Constants.HELP_HEIGHT, // after help
     Constants.HELP_WIDTH,
     "-",
     "white",
@@ -451,7 +436,7 @@ export function drawLines(buffer: Buffer) {
   );
   buffer.drawLineV(
     Constants.MAP_WIDTH,
-    Constants.HELP_HEIGHT + 2,
+    Constants.HELP_HEIGHT + 1,
     Constants.MAP_HEIGHT + 2,
     "|",
     "white",
@@ -459,7 +444,7 @@ export function drawLines(buffer: Buffer) {
   );
   buffer.drawLineH(
     0,
-    Constants.MAP_HEADER_TOP + 1,
+    Constants.MAP_HEADER_TOP + 1, // after map header
     Constants.MAP_WIDTH,
     "-",
     "white",
@@ -467,7 +452,7 @@ export function drawLines(buffer: Buffer) {
   );
   buffer.drawLineH(
     0,
-    Constants.MAP_TOP + Constants.MAP_HEIGHT,
+    Constants.MAP_TOP + Constants.MAP_HEIGHT, // after map
     Constants.SCREEN_WIDTH,
     "-",
     "white",

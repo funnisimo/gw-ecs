@@ -90,11 +90,11 @@ export const SCREEN_HEIGHT = 40;
 export const HELP_TOP = 0;
 export const HELP_LEFT = 0;
 export const HELP_WIDTH = SCREEN_WIDTH;
-export const HELP_HEIGHT = 4;
+export const HELP_HEIGHT = 1;
 
 export const MAP_WIDTH = WORLD_WIDTH;
 export const MAP_HEIGHT = WORLD_HEIGHT;
-export const MAP_HEADER_TOP = HELP_TOP + HELP_HEIGHT + 2;
+export const MAP_HEADER_TOP = HELP_TOP + HELP_HEIGHT + 1;
 export const MAP_HEADER_WIDTH = MAP_WIDTH;
 export const MAP_TOP = MAP_HEADER_TOP + 2;
 export const MAP_LEFT = 0;

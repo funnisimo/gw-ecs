@@ -38,13 +38,14 @@ Triggers:
 
 Signals:
     [] Allow register flag and services on flag
-    [] addSignal('taco' | Taco, [...steps])
-    [] addSignalService('taco' | Taco, 'step'?, new SignalService() | signalFn )
-    [] runSignal('taco' | Taco)
-    [] runSignals()
-    [] setSignal('taco', ...args: any[])
-    [] maintainSignals() - 
-    []
+    [] addSignal('taco', [...steps])
+    [] addSignalStep('taco', 'step', addStepOpts)
+    [] addSignalService('taco', 'step'?, new SignalService() | signalFn )
+    [] runSignal('taco', 'set'?, 'step'?)
+    [] runSignals('set'?, 'step'?)
+    [] setSignal('taco')
+    [] maintainSignals() - ??? 
+    [] 
 
 System:
     [] System implements WorldInit
