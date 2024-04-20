@@ -6,7 +6,7 @@ export class Resources {
   _data: Map<AnyComponent, any> = new Map();
 
   set<T>(val: T) {
-    const comp = (<any>val).constructor;
+    const comp = (<Object>val).constructor as Component<T>;
     this._data.set(comp!, val);
   }
 
@@ -14,15 +14,16 @@ export class Resources {
     return this._data.get(comp);
   }
 
-  // getOr<T>(comp: Component<T>, fn: () => T): T {
-  //   const v = this._data.get(comp);
-  //   if (v !== undefined) {
-  //     return v;
-  //   }
-  //   const newV = fn();
-  //   this.set(newV);
-  //   return newV;
-  // }
+  // NOTE - World should not use this b/c it does not do WorldInit
+  getOr<T>(comp: Component<T>, fn: () => T): T {
+    const v = this._data.get(comp);
+    if (v !== undefined) {
+      return v;
+    }
+    const newV = fn();
+    this.set(newV);
+    return newV;
+  }
 
   delete<T>(comp: Component<T>) {
     this._data.delete(comp);
