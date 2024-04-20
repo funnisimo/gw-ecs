@@ -90,7 +90,7 @@ MoveSystem:
     [X] Collide same team -> swap places as move?
     [X] Mark Hero friends with Ally component
     [] Log slides?
-    [] Pathfinding - swapable entities have cost 2, not AVOID
+    [X] Pathfinding - swapable entities have cost 2, not AVOID
 
 Tiles:
     [] Lava damages blops and hero

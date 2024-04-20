@@ -8,7 +8,7 @@ import { Level } from "./level.js";
 import { AddStepOpts } from "../system/systemSet.js";
 import {
   ComponentSource,
-  Entities,
+  WorldEntities,
   Entity,
   EntityWatcher,
 } from "../entity/entity.js";
@@ -57,17 +57,16 @@ class WorldComponentSource implements ComponentSource {
     val: T,
     comp?: Component<T> | undefined
   ): void {
-    // @ts-ignore
-    comp = comp || val.constructor;
+    comp = comp || ((<Object>val).constructor as Component<T>);
     if (!comp) throw new Error("Missing constructor!");
     const mgr = this.world.level.getStore(comp);
     if (!mgr) throw new Error("Using unregistered component: " + comp.name);
-    mgr.set(entity, val);
+    mgr.set(entity, val, this.world._currentTick);
   }
 
   removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined {
     const mgr = this.world.level.getStore(comp);
-    return mgr && mgr.remove(entity);
+    return mgr && mgr.remove(entity, this.world._currentTick);
   }
 }
 
@@ -75,7 +74,7 @@ export class World {
   _globals: Resources;
   _systems: SystemManager;
   _level: Level;
-  _entities: Entities;
+  _entities: WorldEntities;
   _toDestroy: Entity[];
   _triggers: TriggerManager;
 
@@ -89,7 +88,7 @@ export class World {
     this._globals = globals || new Resources();
     this._systems = new SystemManager();
     this._triggers = new TriggerManager();
-    this._entities = new Entities(new WorldComponentSource(this));
+    this._entities = new WorldEntities(new WorldComponentSource(this));
     this._entities.notify(new WorldEntityWatcher(this));
     this._delta = 0;
     this._time = 0;
@@ -338,7 +337,7 @@ export class World {
 
   ////////////
 
-  entities(): Entities {
+  entities(): WorldEntities {
     return this._entities;
   }
   create(bundle: Bundle, ...extraComps: AnyComponentArg[]): Entity;

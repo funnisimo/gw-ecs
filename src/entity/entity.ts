@@ -1,6 +1,7 @@
 import type { Component, AnyComponent } from "../component/component.js";
 
 export interface ComponentSource {
+  // TODO - updateComponent instead of getTick
   getTick(): number;
   setComponent<T>(entity: Entity, val: T, comp?: Component<T>): void; // TODO - Return replaced value?
   removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined;
@@ -34,13 +35,14 @@ export class Entity {
   index: Index;
   gen: Gen;
 
-  _source: ComponentSource | null;
+  // _source: ComponentSource | null;
   _comps: Map<AnyComponent, AnyCompData>;
 
-  constructor(index: Index, gen: Gen = 1, source?: ComponentSource) {
+  // constructor(index: Index, gen: Gen = 1, source?: ComponentSource) {
+  constructor(index: Index, gen: Gen = 1) {
     this.index = index;
     this.gen = gen;
-    this._source = source || null;
+    // this._source = source || null;
     this._comps = new Map();
   }
 
@@ -84,11 +86,8 @@ export class Entity {
   }
 
   set<T>(val: T, comp?: Component<T>): void {
-    // @ts-ignore
-    comp = comp || val.constructor;
-    this._source
-      ? this._source.setComponent(this, val, comp)
-      : this._setComp(comp!, val);
+    comp = comp || ((<Object>val).constructor as Component<T>);
+    this._setComp(comp!, val, 0);
   }
 
   setAll(...val: any[]): void {
@@ -97,15 +96,12 @@ export class Entity {
     });
   }
 
-  _setComp(comp: AnyComponent, val: any): void {
+  _setComp(comp: AnyComponent, val: any, tick: number): void {
     const data = this._comps.get(comp);
     if (!data) {
-      this._comps.set(
-        comp,
-        new CompData(val, this._source ? this._source.getTick() : 0)
-      );
+      this._comps.set(comp, new CompData(val, tick));
     } else {
-      data.added = data.updated = this._source ? this._source.getTick() : 0;
+      data.added = data.updated = tick;
       data.removed = -1;
       data.data = val;
     }
@@ -117,15 +113,13 @@ export class Entity {
   }
 
   remove<T>(comp: Component<T>): T | undefined {
-    return this._source
-      ? this._source.removeComponent(this, comp)
-      : this._removeComp(comp);
+    return this._removeComp(comp, 0);
   }
 
-  _removeComp<T>(comp: AnyComponent): T | undefined {
+  _removeComp<T>(comp: AnyComponent, tick: number): T | undefined {
     const data = this._comps.get(comp);
     if (data && data.removed < 0) {
-      data.removed = this._source ? this._source.getTick() : 0;
+      data.removed = tick;
       return data.data;
     }
     return undefined;
@@ -145,10 +139,7 @@ export class Entity {
   }
 
   update<T>(comp: Component<T>): T | undefined {
-    const data = this._comps.get(comp);
-    if (!data || data.removed >= 0) return undefined;
-    this._updateComp(comp);
-    return data.data;
+    return this._updateComp(comp, 0);
   }
 
   updateOr<T>(comp: Component<T>, fn: () => T): T {
@@ -160,11 +151,11 @@ export class Entity {
     return t;
   }
 
-  _updateComp(comp: AnyComponent): void {
+  _updateComp<T>(comp: Component<T>, tick: number): T | undefined {
     const data = this._comps.get(comp);
-    if (data) {
-      data.updated = this._source ? this._source.getTick() : 0;
-    }
+    if (!data || data.removed >= 0) return undefined;
+    data.updated = tick;
+    return data.data;
   }
 
   isUpdatedSince(comp: AnyComponent, tick: number): boolean {
@@ -187,12 +178,34 @@ export class Entity {
   }
 }
 
+export class WorldEntity extends Entity {
+  _source: ComponentSource;
+
+  constructor(index: Index, gen: Gen = 1, source: ComponentSource) {
+    super(index, gen);
+    this._source = source;
+  }
+
+  set<T>(val: T, comp?: Component<T>): void {
+    comp = comp || ((<Object>val).constructor as Component<T>);
+    this._source.setComponent(this, val, comp);
+  }
+
+  remove<T>(comp: Component<T>): T | undefined {
+    return this._source.removeComponent(this, comp);
+  }
+
+  update<T>(comp: Component<T>): T | undefined {
+    return this._updateComp(comp, this._source.getTick());
+  }
+}
+
 export interface EntityWatcher {
   entityCreated?(entity: Entity): void;
   entityDestroyed?(entity: Entity): void;
 }
 
-export class Entities {
+export class WorldEntities {
   _all: (Entity | number)[];
   _source: ComponentSource;
   _notify: EntityWatcher[];
@@ -219,12 +232,12 @@ export class Entities {
     const index = this._all.findIndex((e) => typeof e === "number");
     if (index >= 0) {
       const oldGen = this._all[index] as number;
-      const entity = new Entity(index, oldGen + 1, this._source);
+      const entity = new WorldEntity(index, oldGen + 1, this._source);
       this._all[index] = entity;
       this._notify.forEach((h) => h.entityCreated && h.entityCreated(entity));
       return entity;
     }
-    const newE = new Entity(this._all.length, 1, this._source);
+    const newE = new WorldEntity(this._all.length, 1, this._source);
     this._all.push(newE);
     this._notify.forEach((h) => h.entityCreated && h.entityCreated(newE));
     return newE;

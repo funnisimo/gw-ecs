@@ -90,22 +90,9 @@ export const addDna: SceneCreateOpts = {
 
     drawLines(buffer);
 
-    drawMapHeader(
-      buffer,
-      Constants.MAP_LEFT,
-      Constants.MAP_HEADER_TOP,
-      Constants.MAP_WIDTH,
-      1
-    );
-    drawMap(buffer, Constants.MAP_LEFT, Constants.MAP_TOP);
-    drawLog(
-      buffer,
-      this.data.world.getUnique(Log),
-      Constants.LOG_LEFT,
-      Constants.LOG_TOP,
-      Constants.LOG_WIDTH,
-      Constants.LOG_HEIGHT
-    );
+    drawMapHeader(buffer, 0, Constants.MAP_HEADER_TOP);
+    drawMap(buffer, Constants.MAP_BOUNDS);
+    drawLog(buffer, this.data.world.getUnique(Log), Constants.LOG_BOUNDS);
 
     drawAddDnaStatus(buffer, this.data as MyData);
     //   Constants.SIDEBAR_LEFT,
@@ -153,10 +140,10 @@ function drawDnaHelp(buffer: Buffer, data: MyData) {
 }
 
 export function drawAddDnaStatus(buffer: Buffer, data: MyData) {
-  const x0 = Constants.SIDEBAR_LEFT;
-  const y0 = Constants.SIDEBAR_TOP;
-  const w = Constants.SIDEBAR_WIDTH;
-  const h = Constants.SIDEBAR_HEIGHT;
+  const x0 = Constants.SIDEBAR_BOUNDS.left;
+  const y0 = Constants.SIDEBAR_BOUNDS.top;
+  const w = Constants.SIDEBAR_BOUNDS.width;
+  const h = Constants.SIDEBAR_BOUNDS.height;
 
   buffer.fillRect(x0, y0, w, h, " ", "white", "black");
 

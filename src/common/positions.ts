@@ -160,10 +160,12 @@ export class Pos {
 export class PosManager implements EntityWatcher, WorldInit {
   _size: [number, number];
   _entitiesAt: Map<Index, Entity[]>;
+  _tickSource: () => number;
 
   constructor(width: number, height: number) {
     this._size = [width, height];
     this._entitiesAt = new Map();
+    this._tickSource = () => 0;
   }
 
   get width(): number {
@@ -184,6 +186,7 @@ export class PosManager implements EntityWatcher, WorldInit {
   worldInit(world: World): void {
     // TODO - Make this a temp object instead of implementing the interface
     world.entities().notify(this); // Register interest in destroy events
+    this._tickSource = () => world._currentTick;
   }
 
   _getIndex(x: number, y: number): number {
@@ -248,7 +251,7 @@ export class PosManager implements EntityWatcher, WorldInit {
       }
       pos._set(x, y);
     } else {
-      entity._setComp(Pos, new Pos(/* this, */ x, y));
+      entity._setComp(Pos, new Pos(/* this, */ x, y), this._tickSource());
     }
     const index = this._getIndex(x, y);
     let entities = this._entitiesAt.get(index);
@@ -269,7 +272,7 @@ export class PosManager implements EntityWatcher, WorldInit {
     if (entityIndex >= 0) {
       entities.splice(entityIndex, 1);
     }
-    entity._removeComp(Pos);
+    entity._removeComp(Pos, this._tickSource());
   }
 
   // TODO - cb: (xy, entities) => any

@@ -9,16 +9,17 @@ export interface StoreWatcher<T> {
 export interface CompStore<T> extends EntityWatcher {
   has(entity: Entity): boolean;
 
-  set(entity: Entity, comp: T): void;
+  set(entity: Entity, comp: T, tick?: number): void;
   fetch(entity: Entity): T | undefined;
-  update(entity: Entity): T | undefined;
-  remove(entity: Entity): T | undefined; // This is immediate
+  update(entity: Entity, tick?: number): T | undefined;
+  remove(entity: Entity, tick?: number): T | undefined; // This is immediate
 
   singleEntity(): Entity | undefined;
   forEach(fn: (entity: Entity, comp: T) => void): void;
 
   notify(watcher: StoreWatcher<T>): void;
   stopNotify(watcher: StoreWatcher<T>): void;
+  // setTickSource(source: () => number): void;
 
   entities(): Entity[];
   values(): T[];
@@ -38,12 +39,18 @@ export class SetStore<T> implements CompStore<T> {
   _comp: Component<T>;
   _data: Set<Entity>;
   _watchers: (StoreWatcher<T> | null)[];
+  // _tickSource: () => number;
 
   constructor(comp: Component<T>) {
     this._comp = comp;
     this._data = new Set();
     this._watchers = [];
+    // this._tickSource = () => 0;
   }
+
+  // setTickSource(source: () => number): void {
+  //   this._tickSource = source;
+  // }
 
   notify(watcher: StoreWatcher<T>) {
     // TODO - make sure we don't have duplicates
@@ -68,9 +75,9 @@ export class SetStore<T> implements CompStore<T> {
    * @param comp
    * @returns Prior value - if any
    */
-  set(entity: Entity, comp: T): void {
+  set(entity: Entity, comp: T, tick: number = 0): void {
     if (!entity.isAlive()) return undefined;
-    entity._setComp(this._comp, comp);
+    entity._setComp(this._comp, comp, tick);
     this._data.add(entity);
     this._watchers.forEach((w) => w && w.compSet && w.compSet(entity, comp));
   }
@@ -80,16 +87,16 @@ export class SetStore<T> implements CompStore<T> {
     return entity.fetch(this._comp);
   }
 
-  update(entity: Entity): T | undefined {
+  update(entity: Entity, tick: number = 0): T | undefined {
     if (!entity.isAlive()) return undefined;
-    return entity.update(this._comp);
+    return entity._updateComp(this._comp, tick);
   }
 
   // This is immediate
-  remove(entity: Entity): T | undefined {
+  remove(entity: Entity, tick: number = 0): T | undefined {
     if (!entity.isAlive()) return undefined;
     const v = entity.fetch(this._comp);
-    entity._removeComp(this._comp);
+    entity._removeComp(this._comp, tick);
     this._data.delete(entity);
     if (v) {
       this._watchers.forEach(

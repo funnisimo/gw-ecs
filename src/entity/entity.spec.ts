@@ -1,5 +1,5 @@
 import "jest-extended";
-import { Entities, ComponentSource, Entity } from "./entity";
+import { WorldEntities, ComponentSource, Entity } from "./entity";
 
 class CompA {
   data: number;
@@ -13,13 +13,17 @@ describe("Entity", () => {
   let setComponent: jest.Mock;
   let removeComponent: jest.Mock;
   let getTick: jest.Mock;
-  let entities: Entities;
+  let entities: WorldEntities;
   let source: ComponentSource;
 
   beforeEach(() => {
     getTick = jest.fn().mockReturnValue(1);
-    setComponent = jest.fn().mockImplementation((e, v, c) => e._setComp(c, v));
-    removeComponent = jest.fn().mockImplementation((e, c) => e._removeComp(c));
+    setComponent = jest
+      .fn()
+      .mockImplementation((e, v, c) => e._setComp(c, v, 1));
+    removeComponent = jest
+      .fn()
+      .mockImplementation((e, c) => e._removeComp(c, 1));
 
     source = {
       getTick,
@@ -27,7 +31,7 @@ describe("Entity", () => {
       removeComponent,
     };
 
-    entities = new Entities(source);
+    entities = new WorldEntities(source);
   });
 
   test("stand alone", () => {

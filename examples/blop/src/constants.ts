@@ -1,4 +1,5 @@
-import * as GWU from "gw-utils";
+import { Bounds } from "gw-utils/xy";
+import { color as Color } from "gw-utils";
 
 //////////////////////////////////////////////////////
 // MAP
@@ -86,62 +87,68 @@ export const REINFORCE_AMOUNT = 1;
 
 export const SCREEN_WIDTH = 50;
 export const SCREEN_HEIGHT = 40;
+export const MAP_WIDTH = WORLD_WIDTH;
+export const MAP_HEIGHT = WORLD_HEIGHT;
 
 export const HELP_TOP = 0;
 export const HELP_LEFT = 0;
 export const HELP_WIDTH = SCREEN_WIDTH;
 export const HELP_HEIGHT = 1;
 
-export const MAP_WIDTH = WORLD_WIDTH;
-export const MAP_HEIGHT = WORLD_HEIGHT;
-export const MAP_HEADER_TOP = HELP_TOP + HELP_HEIGHT + 1;
+export const MAP_HEADER_TOP = 2;
 export const MAP_HEADER_WIDTH = MAP_WIDTH;
-export const MAP_TOP = MAP_HEADER_TOP + 2;
-export const MAP_LEFT = 0;
 
-export const SIDEBAR_LEFT = MAP_WIDTH + 1;
-export const SIDEBAR_TOP = MAP_HEADER_TOP;
-export const SIDEBAR_WIDTH = SCREEN_WIDTH - MAP_WIDTH - 1;
-export const SIDEBAR_HEIGHT = MAP_HEIGHT + 2; // including header
-
-export const LOG_TOP = MAP_TOP + MAP_HEIGHT + 1;
-export const LOG_LEFT = 0;
-export const LOG_WIDTH = SCREEN_WIDTH;
-export const LOG_HEIGHT = SCREEN_HEIGHT - LOG_TOP;
+export const MAP_BOUNDS = new Bounds(0, 4, MAP_WIDTH, MAP_HEIGHT);
+export const SIDEBAR_BOUNDS = new Bounds(
+  MAP_WIDTH + 1,
+  MAP_HEADER_TOP,
+  SCREEN_WIDTH - MAP_WIDTH - 1,
+  MAP_HEIGHT + 2
+);
+export const LOG_BOUNDS = new Bounds(
+  0,
+  MAP_BOUNDS.bottom + 1,
+  SCREEN_WIDTH,
+  SCREEN_HEIGHT - MAP_BOUNDS.bottom - 1
+);
+// export const LOG_TOP = MAP_BOUNDS.bottom + 1;
+// export const LOG_LEFT = 0;
+// export const LOG_WIDTH = SCREEN_WIDTH;
+// export const LOG_HEIGHT = SCREEN_HEIGHT - LOG_TOP;
 
 //////////////////////////////////////////////////////
 // COLORS
 //////////////////////////////////////////////////////
 
-export const BACKGROUND_COLOR = GWU.color.make("black");
-export const DEFAULT_TEXT_COLOR = GWU.color.make("#ddd");
-export const GREYED_COLOR = GWU.color.make("grey");
-export const LINE_COLOR = GWU.color.make("#ccc");
+export const BACKGROUND_COLOR = Color.make("black");
+export const DEFAULT_TEXT_COLOR = Color.make("#ddd");
+export const GREYED_COLOR = Color.make("grey");
+export const LINE_COLOR = Color.make("#ccc");
 export const CURSOR_COLOR = DEFAULT_TEXT_COLOR;
-export const HELP_COLOR = GWU.color.make("#bbb");
+export const HELP_COLOR = Color.make("#bbb");
 export const DESCRIPTION_COLOR = HELP_COLOR;
-export const SELECTION_BG_COLOR = GWU.color.make("#444");
-export const GOOD_COLOR = GWU.color.make("lime");
-export const BAD_COLOR = GWU.color.make("crimson");
-export const GUIDE_TEXT_COLOR = GWU.color.make("#76befc");
-export const PLAYER_COLOR = GWU.color.make("white");
-export const FLASH_COLOR_LOSE_LIFE = GWU.color.make("red");
-export const FLASH_COLOR_PICK_GENE = GWU.color.make("#66f");
-export const FLASH_COLOR_HEAL = GWU.color.make("lime");
-export const FLASH_COLOR_MISSED_HIT = GWU.color.make("dark_grey");
-export const FLASH_COLOR_TELEPORT = GWU.color.make("cyan");
-export const FLASH_COLOR_DESTROY_WALL = GWU.color.make("orange");
-export const FLASH_COLOR_SHOCK = GWU.color.make("#0ef");
-export const FLASH_COLOR_SUMMON = GWU.color.make("#0d05fc");
-export const FLASH_COLOR_TRIGGERED_CHROMOSOME = GWU.color.make("#666");
-export const FLASH_COLOR_EXPLOSION = GWU.color.make("orange");
-export const FLASH_COLOR_LASER = GWU.color.make("pink");
-export const HEALTH_GAUGE_FULL_COLOR = GWU.color.make("#1efc0a");
-export const HEALTH_GAUGE_EMPTY_COLOR = GWU.color.make("red");
-export const ITEM_COLOR = GWU.color.make("#db49fc");
-export const BLOPULET_COLOR = GWU.color.make("gold");
-export const TRIGGER_GENE_COLOR = GWU.color.make("#05fca9");
-export const EFFECT_GENE_COLOR = GWU.color.make("cyan");
+export const SELECTION_BG_COLOR = Color.make("#444");
+export const GOOD_COLOR = Color.make("lime");
+export const BAD_COLOR = Color.make("crimson");
+export const GUIDE_TEXT_COLOR = Color.make("#76befc");
+export const PLAYER_COLOR = Color.make("white");
+export const FLASH_COLOR_LOSE_LIFE = Color.make("red");
+export const FLASH_COLOR_PICK_GENE = Color.make("#66f");
+export const FLASH_COLOR_HEAL = Color.make("lime");
+export const FLASH_COLOR_MISSED_HIT = Color.make("dark_grey");
+export const FLASH_COLOR_TELEPORT = Color.make("cyan");
+export const FLASH_COLOR_DESTROY_WALL = Color.make("orange");
+export const FLASH_COLOR_SHOCK = Color.make("#0ef");
+export const FLASH_COLOR_SUMMON = Color.make("#0d05fc");
+export const FLASH_COLOR_TRIGGERED_CHROMOSOME = Color.make("#666");
+export const FLASH_COLOR_EXPLOSION = Color.make("orange");
+export const FLASH_COLOR_LASER = Color.make("pink");
+export const HEALTH_GAUGE_FULL_COLOR = Color.make("#1efc0a");
+export const HEALTH_GAUGE_EMPTY_COLOR = Color.make("red");
+export const ITEM_COLOR = Color.make("#db49fc");
+export const BLOPULET_COLOR = Color.make("gold");
+export const TRIGGER_GENE_COLOR = Color.make("#05fca9");
+export const EFFECT_GENE_COLOR = Color.make("cyan");
 
 //////////////////////////////////////////////////////
 // STRINGS

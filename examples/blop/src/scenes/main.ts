@@ -36,6 +36,7 @@ import { UiHelper } from "../uniques/uiHelper";
 import { BLACK } from "gw-utils/color";
 import { Interrupt } from "../triggers";
 import { STAIRS_ASPECT } from "../tiles";
+import type { Bounds } from "gw-utils/xy";
 
 export const mainScene = {
   start() {
@@ -49,23 +50,23 @@ export const mainScene = {
     startNewGame(world);
     // focus.reset(world, game.hero!.fetch(Pos)!);
   },
-  click(ev: Event) {
-    if (ev.x < Constants.MAP_WIDTH) {
-      if (ev.y >= Constants.MAP_TOP && ev.y < Constants.LOG_TOP - 1) {
-        const x = ev.x;
-        const y = ev.y - Constants.MAP_TOP;
+  click(this: Scene, ev: Event) {
+    if (Constants.MAP_BOUNDS.contains(ev)) {
+      const { x, y } = Constants.MAP_BOUNDS.getInternalXY(ev);
 
-        const mgr = world.getUnique(PosManager);
-        const entities = mgr.getAt(x, y);
-        console.log("map click", x, y, entities);
+      const mgr = world.getUnique(PosManager);
+      const entities = mgr.getAt(x, y);
+      console.log("map click", x, y, entities);
 
-        const game = world.getUnique(Game);
-        const hero = game.hero;
-        if (hero && hero.isAlive() && !game.over) {
-          hero.set(new TravelTo({ x, y }));
-        }
-        return;
+      const game = world.getUnique(Game);
+      const hero = game.hero;
+      if (hero && hero.isAlive() && !game.over) {
+        hero.set(new TravelTo({ x, y }));
       }
+      return;
+    } else if (Constants.LOG_BOUNDS.contains(ev)) {
+      this.app.show("archive");
+      return;
     }
     console.log("click", ev.x, ev.y);
   },
@@ -74,14 +75,11 @@ export const mainScene = {
     const game = world.getUnique(Game);
     const hero = game.hero;
 
-    if (ev.x < Constants.MAP_WIDTH) {
-      if (ev.y >= Constants.MAP_TOP && ev.y < Constants.LOG_TOP - 1) {
-        const x = ev.x;
-        const y = ev.y - Constants.MAP_TOP;
-        game.changed = !focus.pos || focus.pos.x !== x || focus.pos.y !== y;
-        focus.focusAt({ x, y }, heroPathTo(world, { x, y }));
-        return;
-      }
+    if (Constants.MAP_BOUNDS.contains(ev)) {
+      const { x, y } = Constants.MAP_BOUNDS.getInternalXY(ev);
+      game.changed = !focus.pos || focus.pos.x !== x || focus.pos.y !== y;
+      focus.focusAt({ x, y }, heroPathTo(world, { x, y }));
+      return;
     }
     game.changed = !!focus.pos; // If there is a focus then we are removing it so that is a change
     focus.clearFocus();
@@ -105,6 +103,8 @@ export const mainScene = {
     }
     if (ev.key === "?") {
       this.app.show("help");
+    } else if (ev.key == "l") {
+      this.app.show("archive");
     } else if (ev.dir) {
       logs.makeLogsOld();
       focus.clearFocus();
@@ -199,29 +199,10 @@ export const mainScene = {
 
     drawHelp(buffer, Constants.HELP_HEIGHT);
 
-    drawMapHeader(
-      buffer,
-      Constants.MAP_LEFT,
-      Constants.MAP_HEADER_TOP,
-      Constants.MAP_WIDTH,
-      1
-    );
-    drawMap(buffer, Constants.MAP_LEFT, Constants.MAP_TOP);
-    drawLog(
-      buffer,
-      world.getUnique(Log),
-      Constants.LOG_LEFT,
-      Constants.LOG_TOP,
-      Constants.LOG_WIDTH,
-      Constants.LOG_HEIGHT
-    );
-    drawStatus(
-      buffer,
-      Constants.SIDEBAR_LEFT,
-      Constants.SIDEBAR_TOP,
-      Constants.SIDEBAR_WIDTH,
-      Constants.SIDEBAR_HEIGHT
-    );
+    drawMapHeader(buffer, 0, Constants.MAP_HEADER_TOP);
+    drawMap(buffer, Constants.MAP_BOUNDS);
+    drawLog(buffer, Constants.LOG_BOUNDS);
+    drawStatus(buffer, Constants.SIDEBAR_BOUNDS);
   },
 };
 
@@ -230,17 +211,11 @@ export function drawHelp(buffer: Buffer, h: number) {
   buffer.drawText(0, 0, "#{teal Bloplike 7DRL} - originally by Drestin");
 }
 
-export function drawMapHeader(
-  buffer: Buffer,
-  x0: number,
-  y0: number,
-  w: number,
-  h: number
-) {
+export function drawMapHeader(buffer: Buffer, x: number, y: number) {
   const game = world.getUnique(Game);
   buffer.drawText(
-    x0,
-    y0,
+    x,
+    y,
     `Depth: ${game.depth}`,
     "white",
     null,
@@ -249,7 +224,7 @@ export function drawMapHeader(
   );
 }
 
-export function drawMap(buffer: Buffer, x0: number, y0: number) {
+export function drawMap(buffer: Buffer, bounds: Bounds) {
   const mgr = world.getUnique(PosManager);
   const game = world.getUnique(Game);
   const focus = world.getUnique(UiHelper);
@@ -257,7 +232,7 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
 
   mgr.everyXY((x, y, entities) => {
     if (entities.length == 0) {
-      buffer.draw(x + x0, y + y0, "?", "red");
+      buffer.draw(x + bounds.x, y + bounds.y, "?", "red");
     } else {
       // TODO - Charge effect
       let entity = HERO_ASPECT.first(entities);
@@ -288,30 +263,33 @@ export function drawMap(buffer: Buffer, x0: number, y0: number) {
         sprite.blackOut();
       }
 
-      buffer.draw(x + x0, y + y0, sprite.ch, sprite.fg, sprite.bg);
+      buffer.draw(x + bounds.x, y + bounds.y, sprite.ch, sprite.fg, sprite.bg);
     }
   }, new Aspect(Pos, Sprite));
 
   if (focus.pos) {
-    buffer.invert(focus.pos.x + x0, focus.pos.y + y0);
+    buffer.invert(focus.pos.x + bounds.x, focus.pos.y + bounds.y);
   }
   if (focus.path && focus.path.length) {
     // Avoid first and last
     for (let i = 0; i < focus.path.length - 1; ++i) {
       const loc = focus.path[i];
-      buffer.highlight(loc[0] + x0, loc[1] + y0, "yellow", 50);
+      buffer.highlight(loc[0] + bounds.x, loc[1] + bounds.y, "yellow", 50);
     }
   }
 }
 
-export function drawLog(
-  buffer: Buffer,
-  logs: Log,
-  x0: number,
-  y0: number,
-  _w: number,
-  h: number
-) {
+export function drawLog(buffer: Buffer, bounds: Bounds, height?: number) {
+  const h = height || Constants.LOG_BOUNDS.height;
+  const w = Constants.LOG_BOUNDS.width;
+
+  const x0 = Constants.LOG_BOUNDS.left;
+  const y0 = Constants.LOG_BOUNDS.bottom - h;
+
+  const logs = world.getUnique(Log);
+
+  buffer.blackOutRect(x0, y0, w, h);
+
   for (let i = 0; i < h; ++i) {
     let y = y0 + h - i - 1;
     const log = logs.get(i);
@@ -329,13 +307,12 @@ export function drawLog(
   }
 }
 
-export function drawStatus(
-  buffer: Buffer,
-  x0: number,
-  y0: number,
-  w: number,
-  h: number
-) {
+export function drawStatus(buffer: Buffer, bounds: Bounds) {
+  const x0 = Constants.SIDEBAR_BOUNDS.left;
+  const y0 = Constants.SIDEBAR_BOUNDS.top;
+  const w = Constants.SIDEBAR_BOUNDS.width;
+  const h = Constants.SIDEBAR_BOUNDS.height;
+
   const game = world.getUnique(Game);
   const focus = world.getUnique(UiHelper);
   const hero = game.hero!;
@@ -452,7 +429,7 @@ export function drawLines(buffer: Buffer) {
   );
   buffer.drawLineH(
     0,
-    Constants.MAP_TOP + Constants.MAP_HEIGHT, // after map
+    Constants.MAP_BOUNDS.bottom, // after map
     Constants.SCREEN_WIDTH,
     "-",
     "white",

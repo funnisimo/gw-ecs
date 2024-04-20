@@ -40,6 +40,7 @@ export const helpScene: SceneCreateOpts = {
     buffer.drawText(5, keys_y + 2, "#{green g} - Pickup items");
     buffer.drawText(5, keys_y + 3, "#{green >} - Find or take the stairs");
     buffer.drawText(5, keys_y + 4, "#{green Tab+TAB} - Observe");
+    buffer.drawText(5, keys_y + 5, "#{green l} - See Log Archive");
 
     buffer.drawText(5, 32, "The original:");
     buffer.drawText(5, 33, "https://drestin.itch.io/7rld2021-bloplike");
