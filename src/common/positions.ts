@@ -153,10 +153,8 @@ export class Pos {
   }
 }
 
-// Need World Hook for Destroy Entity
-// ??? world.notify.push(this);
-// interface WorldEvent { destroyEntity(entity: Entity): void; }
-
+// TODO - Make this a CompStore<Pos>?
+//      - may need update to be function based - entity.update(Pos, (p) => {})
 export class PosManager implements EntityWatcher, WorldInit {
   _size: [number, number];
   _entitiesAt: Map<Index, Entity[]>;
