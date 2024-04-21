@@ -179,7 +179,7 @@ export class HandlerStep<T> {
   }
 }
 
-export class HandlerSet<T> {
+export class HandlerSet<T extends Object> {
   _trigger: Component<T>;
   _steps: HandlerStep<T>[];
 
@@ -299,14 +299,14 @@ export class TriggerManager {
     this._sets = new Map();
   }
 
-  register<T>(cls: Component<T>, steps?: string[]): this {
+  register<T extends Object>(cls: Component<T>, steps?: string[]): this {
     if (this._sets.get(cls)) return this;
     const set = new HandlerSet(cls, steps);
     this._sets.set(cls, set);
     return this;
   }
 
-  getSet<T>(cls: Component<T>): HandlerSet<T> | undefined {
+  getSet<T extends Object>(cls: Component<T>): HandlerSet<T> | undefined {
     do {
       const set = this._sets.get(cls);
       if (set) return set as HandlerSet<T>;
@@ -314,7 +314,11 @@ export class TriggerManager {
     } while (cls && !cls.isPrototypeOf(Event));
   }
 
-  addStep<T>(cls: Component<T>, name: string, opts: AddStepOpts = {}): this {
+  addStep<T extends Object>(
+    cls: Component<T>,
+    name: string,
+    opts: AddStepOpts = {}
+  ): this {
     const set = this.getSet(cls);
     if (!set)
       throw new Error(
@@ -324,21 +328,24 @@ export class TriggerManager {
     return this;
   }
 
-  getStep<T>(cls: Component<T>, name: string): HandlerStep<T> | undefined {
+  getStep<T extends Object>(
+    cls: Component<T>,
+    name: string
+  ): HandlerStep<T> | undefined {
     const set = this.getSet(cls);
     return set?.getStep(name);
   }
 
-  addHandler<T>(
+  addHandler<T extends Object>(
     cls: Component<T>,
     handler: TriggerHandler<T> | TriggerHandlerFn<T>
   ): this;
-  addHandler<T>(
+  addHandler<T extends Object>(
     cls: Component<T>,
     step: string,
     handler: TriggerHandler<T> | TriggerHandlerFn<T>
   ): this;
-  addHandler<T>(cls: Component<T>, ...args: any[]): this {
+  addHandler<T extends Object>(cls: Component<T>, ...args: any[]): this {
     const set = this.getSet(cls);
     // TODO - Auto Register
     if (!set) throw new Error("Event not registered.");
@@ -349,7 +356,7 @@ export class TriggerManager {
     return this;
   }
 
-  emit<T>(world: World, comp: T, time: number) {
+  emit<T extends Object>(world: World, comp: T, time: number) {
     // @ts-ignore
     const cls = comp.constructor as Component<T>;
     const set = this.getSet(cls);

@@ -52,7 +52,7 @@ class WorldComponentSource implements ComponentSource {
     return this.world._currentTick;
   }
 
-  setComponent<T>(
+  setComponent<T extends Object>(
     entity: Entity,
     val: T,
     comp?: Component<T> | undefined
@@ -64,7 +64,10 @@ class WorldComponentSource implements ComponentSource {
     mgr.set(entity, val, this.world._currentTick);
   }
 
-  removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined {
+  removeComponent<T extends Object>(
+    entity: Entity,
+    comp: Component<T>
+  ): T | undefined {
     const mgr = this.world.level.getStore(comp);
     return mgr && mgr.remove(entity, this.world._currentTick);
   }
@@ -158,7 +161,7 @@ export class World {
   ////////////////////////
   // GLOBALS
 
-  setGlobal<T>(
+  setGlobal<T extends Object>(
     val: T & WorldInit,
     initFn?: (global: T, world: World) => void
   ): this {
@@ -173,11 +176,14 @@ export class World {
     return this;
   }
 
-  getGlobal<T>(comp: Component<T>): T {
+  getGlobal<T extends Object>(comp: Component<T>): T {
     return this._globals.get(comp);
   }
 
-  getGlobalOr<T>(comp: Component<T>, fn: () => T & WorldInit): T {
+  getGlobalOr<T extends Object>(
+    comp: Component<T>,
+    fn: () => T & WorldInit
+  ): T {
     const v = this.getGlobal(comp);
     if (v !== undefined) {
       return v;
@@ -187,7 +193,7 @@ export class World {
     return newV;
   }
 
-  removeGlobal<T>(comp: Component<T>) {
+  removeGlobal<T extends Object>(comp: Component<T>) {
     this._globals.delete(comp);
   }
 
@@ -296,12 +302,15 @@ export class World {
   ///////////////////////
   // TRIGGERS
 
-  registerTrigger<T>(component: Component<T>, steps?: string[]): this {
+  registerTrigger<T extends Object>(
+    component: Component<T>,
+    steps?: string[]
+  ): this {
     this._triggers.register(component, steps);
     return this;
   }
 
-  addTriggerStep<T>(
+  addTriggerStep<T extends Object>(
     component: Component<T>,
     step: string,
     opts: AddStepOpts = {}
@@ -310,16 +319,16 @@ export class World {
     return this;
   }
 
-  addTrigger<T>(
+  addTrigger<T extends Object>(
     component: Component<T>,
     handler: TriggerHandler<T> | TriggerHandlerFn<T>
   ): this;
-  addTrigger<T>(
+  addTrigger<T extends Object>(
     component: Component<T>,
     step: string,
     handler: TriggerHandler<T> | TriggerHandlerFn<T>
   ): this;
-  addTrigger<T>(component: Component<T>, ...args: any[]): this {
+  addTrigger<T extends Object>(component: Component<T>, ...args: any[]): this {
     if (args.length == 1) {
       this._triggers.addHandler(component, args[0]);
     } else {
@@ -328,7 +337,7 @@ export class World {
     return this;
   }
 
-  emitTrigger<T>(component: T, time?: number) {
+  emitTrigger<T extends Object>(component: T, time?: number) {
     if (time === undefined) {
       time = this.time;
     }
@@ -389,7 +398,7 @@ export class World {
 
   /// Resources
 
-  setUnique<T>(
+  setUnique<T extends Object>(
     val: T & WorldInit,
     initFn?: (unique: T, world: World) => void
   ): this {
@@ -408,11 +417,14 @@ export class World {
     return this._level.uniques();
   }
 
-  getUnique<T>(comp: Component<T>): T {
+  getUnique<T extends Object>(comp: Component<T>): T {
     return this._level.getUnique(comp);
   }
 
-  getUniqueOr<T>(comp: Component<T>, fn: () => T & WorldInit): T {
+  getUniqueOr<T extends Object>(
+    comp: Component<T>,
+    fn: () => T & WorldInit
+  ): T {
     const v = this.getUnique(comp);
     if (v !== undefined) {
       return v;
@@ -422,13 +434,16 @@ export class World {
     return newV;
   }
 
-  removeUnique<T>(comp: Component<T>) {
+  removeUnique<T extends Object>(comp: Component<T>) {
     this._level.removeUnique(comp);
   }
 
   /// ComponentSource
 
-  registerComponent<T>(comp: Component<T>, storeCls?: AnyCompStoreCtr): this {
+  registerComponent<T extends Object>(
+    comp: Component<T>,
+    storeCls?: AnyCompStoreCtr
+  ): this {
     this._level.registerComponent(comp, storeCls);
     return this;
   }
@@ -440,11 +455,11 @@ export class World {
     return this;
   }
 
-  getStore<T>(comp: Component<T>): CompStore<T> {
+  getStore<T extends Object>(comp: Component<T>): CompStore<T> {
     return this._level.getStore(comp);
   }
 
-  hasStore<T>(comp: Component<T>): boolean {
+  hasStore<T extends Object>(comp: Component<T>): boolean {
     return this._level.hasStore(comp);
   }
 

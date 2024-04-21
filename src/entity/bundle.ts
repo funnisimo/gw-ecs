@@ -2,14 +2,17 @@ import { SimpleComponent } from "../component";
 import { type World } from "../world";
 import { Entity } from "./entity";
 
-export type ComponentFn<T> = (
+export type ComponentFn<T extends Object> = (
   world: World,
   entity: Entity,
   ...args: any[]
 ) => T | undefined;
 export type AnyComponentFn = ComponentFn<any>;
 
-export type ComponentArg<T> = T | SimpleComponent<T> | ComponentFn<T>;
+export type ComponentArg<T extends Object> =
+  | T
+  | SimpleComponent<T>
+  | ComponentFn<T>;
 export type AnyComponentArg = ComponentArg<any>;
 
 export interface ComponentObj {

@@ -29,13 +29,13 @@ export interface CompStore<T> extends EntityWatcher {
 
 export type AnyStore = CompStore<any>;
 
-export interface CompStoreCtr<T> extends Function {
+export interface CompStoreCtr<T extends Object> extends Function {
   new (comp: Component<T>): CompStore<T>;
 }
 
 export type AnyCompStoreCtr = CompStoreCtr<any>;
 
-export class SetStore<T> implements CompStore<T> {
+export class SetStore<T extends Object> implements CompStore<T> {
   _comp: Component<T>;
   _data: Set<Entity>;
   _watchers: (StoreWatcher<T> | null)[];

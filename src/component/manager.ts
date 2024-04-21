@@ -10,7 +10,10 @@ export class ComponentManager {
     this._stores = new Map();
   }
 
-  register<T>(comp: Component<T>, store?: CompStore<T>): CompStore<T> {
+  register<T extends Object>(
+    comp: Component<T>,
+    store?: CompStore<T>
+  ): CompStore<T> {
     const existing = this._stores.get(comp); // do not look at base classes
     if (existing && !store) return existing;
     store = store || new SetStore(comp);
@@ -18,7 +21,7 @@ export class ComponentManager {
     return store;
   }
 
-  getStore<T>(comp: Component<T>): CompStore<T> | undefined {
+  getStore<T extends Object>(comp: Component<T>): CompStore<T> | undefined {
     do {
       // Look for base class if we don't have this class
       const store = this._stores.get(comp);
@@ -27,7 +30,7 @@ export class ComponentManager {
     } while (comp && !comp.isPrototypeOf(Object));
   }
 
-  hasStore<T>(comp: Component<T>): boolean {
+  hasStore<T extends Object>(comp: Component<T>): boolean {
     do {
       // Look for base class if we don't have this class
       const store = this._stores.get(comp);

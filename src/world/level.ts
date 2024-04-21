@@ -90,7 +90,7 @@ export class Level {
 
   /// Resources
 
-  setUnique<T>(val: T): this {
+  setUnique<T extends Object>(val: T): this {
     this._uniques.set(val);
     return this;
   }
@@ -99,7 +99,7 @@ export class Level {
     return this._uniques;
   }
 
-  getUnique<T>(comp: Component<T>): T {
+  getUnique<T extends Object>(comp: Component<T>): T {
     return this._uniques.get(comp);
   }
 
@@ -107,14 +107,17 @@ export class Level {
   //   return this._uniques.getOr(comp, fn);
   // }
 
-  removeUnique<T>(comp: Component<T>) {
+  removeUnique<T extends Object>(comp: Component<T>) {
     this._uniques.delete(comp);
   }
 
   //////////////////////////////////////////////
   /// COMPONENT
 
-  registerComponent<T>(comp: Component<T>, storeCls?: AnyCompStoreCtr): this {
+  registerComponent<T extends Object>(
+    comp: Component<T>,
+    storeCls?: AnyCompStoreCtr
+  ): this {
     storeCls = storeCls || SetStore;
     this._components.register(comp, new storeCls(comp));
     return this;
@@ -127,13 +130,13 @@ export class Level {
     return this;
   }
 
-  getStore<T>(comp: Component<T>): CompStore<T> {
+  getStore<T extends Object>(comp: Component<T>): CompStore<T> {
     const store = this._components.getStore(comp);
     if (!store) throw new Error("Failed to find component store: " + comp.name);
     return store;
   }
 
-  hasStore<T>(comp: Component<T>): boolean {
+  hasStore<T extends Object>(comp: Component<T>): boolean {
     return this._components.hasStore(comp);
   }
 

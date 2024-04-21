@@ -3,8 +3,15 @@ import type { Component, AnyComponent } from "../component/component.js";
 export interface ComponentSource {
   // TODO - updateComponent instead of getTick
   getTick(): number;
-  setComponent<T>(entity: Entity, val: T, comp?: Component<T>): void; // TODO - Return replaced value?
-  removeComponent<T>(entity: Entity, comp: Component<T>): T | undefined;
+  setComponent<T extends Object>(
+    entity: Entity,
+    val: T,
+    comp?: Component<T>
+  ): void; // TODO - Return replaced value?
+  removeComponent<T extends Object>(
+    entity: Entity,
+    comp: Component<T>
+  ): T | undefined;
 }
 
 export type Index = number;
@@ -70,13 +77,13 @@ export class Entity {
     return !!data && data.removed < 0;
   }
 
-  fetch<T>(comp: Component<T>): T | undefined {
+  fetch<T extends Object>(comp: Component<T>): T | undefined {
     const data = this._comps.get(comp);
     if (!data || data.removed >= 0) return undefined;
     return data.data;
   }
 
-  fetchOr<T>(comp: Component<T>, fn: () => T): T {
+  fetchOr<T extends Object>(comp: Component<T>, fn: () => T): T {
     let t = this.fetch(comp);
     if (t === undefined) {
       t = fn();
@@ -85,7 +92,7 @@ export class Entity {
     return t;
   }
 
-  set<T>(val: T, comp?: Component<T>): void {
+  set<T extends Object>(val: T, comp?: Component<T>): void {
     comp = comp || ((<Object>val).constructor as Component<T>);
     this._setComp(comp!, val, 0);
   }
@@ -112,7 +119,7 @@ export class Entity {
     return !!data && data.added > tick && data.removed < 0;
   }
 
-  remove<T>(comp: Component<T>): T | undefined {
+  remove<T extends Object>(comp: Component<T>): T | undefined {
     return this._removeComp(comp, 0);
   }
 
@@ -130,7 +137,10 @@ export class Entity {
     return !!data && data.removed > tick;
   }
 
-  fetchRemoved<T>(comp: Component<T>, sinceTick: number = 0): T | undefined {
+  fetchRemoved<T extends Object>(
+    comp: Component<T>,
+    sinceTick: number = 0
+  ): T | undefined {
     const data = this._comps.get(comp);
     if (data && data.removed > sinceTick) {
       return data.data;
@@ -138,11 +148,11 @@ export class Entity {
     return undefined;
   }
 
-  update<T>(comp: Component<T>): T | undefined {
+  update<T extends Object>(comp: Component<T>): T | undefined {
     return this._updateComp(comp, 0);
   }
 
-  updateOr<T>(comp: Component<T>, fn: () => T): T {
+  updateOr<T extends Object>(comp: Component<T>, fn: () => T): T {
     let t = this.update(comp);
     if (t === undefined) {
       t = fn();
@@ -151,7 +161,10 @@ export class Entity {
     return t;
   }
 
-  _updateComp<T>(comp: Component<T>, tick: number): T | undefined {
+  _updateComp<T extends Object>(
+    comp: Component<T>,
+    tick: number
+  ): T | undefined {
     const data = this._comps.get(comp);
     if (!data || data.removed >= 0) return undefined;
     data.updated = tick;
@@ -186,16 +199,16 @@ export class WorldEntity extends Entity {
     this._source = source;
   }
 
-  set<T>(val: T, comp?: Component<T>): void {
+  set<T extends Object>(val: T, comp?: Component<T>): void {
     comp = comp || ((<Object>val).constructor as Component<T>);
     this._source.setComponent(this, val, comp);
   }
 
-  remove<T>(comp: Component<T>): T | undefined {
+  remove<T extends Object>(comp: Component<T>): T | undefined {
     return this._source.removeComponent(this, comp);
   }
 
-  update<T>(comp: Component<T>): T | undefined {
+  update<T extends Object>(comp: Component<T>): T | undefined {
     return this._updateComp(comp, this._source.getTick());
   }
 }

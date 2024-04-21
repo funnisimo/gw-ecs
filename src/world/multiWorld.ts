@@ -3,7 +3,6 @@ import { AnyComponent, Component } from "../component/component.js";
 import { AnyCompStoreCtr, SetStore } from "../component/store.js";
 import { AnyQueue, Queue } from "./queue.js";
 import { Level } from "./level.js";
-import { AnyResourceCtr } from "./resources.js";
 import { Entity } from "../entity/entity.js";
 
 // export interface Global<T> extends Function {
@@ -118,7 +117,7 @@ class Levels {
 export class MultiWorld extends World {
   _registeredComponents: Map<AnyComponent, AnyCompStoreCtr>;
   _registeredQueues: Set<AnyQueue>;
-  _registeredUniques: Set<AnyResourceCtr>;
+  _registeredUniques: Set<AnyComponent>;
   _levels: Levels;
   _updateLevelAfterSet: string;
 
@@ -214,7 +213,10 @@ export class MultiWorld extends World {
   ///////////////////////////
   // REGISTER
 
-  registerComponent<T>(comp: Component<T>, storeCls?: AnyCompStoreCtr): this {
+  registerComponent<T extends Object>(
+    comp: Component<T>,
+    storeCls?: AnyCompStoreCtr
+  ): this {
     storeCls = storeCls || SetStore<T>;
     this._registeredComponents.set(comp, storeCls);
     this._levels.forEach((level) => {
@@ -238,7 +240,7 @@ export class MultiWorld extends World {
     return this;
   }
 
-  registerUnique<T>(uniqueCls: AnyResourceCtr): this {
+  registerUnique<T>(uniqueCls: AnyComponent): this {
     this._registeredUniques.add(uniqueCls);
     this._levels.forEach((level) => {
       level.setUnique(new uniqueCls());

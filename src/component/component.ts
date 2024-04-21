@@ -1,10 +1,10 @@
-export interface Component<T> extends Function {
+export interface Component<T extends Object> extends Function {
   new (...args: any[]): T;
 }
 
 export type AnyComponent = Component<any>;
 
-export interface SimpleComponent<T> extends Function {
+export interface SimpleComponent<T extends Object> extends Function {
   new (): T;
 }
 
